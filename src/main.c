@@ -117,10 +117,11 @@ int main(void) {
 	char respBuf1[10];
 	char respBuf2[100];
 	Delay(500);
-
-	//BTM222_SendData("ATE0\r");
-							//	Delay(500);
-
+	BTM222_SendData("+++\r");
+	BTM222_SendData("ATE0\r");
+								Delay(500);
+								BTM222_SendData("ATL5\r");
+																Delay(500);
 	///BTM222_SendData("ATN=CMETER2\r");
 	//Delay(500);
 	//BTM222_SendData("ATN?\r");
@@ -203,26 +204,26 @@ int main(void) {
 	int i = 12; // liczba bitow
 	uint16_t FRAME = 0;
 #endif
-
 	int licznik_kwiecinskigo = 0;
 	char buf[10];
 	for (int i = 0; i < 10; i++) {
-
 		buf[i] = 0;
 	}
 	while (1) {
 		GLCD_GoTo(4, 1);
-
 		licznik_kwiecinskigo++;
 		snprintf(buf, 10, "NR: %d", licznik_kwiecinskigo);
 		GLCD_WriteString(buf);
-
-
-		BTM222_SendData("10");
 		BTM222_ReadData(respBuf1);
 		GLCD_GoTo(1, 6);
 		GLCD_WriteString(respBuf1);
 
+// one time per second
+Delay(900);
+	BTM222_SendData("TEST"/*bufoo*/);
+	ConvertDOUBLEtoLCD(RMS_Value, bufoo);
+				GLCD_GoTo(1, 5);
+				GLCD_WriteString(bufoo);
 
 
 		if (TheEndofInterruptTImer0) {
@@ -231,14 +232,15 @@ int main(void) {
 			if (ADC_RESULT.Buf_isFull) {
 
 				RMS_Value = rms(&ADC_RESULT);
-#if DEBUG
+
 
 
 			}
-			ConvertDOUBLEtoLCD(RMS_Value, bufoo);
+			/*ConvertDOUBLEtoLCD(RMS_Value, bufoo);
 			GLCD_GoTo(1, 5);
 			GLCD_WriteString(bufoo);
-#endif
+			*/
+
 
 			// Enter EM1
 			//EMU_EnterEM1();

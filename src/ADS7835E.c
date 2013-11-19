@@ -94,7 +94,7 @@ void USART2_RX_IRQHandler(void) {
 	if (spi->STATUS & USART_STATUS_RXDATAV) { //Set when data is available in the receive buffer. Cleared when the receive buffer is empty.
 		/* Reading out data */
 		rxdata = spi->RXDOUBLE;
-		GPIO ->P[4].DOUTTGL = 1 << 3; // zapalam obie
+		//GPIO ->P[4].DOUTTGL = 1 << 3; // zapalam obie
 
 		/*	if (masterRxBuffer != 0) {
 		 Store Data
@@ -107,6 +107,32 @@ void USART2_RX_IRQHandler(void) {
 		 }*/
 	}
 }
+
+
+/**************************************************************************//**
+ * @brief USART1 TX IRQ Handler Setup
+ * @param transmitBuffer points to the data to send
+ * @param transmitBufferSize indicates the number of bytes to send
+ *****************************************************************************/
+/*
+void SPI2_setupTXInt(char* transmitBuffer, int transmitBufferSize)
+{
+  USART_TypeDef *spi = USART1;
+
+  // Setting up pointer and indexes
+  slaveTxBuffer      = transmitBuffer;
+  slaveTxBufferSize  = transmitBufferSize;
+  slaveTxBufferIndex = 0;
+
+  // Clear TX
+  spi->CMD = USART_CMD_CLEARTX;
+
+  // Enable interrupts
+  NVIC_ClearPendingIRQ(USART2_TX_IRQn);
+  NVIC_EnableIRQ(USART2_TX_IRQn);
+  spi->IEN |= USART_IEN_TXBL;
+}
+*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 	const float CONST_of_MULTIPLICATION = 0.00122;
@@ -131,7 +157,7 @@ void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
 	const float CONST_of_MULTIPLICATION = 0.00122;
 
 	digit = digit * CONST_of_MULTIPLICATION;
-	gcvt(digit, 6, StringOutput);
+	gcvt(digit, 4, StringOutput);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
