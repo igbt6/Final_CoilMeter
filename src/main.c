@@ -88,7 +88,8 @@ int main(void) {
 	/* Initialize chip */
 
 	CHIP_Init();
-
+	GPIO ->P[2].DOUT |=(1 << 2);
+		GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK) |GPIO_P_MODEH_MODE13_PUSHPULL;
 		 // CMU->CTRL |= CMU_CTRL_HFXOMODE_XTAL;
 		 // CMU->CTRL    = (CMU->CTRL & ~_CMU_CTRL_HFXOBOOST_MASK) | CMU_CTRL_HFXOBOOST_100PCENT;
 		 //CMU_ClockSelectSet(cmuClock_HF,cmuSelect_HFXO);
@@ -144,7 +145,6 @@ int main(void) {
 	//Delay(1000);
 //	BTM222_SendData("+++\r");
 //	Delay(500);
-//	BTM222_SendData("ATI2\r");
 //	Delay(500);
 
 	//BTM222_SendData("ATO\r");

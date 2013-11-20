@@ -105,7 +105,7 @@ void uart1SendChar(uint8_t ch) {
  *****************************************************************************/
 void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
 	uint32_t i = 0;
-/*
+
 	// Check if buffer is large enough for data
 	if (dataLen > BUFFERSIZE) {
 		// Buffer can never fit the requested amount of data
@@ -118,10 +118,10 @@ void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
 		while ((txBuf.pendingBytes + dataLen) > BUFFERSIZE)
 			;
 	}
-*/
+
 	/* Fill dataPtr[0:dataLen-1] into txBuffer */
 //TODO i<dataLen
-	/*
+
 	while (i<dataLen) {
 		txBuf.data[i] = *(dataPtr + i);
 		txBuf.wrI = (txBuf.wrI + 1) % BUFFERSIZE;
@@ -132,7 +132,7 @@ void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
   txBuf.pendingBytes += dataLen;
 
 	// Enable interrupt on USART TX Buffer
-	 */
+
 
  USART_IntEnable(uart1, UART_IF_TXBL);
 }
@@ -153,7 +153,6 @@ uint32_t uart1ReadData(uint8_t * dataPtr, uint32_t dataLen) {
 	if (dataLen == 0) {
 		dataLen = rxBuf.pendingBytes;
 	}
-
 	/* Copy data from Rx buffer to dataPtr */
 	while (i < dataLen) {
 		*(dataPtr + i) = rxBuf.data[rxBuf.rdI];
@@ -221,24 +220,25 @@ void UART1_TX_IRQHandler(void) {
 
 	/* Check TX buffer level status */
 	if (uart1->STATUS & UART_STATUS_TXBL) {
-		/*
+
 		if (txBuf.pendingBytes > 0) {
 			// Transmit pending character
 			USART_Tx(uart1, txBuf.data[txBuf.rdI]);
 			txBuf.rdI = (txBuf.rdI + 1) % BUFFERSIZE;
 			txBuf.pendingBytes--;
 		}
-	   */
+
+		/*
 		USART_Tx(uart1, 'x');
 		USART_Tx(uart1, 'A');
 		USART_Tx(uart1, 'B');
 		USART_Tx(uart1, 'C');
 		USART_Tx(uart1, '\r');
-
-		/* Disable Tx interrupt if no more bytes in queue */
-		//if (txBuf.pendingBytes == 0) {
+*/
+		 //Disable Tx interrupt if no more bytes in queue
+		if (txBuf.pendingBytes == 0) {
 			USART_IntDisable(uart1, UART_IF_TXBL);
-		//}
+		}
 	}
 }
 
