@@ -42,6 +42,13 @@
 #define COMPILATION 1   // 1 sprzetowa obsl USART, 0 programowa
 #define SAMPLING_TIMER0 1 // jesli probkuje w przerwaniu od timera to 1
 #define	SIGN_TEST 0
+/* OPIS DO PODL ADC TAM GDZIE SWITCHE
+//	PE12	left - clk
+//	PE14	right- conv
+//	PE13	OK- data
+ *
+ */
+#define ADC_ZE_SWITCHY 1   //JAK 1 to ze switchy jak nie to znaczy ze normalnie z KONWERTERA
 /*void RTC_init(void) {
  CMU_ClockEnable(cmuClock_RTC, true); // Enable clock to RTC module
  RTC_Init_TypeDef init;
@@ -61,7 +68,7 @@ void gpioEXTInputSetup(void);
 void USART2_setup(void);
 void eADesigner_Init(void);
 void Delay(uint32_t dlyTicks);
-void USART2_sendBuffer(char* txBuffer, int bytesToSend);
+//void USART2_sendBuffer(char* txBuffer, int bytesToSend);
 volatile uint32_t msTicks; /* counts 1ms timeTicks */
 
 /* Buffers */
@@ -73,7 +80,7 @@ char receiveBuffer[10];
 double RMS_Value;
 #if SAMPLING_TIMER0==1
 /* Clearing the receive buffers */
-char bufoo[6];
+char bufoo[7];
 
 //extern volatile struct circularBuffer;
 
@@ -88,11 +95,12 @@ int main(void) {
 	/* Initialize chip */
 
 	CHIP_Init();
-	GPIO ->P[2].DOUT |=(1 << 2);
-		GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK) |GPIO_P_MODEH_MODE13_PUSHPULL;
-		 // CMU->CTRL |= CMU_CTRL_HFXOMODE_XTAL;
-		 // CMU->CTRL    = (CMU->CTRL & ~_CMU_CTRL_HFXOBOOST_MASK) | CMU_CTRL_HFXOBOOST_100PCENT;
-		 //CMU_ClockSelectSet(cmuClock_HF,cmuSelect_HFXO);
+	GPIO ->P[2].DOUT |= (1 << 2);
+	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
+			| GPIO_P_MODEH_MODE13_PUSHPULL;
+	// CMU->CTRL |= CMU_CTRL_HFXOMODE_XTAL;
+	// CMU->CTRL    = (CMU->CTRL & ~_CMU_CTRL_HFXOBOOST_MASK) | CMU_CTRL_HFXOBOOST_100PCENT;
+	//CMU_ClockSelectSet(cmuClock_HF,cmuSelect_HFXO);
 
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 64 samples / for tests , a sample freuency is 100Hz
@@ -116,63 +124,16 @@ int main(void) {
 	BTM222_Init();
 
 	char respBuf1[10];
-	char respBuf2[100];
+	int BTMcounter=0;
+
+
 	Delay(500);
-	BTM222_SendData("+++\r");
-	BTM222_SendData("ATE0\r");
-								Delay(500);
-								BTM222_SendData("ATL5\r");
-																Delay(500);
-	///BTM222_SendData("ATN=CMETER2\r");
-	//Delay(500);
-	//BTM222_SendData("ATN?\r");
-	//Delay(500);
-	//BTM222_SendData("ATI1\r");
-//	BTM222_SendData("ATR0\r");
-//	Delay(500);
-//	BTM222_SendData("ATO1\r");
-//	Delay(500);
-	//BTM222_SendData("ATF?\r");
-	//Delay(60000);
-
-//	while(respBuf2[0]!='I'){
-//		BTM222_ReadData(respBuf2);
-
-//	}
-
-
-	//BTM222_SendData("ATA1\r");
-	//Delay(1000);
-//	BTM222_SendData("+++\r");
-//	Delay(500);
-//	Delay(500);
-
-	//BTM222_SendData("ATO\r");
-	Delay(500);
-	/*BTM222_ReadData(respBuf2);
-	GLCD_GoTo(0, 2);
-	GLCD_WriteString(respBuf2);
-	GLCD_GoTo(0, 3);
-		GLCD_WriteString(respBuf2+20);
-		GLCD_GoTo(0, 4);
-			GLCD_WriteString(respBuf2+40);
-			GLCD_GoTo(0, 5);
-					GLCD_WriteString(respBuf2+60);
-					GLCD_GoTo(0, 6);
-							GLCD_WriteString(respBuf2+80);
-*/
-
-							//BTM222_SendData("ATI2\r");
-								//Delay(500);
-	///eADesigner_Init();
-
 
 
 	//SPI_setup();
 	//SPI2_setupRXInt(receiveBuffer, 1);
 
 
-#if(1)
 	CMU ->HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;
 
 	/* To avoid false start, configure output US2_TX as high on PC2 */GPIO ->P[2].DOUT |=
@@ -192,11 +153,6 @@ int main(void) {
 	(GPIO ->P[2].MODEL & ~_GPIO_P_MODEL_MODE5_MASK)
 	| GPIO_P_MODEL_MODE5_PUSHPULL;
 
-	#endif
-
-
-
-
 #if SAMPLING_TIMER0==0
 	/* Clearing the receive buffers */
 	char bufoo[6];
@@ -205,7 +161,7 @@ int main(void) {
 	uint16_t FRAME = 0;
 #endif
 	int licznik_kwiecinskigo = 0;
-	char buf[10];
+	char buf[11];
 	for (int i = 0; i < 10; i++) {
 		buf[i] = 0;
 	}
@@ -214,16 +170,11 @@ int main(void) {
 		licznik_kwiecinskigo++;
 		snprintf(buf, 10, "NR: %d", licznik_kwiecinskigo);
 		GLCD_WriteString(buf);
-		BTM222_ReadData(respBuf1);
+		BTMcounter++;
+
+		//BTM222_ReadData(respBuf1);
 		GLCD_GoTo(1, 6);
 		GLCD_WriteString(respBuf1);
-
-// one time per second
-Delay(900);
-	BTM222_SendData("TEST"/*bufoo*/);
-	ConvertDOUBLEtoLCD(RMS_Value, bufoo);
-				GLCD_GoTo(1, 5);
-				GLCD_WriteString(bufoo);
 
 
 		if (TheEndofInterruptTImer0) {
@@ -232,19 +183,19 @@ Delay(900);
 			if (ADC_RESULT.Buf_isFull) {
 
 				RMS_Value = rms(&ADC_RESULT);
-
-
-
 			}
 			/*ConvertDOUBLEtoLCD(RMS_Value, bufoo);
-			GLCD_GoTo(1, 5);
-			GLCD_WriteString(bufoo);
-			*/
-
-
+			 GLCD_GoTo(1, 5);
+			 GLCD_WriteString(bufoo);
+			 */
+			ConvertDOUBLEtoLCD(RMS_Value, bufoo);
+					GLCD_GoTo(1, 5);
+					GLCD_WriteString(bufoo);
+				//if(BTMcounter>=1000){BTM222_SendData(bufoo);BTMcounter=0;}
+					BTM222_SendData(bufoo);
 			// Enter EM1
-			//EMU_EnterEM1();
-			}
+			EMU_EnterEM1();
+		}
 
 	}
 
@@ -266,10 +217,10 @@ void Delay(uint32_t dlyTicks) {
  * @param txBuffer points to data to transmit
  * @param bytesToSend bytes will be sent
  *****************************************************************************/
-void USART2_sendBuffer(char* txBuffer, int bytesToSend) {
-	USART_TypeDef *uart = USART2;
+//void USART2_sendBuffer(char* txBuffer, int bytesToSend) {
+//	USART_TypeDef *uart = USART2;
 
-	uart->TXDOUBLE = 12445;
+//	uart->TXDOUBLE = 12445;
 	/* Sending the data */
 	/*	int ii; for (ii = 0; ii < bytesToSend; ii++) {
 	 Waiting for the usart to be ready
@@ -290,7 +241,7 @@ void USART2_sendBuffer(char* txBuffer, int bytesToSend) {
 //	while (!(uart->STATUS & USART_STATUS_TXC))   //Set when a transmission has completed and no more data is available in the transmit buffer and shift register. Cleared when data
 	//is written to the transmit buffer.
 //		;
-}
+//}
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -310,11 +261,8 @@ void USART2_setup(void) {
 	init.clockMode = usartClockMode0;
 	init.prsRxEnable = 0;
 	init.autoTx = 1;
-
 	USART_InitSync(USART2, &init);
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**************************************************************************//**
@@ -328,6 +276,7 @@ void TIMER0_IRQHandler(void) {
 
 	FRAME = 0;
 	int i = 12;
+
 	GPIO ->P[2].DOUTCLR = 1 << 5;
 	//	GPIO ->P[2].DOUTSET = 1 << 4; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! remove it after test
 	//	GPIO ->P[2].DOUTCLR = 1 << 4; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! remove it after test
@@ -343,5 +292,6 @@ void TIMER0_IRQHandler(void) {
 	}
 	GPIO ->P[2].DOUTSET |= 1 << 5;
 	TheEndofInterruptTImer0 = true;
+
 }
 

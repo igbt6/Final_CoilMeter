@@ -24,7 +24,7 @@ void uart1Setup(void) {
 	GPIO_PinModeSet(gpioPortB, 10, gpioModeInput, 0);
 	uart1Init.enable = usartDisable;
 	uart1Init.refFreq = 0;
-	uart1Init.baudrate = 19200;      // Baud Rate - default value  for my BTM222
+	uart1Init.baudrate = 115200;      // Baud Rate - default value  for my BTM222
 	uart1Init.oversampling = usartOVS16;
 	uart1Init.parity = usartNoParity;  // Parity mode
 	uart1Init.stopbits = usartStopbits1; //  Number of stop bits. Range is 0 to 2
@@ -119,18 +119,18 @@ void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
 			;
 	}
 
-	/* Fill dataPtr[0:dataLen-1] into txBuffer */
+	// Fill dataPtr[0:dataLen-1] into txBuffer
 //TODO i<dataLen
 
 	while (i<dataLen) {
 		txBuf.data[i] = *(dataPtr + i);
-		txBuf.wrI = (txBuf.wrI + 1) % BUFFERSIZE;
+		/////////txBuf.wrI = (txBuf.wrI + 1) % BUFFERSIZE;
 		i++;
 	}
 
 	// Increment pending byte counter
-  txBuf.pendingBytes += dataLen;
-
+  ///////txBuf.pendingBytes /*+*/= dataLen;
+ ///TESTTSSSSSS
 	// Enable interrupt on USART TX Buffer
 
 
@@ -220,25 +220,37 @@ void UART1_TX_IRQHandler(void) {
 
 	/* Check TX buffer level status */
 	if (uart1->STATUS & UART_STATUS_TXBL) {
-
-		if (txBuf.pendingBytes > 0) {
+/*
+		if (txBuf.pendingBytes < 0) {
 			// Transmit pending character
 			USART_Tx(uart1, txBuf.data[txBuf.rdI]);
-			txBuf.rdI = (txBuf.rdI + 1) % BUFFERSIZE;
+			//txBuf.rdI = (txBuf.rdI + 1) % BUFFERSIZE;
 			txBuf.pendingBytes--;
 		}
+*/
+int i=0;
+		while (i < 8) {
 
-		/*
-		USART_Tx(uart1, 'x');
-		USART_Tx(uart1, 'A');
-		USART_Tx(uart1, 'B');
-		USART_Tx(uart1, 'C');
-		USART_Tx(uart1, '\r');
+				USART_Tx(uart1, txBuf.data[i]);
+				i++;
+			}
+/*
+		USART_Tx(uart1, 'r');
+		USART_Tx(uart1, 'm');
+		USART_Tx(uart1, 's');
+		USART_Tx(uart1, '0');
+
+		USART_Tx(uart1, '.');
+				USART_Tx(uart1, '3');
+				USART_Tx(uart1, '3');
+				USART_Tx(uart1, '9');
+				USART_Tx(uart1, '9');
+				USART_Tx(uart1, 'r');
 */
 		 //Disable Tx interrupt if no more bytes in queue
-		if (txBuf.pendingBytes == 0) {
+		//if (txBuf.pendingBytes == 0) {  ///ttests
 			USART_IntDisable(uart1, UART_IF_TXBL);
-		}
+		//} ///ttests
 	}
 }
 
@@ -296,7 +308,7 @@ void BTM222_SendData(char * buffer)
 
 void BTM222_ReadData(char* buffer){
 
-	uart1ReadData((uint8_t*)buffer, rxBuf.pendingBytes);
+	uart1ReadData((uint8_t*)buffer, (uint32_t)strlen(buffer));
 
 }
 

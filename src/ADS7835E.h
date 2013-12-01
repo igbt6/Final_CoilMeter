@@ -41,8 +41,11 @@ inline int ResultADC_Buf_IsEmpty(CircularBufferADC_Result *cb) {
 
 
 
-void SPI_setup(void);
-void SPI2_setupRXInt(char* receiveBuffer, int bytesToReceive);
+void SPI_setup(void); // hardware SPI
+void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive);
+void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
+
+
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput);
 int ConvertU16_from_ADCToINT(uint16_t digit);

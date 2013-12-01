@@ -10,14 +10,15 @@
 #include "em_cmu.h"
 #include "splc501c.h"
 #include "em_lcd.h"
+#include "em_usart.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <math.h>
 /* Buffer pointers and indexes */
 
-char* masterRxBuffer;
-char* masterRxBuffer;
+uint16_t* masterRxBuffer;
+uint16_t* masterRxBuffer;
 int masterRxBufferSize;
 volatile int masterRxBufferIndex;
 
@@ -43,7 +44,7 @@ void SPI_setup(void) {
 	spi->FRAME = USART_FRAME_DATABITS_TWELVE;
 	//Enabling Master, TX and RX and CS line
 	spi->CMD |= USART_CMD_MASTEREN | USART_CMD_TXEN | USART_CMD_RXEN;
-	spi->CTRL |= USART_CTRL_AUTOCS | USART_CTRL_MSBF | USART_CTRL_AUTOTX
+	spi->CTRL |=/* USART_CTRL_AUTOCS |*/ USART_CTRL_MSBF// | USART_CTRL_AUTOTX
 			| USART_CTRL_TXDELAY_NONE; //MSBF- najstarszy bit 1 //If AUTOCS is set, USn_CS is activated when a transmission begins, and deactivated directly after the last bit has been transmitted and there is no more data in the  	transmit buffer.
 	//spi->TXDATAX|=USART_TXDATAX_RXENAT;
 //spi->CTRL|=USART_CTRL_CLKPHA;
@@ -70,7 +71,7 @@ void SPI_setup(void) {
  * @param receiveBuffer points to where received data is to be stored
  * @param bytesToReceive indicates the number of bytes to receive
  *****************************************************************************/
-void SPI2_setupRXInt(char* receiveBuffer, int bytesToReceive) {
+void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive) {
 	USART_TypeDef *spi = USART2;
 
 	//Setting up pointer and indexes
@@ -82,57 +83,71 @@ void SPI2_setupRXInt(char* receiveBuffer, int bytesToReceive) {
 //Enable interrupts
 	NVIC_ClearPendingIRQ(USART2_RX_IRQn);
 	NVIC_EnableIRQ(USART2_RX_IRQn);
-	spi->IEN = USART_IEN_RXDATAV;	//USART_IEN_RXFULL;
-// GPIO->P[2].DOUTCLR=1<<5;  // wylaczam ustawiam 0 na CS start pomiaru
+	spi->IEN = USART_IEN_RXFULL;//USART_IEN_RXDATAV;	//USART_IEN_RXFULL;
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void USART2_RX_IRQHandler(void) {
-	USART_TypeDef *spi = USART2;
-	uint8_t rxdata;
-//char bufoo[10];
-	if (spi->STATUS & USART_STATUS_RXDATAV) { //Set when data is available in the receive buffer. Cleared when the receive buffer is empty.
-		/* Reading out data */
-		rxdata = spi->RXDOUBLE;
-		//GPIO ->P[4].DOUTTGL = 1 << 3; // zapalam obie
-
-		/*	if (masterRxBuffer != 0) {
-		 Store Data
-		 masterRxBuffer[masterRxBufferIndex] = rxdata;
-		 masterRxBufferIndex++;
-
-		 if (masterRxBufferIndex == masterRxBufferSize) {
-		 masterRxBuffer = 0;
-		 }
-		 }*/
-	}
-}
-
-
-/**************************************************************************//**
- * @brief USART1 TX IRQ Handler Setup
- * @param transmitBuffer points to the data to send
- * @param transmitBufferSize indicates the number of bytes to send
- *****************************************************************************/
-/*
-void SPI2_setupTXInt(char* transmitBuffer, int transmitBufferSize)
+void USART2_RX_IRQHandler(void)
 {
-  USART_TypeDef *spi = USART1;
+  USART_TypeDef *spi = USART2;
+  uint8_t       rxdata;
 
-  // Setting up pointer and indexes
-  slaveTxBuffer      = transmitBuffer;
-  slaveTxBufferSize  = transmitBufferSize;
-  slaveTxBufferIndex = 0;
 
-  // Clear TX
-  spi->CMD = USART_CMD_CLEARTX;
+   masterRxBuffer[0]= USART_RxDouble(spi);
+/*
+  if (spi->STATUS & USART_STATUS_RXDATAV)
+  {
+    // Reading out data
+    rxdata = spi->RXDATA;
 
-  // Enable interrupts
-  NVIC_ClearPendingIRQ(USART2_TX_IRQn);
-  NVIC_EnableIRQ(USART2_TX_IRQn);
-  spi->IEN |= USART_IEN_TXBL;
+    if (masterRxBuffer != 0)
+    {
+      // Store Data
+      masterRxBuffer[masterRxBufferIndex] = rxdata;
+      masterRxBufferIndex++;
+
+      if (masterRxBufferIndex == masterRxBufferSize)
+      {
+        masterRxBuffer = 0;
+      }
+    }
+  }
+  */
 }
-*/
+
+void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend)
+{
+  USART_TypeDef *uart = USART2;
+  int           ii;
+  GPIO->P[2].DOUTCLR=1<<5;  // wylaczam ustawiam 0 na CS start pomiaru
+USART_TxDouble(uart, txBuffer[0]);
+/*
+  // Sending the data
+  for (ii = 0; ii < bytesToSend;  ii++)
+  {
+    // Waiting for the usart to be ready
+    while (!(uart->STATUS & USART_STATUS_TXBL)) ;
+
+    if (txBuffer != 0)
+    {
+      // Writing next byte to USART
+      uart->TXDOUBLE = *txBuffer;
+      txBuffer++;
+    }
+    else
+    {
+      uart->TXDOUBLE = 0;
+    }
+  }
+
+  //Waiting for transmission of last byte
+  while (!(uart->STATUS & USART_STATUS_TXC)) ;
+  */
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 	const float CONST_of_MULTIPLICATION = 0.00122;
@@ -154,10 +169,11 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
-	const float CONST_of_MULTIPLICATION = 0.00122;
-
+	const float CONST_of_MULTIPLICATION = 0.00122;//*185.474;
 	digit = digit * CONST_of_MULTIPLICATION;
-	gcvt(digit, 4, StringOutput);
+	gcvt(digit, 4, &StringOutput[1]);
+	StringOutput[0]='r';
+	StringOutput[6]='x';
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
