@@ -48,20 +48,40 @@
 //	PE13	OK- data
  *
  */
+
+uint16_t transmitBuffer[] ={12345};
+#define            BUFFERSIZE    (sizeof(transmitBuffer) / sizeof(uint16_t))
+volatile uint16_t receiveBuffer[BUFFERSIZE];
+
+static void SPIinit(void)
+{
+  /* Enabling clock to USART 1 and 2*/
+
+  CMU_ClockEnable(cmuClock_USART2, true);
+  CMU_ClockEnable(cmuClock_GPIO, true);
+
+  /* Setup UART */
+  SPI_setup();
+  SPI2_setupRXInt(receiveBuffer, BUFFERSIZE);
+}
+
+
+static void Set20MHzFrequency_Init(void)
+{
+  /* Use crystal oscillator for HFXO */
+  CMU->CTRL |= CMU_CTRL_HFXOMODE_XTAL;
+  /* HFXO setup */
+  CMU->CTRL    = (CMU->CTRL & ~_CMU_CTRL_HFXOBOOST_MASK) | CMU_CTRL_HFXOBOOST_50PCENT;
+
+  /* Enable HFXO as high frequency clock, HFCLK */
+  CMU_ClockSelectSet(cmuClock_HF,cmuSelect_HFXO);
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 #define ADC_ZE_SWITCHY 1   //JAK 1 to ze switchy jak nie to znaczy ze normalnie z KONWERTERA
-/*void RTC_init(void) {
- CMU_ClockEnable(cmuClock_RTC, true); // Enable clock to RTC module
- RTC_Init_TypeDef init;
- init.comp0Top = true; // porownanie z wartoscia ustawiona ponizej
- init.enable = true;
- RTC_Init(&init);
- RTC_CompareSet(0, 32768); // wartoæ do prównania , wtedy bede kasowal
- RTC_CounterReset(); // reset i start zegara
- RTC_IntEnable(RTC_IF_COMP0); // wlaczenie przerwan
- //RTC_IntEnable(RTC_IF_OF);
- NVIC_ClearPendingIRQ(RTC_IRQn); // Enable interrupts
- NVIC_EnableIRQ(RTC_IRQn);
- }*/
+
 #if DEBUG
 void gpioEXTInputSetup(void);
 #endif
@@ -76,7 +96,7 @@ volatile uint32_t msTicks; /* counts 1ms timeTicks */
 //txBuf; // externowe
 ///////////////////GLOBAL VARIABLES////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-char receiveBuffer[10];
+char receivexBuffer[10];
 double RMS_Value;
 #if SAMPLING_TIMER0==1
 /* Clearing the receive buffers */
@@ -95,19 +115,11 @@ int main(void) {
 	/* Initialize chip */
 
 	CHIP_Init();
-	GPIO ->P[2].DOUT |= (1 << 2);
-	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
-			| GPIO_P_MODEH_MODE13_PUSHPULL;
-	// CMU->CTRL |= CMU_CTRL_HFXOMODE_XTAL;
-	// CMU->CTRL    = (CMU->CTRL & ~_CMU_CTRL_HFXOBOOST_MASK) | CMU_CTRL_HFXOBOOST_100PCENT;
-	//CMU_ClockSelectSet(cmuClock_HF,cmuSelect_HFXO);
-
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 64 samples / for tests , a sample freuency is 100Hz
-#if SAMPLING_TIMER0==1
 
-	TIMER0forADC_Setup();
-#endif
+
+
 	/* Setup SysTick Timer for 1 msec interrupts  */
 	if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
 		while (1)
@@ -130,8 +142,9 @@ int main(void) {
 	Delay(500);
 
 
-	//SPI_setup();
-	//SPI2_setupRXInt(receiveBuffer, 1);
+	Set20MHzFrequency_Init();
+	/////SPI2_Init();                                  /*****/
+	////SPI2_setupRXInt(receiveBuffer, BUFFERSIZE);    /****/
 
 
 	CMU ->HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;
@@ -153,18 +166,14 @@ int main(void) {
 	(GPIO ->P[2].MODEL & ~_GPIO_P_MODEL_MODE5_MASK)
 	| GPIO_P_MODEL_MODE5_PUSHPULL;
 
-#if SAMPLING_TIMER0==0
-	/* Clearing the receive buffers */
-	char bufoo[6];
 
-	int i = 12; // liczba bitow
-	uint16_t FRAME = 0;
-#endif
 	int licznik_kwiecinskigo = 0;
 	char buf[11];
 	for (int i = 0; i < 10; i++) {
 		buf[i] = 0;
 	}
+	///TIMER0forADC_Setup();
+
 	while (1) {
 		GLCD_GoTo(4, 1);
 		licznik_kwiecinskigo++;
@@ -176,7 +185,7 @@ int main(void) {
 		GLCD_GoTo(1, 6);
 		GLCD_WriteString(respBuf1);
 
-
+    // SOFTWARE SPI
 		if (TheEndofInterruptTImer0) {
 			TheEndofInterruptTImer0 = false;
 			ResultADC_Buf_Write(&ADC_RESULT, FRAME);
@@ -184,18 +193,42 @@ int main(void) {
 
 				RMS_Value = rms(&ADC_RESULT);
 			}
-			/*ConvertDOUBLEtoLCD(RMS_Value, bufoo);
-			 GLCD_GoTo(1, 5);
-			 GLCD_WriteString(bufoo);
-			 */
+
 			ConvertDOUBLEtoLCD(RMS_Value, bufoo);
 					GLCD_GoTo(1, 5);
 					GLCD_WriteString(bufoo);
+
+					int x = ConvertU16_from_ADCToINT(receiveBuffer[0]);
+					 ConvertDOUBLEtoLCD((double) x, bufoo);
+					GLCD_GoTo(1, 3);
+					GLCD_WriteString(bufoo);                //// HARDWARE SPI
 				//if(BTMcounter>=1000){BTM222_SendData(bufoo);BTMcounter=0;}
-					BTM222_SendData(bufoo);
+				//	BTM222_SendData(bufoo);
 			// Enter EM1
 			EMU_EnterEM1();
 		}
+
+
+		/*///HARDWARE SPI
+		if (TheEndofInterruptTImer0) {
+					TheEndofInterruptTImer0 = false;
+					ResultADC_Buf_Write(&ADC_RESULT, receiveBuffer[0]);
+					if (ADC_RESULT.Buf_isFull) {
+
+						RMS_Value = rms(&ADC_RESULT);
+					}
+
+					ConvertDOUBLEtoLCD(RMS_Value, bufoo);
+							GLCD_GoTo(1, 5);
+							GLCD_WriteString(bufoo);
+
+
+					//		BTM222_SendData(bufoo);
+
+					EMU_EnterEM1();
+				}
+*/
+
 
 	}
 
@@ -212,58 +245,6 @@ void Delay(uint32_t dlyTicks) {
 		;
 }
 
-/******************************************************************************
- * @brief sends data using USART2
- * @param txBuffer points to data to transmit
- * @param bytesToSend bytes will be sent
- *****************************************************************************/
-//void USART2_sendBuffer(char* txBuffer, int bytesToSend) {
-//	USART_TypeDef *uart = USART2;
-
-//	uart->TXDOUBLE = 12445;
-	/* Sending the data */
-	/*	int ii; for (ii = 0; ii < bytesToSend; ii++) {
-	 Waiting for the usart to be ready
-	 while (!(uart->STATUS & USART_STATUS_TXBL))   //Indicates the level of the transmit buffer. If TXBIL is cleared, TXBL is set whenever the transmit buffer is empty, and if TXBIL is set,
-	 //TXBL is set whenever the transmit buffer is half-full or empty.
-	 ;
-
-	 if (txBuffer != 0) {
-	 Writing next byte to USART
-	 uart->TXDOUBLE  = *txBuffer& 0xFF;
-	 txBuffer++;
-	 } else {
-	 uart->TXDOUBLE = 0;
-	 }
-	 }*/
-
-	/*Waiting for transmission of last byte */
-//	while (!(uart->STATUS & USART_STATUS_TXC))   //Set when a transmission has completed and no more data is available in the transmit buffer and shift register. Cleared when data
-	//is written to the transmit buffer.
-//		;
-//}
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
-/***************************************************************************//**
- * @brief
- *   Initializes USART2.
- * @note
- *   This function was autogenerated by energyAware Tools.
- ******************************************************************************/
-void USART2_setup(void) {
-	USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
-
-	init.baudrate = 115200;
-	init.databits = usartDatabits12;
-	init.msbf = 1;
-	init.master = 1;
-	init.clockMode = usartClockMode0;
-	init.prsRxEnable = 0;
-	init.autoTx = 1;
-	USART_InitSync(USART2, &init);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**************************************************************************//**
  * Interrupt Service Routine TIMER0 Interrupt Line for sampling of ADC converter
@@ -278,8 +259,6 @@ void TIMER0_IRQHandler(void) {
 	int i = 12;
 
 	GPIO ->P[2].DOUTCLR = 1 << 5;
-	//	GPIO ->P[2].DOUTSET = 1 << 4; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! remove it after test
-	//	GPIO ->P[2].DOUTCLR = 1 << 4; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! remove it after test
 	GPIO ->P[2].DOUTSET = 1 << 4;
 	GPIO ->P[2].DOUTCLR = 1 << 4;
 	GPIO ->P[2].DOUTSET = 1 << 4;
@@ -287,10 +266,39 @@ void TIMER0_IRQHandler(void) {
 	while (i) {
 		--i;
 		GPIO ->P[2].DOUTSET = 1 << 4;
-		FRAME |= GPIO_PinInGet(gpioPortC, 3) << i;
+		FRAME |= ((GPIO->P[2].DIN >> 3) & 0x1) << i;
 		GPIO ->P[2].DOUTCLR = 1 << 4;
 	}
 	GPIO ->P[2].DOUTSET |= 1 << 5;
+
+
+/*
+    GPIO ->P[2].DOUTCLR = 1 << 5;
+	receiveBuffer[0] =USART_SpiTransfer(USART2,10);
+	GPIO ->P[2].DOUTSET = 1 << 5;
+*/
+
+
+	///GPIO ->P[2].DOUTCLR = 1 << 5;
+
+	//////////////////////////////////////////////////////////////////////////////USART2_sendBuffer(transmitBuffer, BUFFERSIZE);
+	//GPIO ->P[2].DOUTSET = 1 << 5;
+/*
+	  USART_TypeDef *spi = USART2;
+	  uint16_t       rxdata=0;
+	 if (spi->STATUS & USART_STATUS_RXFULL)
+	  {
+	    // Reading out data
+	    rxdata = spi->RXDOUBLE;
+
+	    if (receiveBuffer != 0)
+	    {
+
+	    	receiveBuffer[0] = rxdata;
+	    }
+	  }
+		GPIO ->P[2].DOUTSET = 1 << 5;
+*/
 	TheEndofInterruptTImer0 = true;
 
 }

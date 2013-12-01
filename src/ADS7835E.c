@@ -12,6 +12,7 @@
 #include "em_lcd.h"
 #include "em_usart.h"
 #include <stdio.h>
+#include "Timers.h"
 #include <stdlib.h>
 #include <malloc.h>
 #include <math.h>
@@ -19,52 +20,59 @@
 
 uint16_t* masterRxBuffer;
 uint16_t* masterRxBuffer;
+uint16_t* RxFrame; // for software SPI
 int masterRxBufferSize;
 volatile int masterRxBufferIndex;
 
-void SPI_setup(void) {
 
-	CMU_ClockEnable(cmuClock_USART2, true);
-	CMU_ClockEnable(cmuClock_GPIO, true);
-	USART_TypeDef *spi;
-	spi = USART2;
+void SPI2_Init(void)
+{
+   /* No low frequency clock source selected */
 
-	// Setting baudrate
-	spi->CLKDIV = 128 * (SPI_PERCLK_FREQUENCY / SPI_BAUDRATE - 2);
+  /* Enable GPIO clock */
+  CMU_ClockEnable(cmuClock_GPIO, true);
 
-	// Configure SPI
-	// Using synchronous (SPI) mode
-	spi->CTRL = USART_CTRL_SYNC;
-	// Clearing old transfers/receptions, and disabling interrupts
-	spi->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
-	spi->IEN = 0;
-	// Enabling pins and setting location
-	spi->ROUTE = USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | USART_ROUTE_CLKPEN
-			| USART_ROUTE_CSPEN | USART_ROUTE_LOCATION_LOC0;
-	spi->FRAME = USART_FRAME_DATABITS_TWELVE;
-	//Enabling Master, TX and RX and CS line
-	spi->CMD |= USART_CMD_MASTEREN | USART_CMD_TXEN | USART_CMD_RXEN;
-	spi->CTRL |=/* USART_CTRL_AUTOCS |*/ USART_CTRL_MSBF// | USART_CTRL_AUTOTX
-			| USART_CTRL_TXDELAY_NONE; //MSBF- najstarszy bit 1 //If AUTOCS is set, USn_CS is activated when a transmission begins, and deactivated directly after the last bit has been transmitted and there is no more data in the  	transmit buffer.
-	//spi->TXDATAX|=USART_TXDATAX_RXENAT;
-//spi->CTRL|=USART_CTRL_CLKPHA;
+  /* To avoid false start, configure output US2_TX as high on PC2 */
+  GPIO->P[2].DOUT |= (1 << 2);
+  /* Pin PC2 is configured to Push-pull */
+  GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE2_MASK) | GPIO_P_MODEL_MODE2_PUSHPULL;
+  /* Pin PC3 is configured to Input enabled */
+  GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE3_MASK) | GPIO_P_MODEL_MODE3_INPUT;
+  /* Pin PC4 is configured to Push-pull */
+  GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE4_MASK) | GPIO_P_MODEL_MODE4_PUSHPULL;
+  /* To avoid false start, configure output US2_CS as high on PC5 */
+  GPIO->P[2].DOUT |= (1 << 5);
+  /* Pin PC5 is configured to Push-pull */
+  GPIO->P[2].MODEL = (GPIO->P[2].MODEL & ~_GPIO_P_MODEL_MODE5_MASK) | GPIO_P_MODEL_MODE5_PUSHPULL;
 
-	/* Set GPIO config to master */
+  /* Enable clock for USART2 */
+  CMU_ClockEnable(cmuClock_USART2, true);
+  /* Custom initialization for USART2 */
+  USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
 
-	GPIO_Mode_TypeDef gpioModeMosi = gpioModePushPull;
-	GPIO_Mode_TypeDef gpioModeMiso = gpioModeInput;
-	GPIO_Mode_TypeDef gpioModeCs = gpioModePushPull;
-	GPIO_Mode_TypeDef gpioModeClk = gpioModePushPull;
-	/* Clear previous interrupts */
-	spi->IFC = _USART_IFC_MASK;
+ 	  init.baudrate     = 1000000;
+ 	  init.databits     = usartDatabits12;
+ 	  init.msbf         = 1;
+ 	  init.master       = 1;
+ 	  init.clockMode    = usartClockMode1;
+ 	  init.prsRxEnable  = 0;
+ 	  init.autoTx       = 0;
 
-	/* IO configuration (USART 2, Location #0) */
-	GPIO_PinModeSet(gpioPortC, 2, gpioModeMosi, 0); /* MOSI */
-	GPIO_PinModeSet(gpioPortC, 3, gpioModeMiso, 0); /* MISO */
-	GPIO_PinModeSet(gpioPortC, 5, gpioModeCs, 0); /* CS */
-	GPIO_PinModeSet(gpioPortC, 4, gpioModeClk, 0); /* Clock */
+
+
+ 	  USART_InitSync(USART2, &init);
+  /* Enable signals TX, RX, CLK, CS */
+
+USART2->CTRL|=USART_CTRL_AUTOCS
+| USART_CTRL_TXDELAY_DOUBLE;
+  USART2->ROUTE |= /*USART_ROUTE_TXPEN |*/ USART_ROUTE_RXPEN | USART_ROUTE_CLKPEN | USART_ROUTE_CSPEN| USART_ROUTE_LOCATION_LOC0 ;
+ //USART2->CMD |=USART_CMD_TXTRIEN;
 
 }
+
+
+
+
 
 /**************************************************************************//**
  * @brief Setting up RX interrupts from USART2 RX
@@ -82,53 +90,59 @@ void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive) {
 	spi->CMD = USART_CMD_CLEARRX;
 //Enable interrupts
 	NVIC_ClearPendingIRQ(USART2_RX_IRQn);
+	NVIC_SetPriority(USART2_RX_IRQn,1);
 	NVIC_EnableIRQ(USART2_RX_IRQn);
-	spi->IEN = USART_IEN_RXFULL;//USART_IEN_RXDATAV;	//USART_IEN_RXFULL;
 
+	spi->IEN = USART_IEN_RXFULL;//USART_IEN_RXDATAV;	//USART_IEN_RXFULL;
 }
 
+/**************************************************************************//**
+ * @brief Setting up RX interrupts from TIMER0 sowtware SPI-> RX
+ * @param receiveBuffer points to where received data is to be stored
+ * @param bytesToReceive indicates the number of bytes to receive
+ *****************************************************************************/
+void SPI2_setupRXIntSW(uint16_t* receiveBuffer) {
+
+	RxFrame = receiveBuffer;
+	TIMER0forADC_Setup();
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void USART2_RX_IRQHandler(void)
 {
-  USART_TypeDef *spi = USART2;
-  uint8_t       rxdata;
+	 USART_TypeDef *spi = USART2;
 
+	 if(spi->IF&USART_IF_RXFULL){
+		 spi->IFC=USART_IFC_RXFULL;
 
-   masterRxBuffer[0]= USART_RxDouble(spi);
-/*
-  if (spi->STATUS & USART_STATUS_RXDATAV)
-  {
-    // Reading out data
-    rxdata = spi->RXDATA;
+		  uint16_t       rxdata=0;
+		// if (spi->STATUS & USART_STATUS_RXFULL)
+		//  {
+		    // Reading out data
+		    rxdata = spi->RXDOUBLE;
 
-    if (masterRxBuffer != 0)
-    {
-      // Store Data
-      masterRxBuffer[masterRxBufferIndex] = rxdata;
-      masterRxBufferIndex++;
+		    if (masterRxBuffer != 0)
+		    {
 
-      if (masterRxBufferIndex == masterRxBufferSize)
-      {
-        masterRxBuffer = 0;
-      }
-    }
-  }
-  */
+		    	*masterRxBuffer = rxdata;
+		    }
+		//  }
+			//GPIO ->P[2].DOUTSET = 1 << 5;
+	 }
 }
 
 void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend)
 {
   USART_TypeDef *uart = USART2;
   int           ii;
-  GPIO->P[2].DOUTCLR=1<<5;  // wylaczam ustawiam 0 na CS start pomiaru
-USART_TxDouble(uart, txBuffer[0]);
+  ///GPIO->P[2].DOUTCLR=1<<5;  // wylaczam ustawiam 0 na CS start pomiaru
+USART_TxDouble(uart, 0);
 /*
   // Sending the data
   for (ii = 0; ii < bytesToSend;  ii++)
   {
     // Waiting for the usart to be ready
     while (!(uart->STATUS & USART_STATUS_TXBL)) ;
-
+no wiê
     if (txBuffer != 0)
     {
       // Writing next byte to USART
@@ -253,4 +267,4 @@ double rms(CircularBufferADC_Result *v) {
 }
 
 
-
+uint16_t ReadFrameSwSPI(void){}

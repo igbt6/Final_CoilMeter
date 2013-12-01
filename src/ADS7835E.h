@@ -42,7 +42,9 @@ inline int ResultADC_Buf_IsEmpty(CircularBufferADC_Result *cb) {
 
 
 void SPI_setup(void); // hardware SPI
+void SPI2_Init(void);
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive);
+void SPI2_setupRXIntSW(uint16_t* receiveBuffer); // software SPI
 void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 
 
