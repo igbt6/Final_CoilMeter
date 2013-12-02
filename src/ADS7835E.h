@@ -30,9 +30,15 @@ typedef struct {
     bool Buf_isFull;
 } CircularBufferADC_Result;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct {
+	double rms;
+	double min;
+	double max;
+	double avg;
+}Results;
 
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline int ResultADC_Buf_IsFull(CircularBufferADC_Result *cb) {
     return (cb->end + 1) % cb->size == cb->start; }
 
@@ -44,18 +50,22 @@ inline int ResultADC_Buf_IsEmpty(CircularBufferADC_Result *cb) {
 void SPI_setup(void); // hardware SPI
 void SPI2_Init(void);
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive);
-void SPI2_setupRXIntSW(uint16_t* receiveBuffer); // software SPI
+void SPI2_setupRXInt_SW(uint16_t* receiveBuffer); // software SPI
 void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 
 
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput);
 int ConvertU16_from_ADCToINT(uint16_t digit);
+void ParseDataToSendThroughBTM(char* data, char typeOfMessage);
 //void ResultADC_Buf_Read(CircularBufferADC_Result *cb);
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb,TYPE_OF_ADC_RESULT x);
 void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size);
 void ResultADC_Buf_Free(CircularBufferADC_Result *cb);
 double rms(CircularBufferADC_Result *v);
+double min(CircularBufferADC_Result *v);
+double max(CircularBufferADC_Result *v);
+double avg(CircularBufferADC_Result *v);
 
 
 #endif /* ADS7835E_H_ */
