@@ -9,6 +9,7 @@
 #include "em_gpio.h"
 #include "em_cmu.h"
 #include "splc501c.h"
+#include "goertzel.h"
 #include "em_lcd.h"
 #include "em_usart.h"
 #include <stdio.h>
@@ -161,6 +162,17 @@ void TIMER0_IRQHandler(void) {
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
 	*RxFrame = ReadFrameFromSPI_SW();
 	endOfADCInterrupt = true;
+	/*
+	 static int i ,x;
+	 i++;
+	 if (i >= 1000) {
+	 x++;
+	 GLCD_GoTo(1, 0);
+	 GLCD_WriteChar((char)x);
+
+	 i = 0;
+	 }
+	 */
 }
 
 #endif
@@ -185,10 +197,25 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static bool checkData(double *data) {
+	if (((int)*data) < 1.000000) {
+		*data = 0;
+		return false;
+	}
+ return true;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
-	const float CONST_of_MULTIPLICATION = 0.00122;			//*185.474;
-	digit = digit * CONST_of_MULTIPLICATION;
+	const double COEFFICIENT = 0.00122*184 ;
+
+	if (checkData(&digit)) {
+		digit = digit * COEFFICIENT ;
+	}
+	else digit=0;
 	gcvt(digit, 4, StringOutput);
+
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
@@ -204,7 +231,7 @@ int ConvertU16_from_ADCToINT(uint16_t digit) {
 	return signedDigit;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
+char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 	for (uint8_t i = 0; i < 6; i++) {
 
 		data[i + 1] = data[i];
@@ -221,6 +248,7 @@ void ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 		break;
 	}
 	data[0] = 'r';
+	return data;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -316,5 +344,29 @@ double avg(CircularBufferADC_Result *v) {
 		avg += ConvertU16_from_ADCToINT(v->Values[i]);
 	}
 	return (avg / v->size);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//goertzel
+
+float doGoertzelAlgorithm(CircularBufferADC_Result *v) {
+	float magnitudeSquared = 0;
+	float real, imag;
+#if 0
+	for (int i = 0; i < v->size; i++) {
+		ProcessSample(ConvertU16_from_ADCToINT(v->Values[i]));
+	}
+	/* optimized algorithm
+
+	 magnitudeSquared = GetMagnitudeSquared(); // magnitude squared
+
+	 */
+	/*basic algorithm*/
+	GetRealImag(&real, &imag);
+	magnitudeSquared = real*real + imag*imag;
+	return sqrt(magnitudeSquared); //relative magntude
+#endif
+
+	return goertzel_mag(100, 50, 1000, v->Values);
+
 }
 

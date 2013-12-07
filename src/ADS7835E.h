@@ -12,11 +12,9 @@
 #include <malloc.h>
 #include <stdbool.h>
 /* Defines */
-#define HFRCO_FREQUENCY         14000000
-#define SPI_PERCLK_FREQUENCY    HFRCO_FREQUENCY
-#define SPI_BAUDRATE            10000000
 
-#define SIZE_BUF_ADC  100
+
+#define SIZE_BUF_ADC  100 //ilosc probek
 
 
 
@@ -57,7 +55,7 @@ void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput);
 int ConvertU16_from_ADCToINT(uint16_t digit);
-void ParseDataToSendThroughBTM(char* data, char typeOfMessage);
+char* ParseDataToSendThroughBTM(char* data, char typeOfMessage);
 //void ResultADC_Buf_Read(CircularBufferADC_Result *cb);
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb,TYPE_OF_ADC_RESULT x);
 void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size);
@@ -66,6 +64,7 @@ double rms(CircularBufferADC_Result *v);
 double min(CircularBufferADC_Result *v);
 double max(CircularBufferADC_Result *v);
 double avg(CircularBufferADC_Result *v);
+float doGoertzelAlgorithm(CircularBufferADC_Result *v);
 
 
 #endif /* ADS7835E_H_ */

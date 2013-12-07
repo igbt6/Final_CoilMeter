@@ -8,7 +8,7 @@
 #ifndef TIMERS_H_
 #define TIMERS_H_
 
-#define TOP_Value 547 /*100Hz*/  //an interrupt appears every one second a period for osc. 14MHZ like here and prescaler is set on 256  // it is a frequency of sampling of ADC
+#define TOP_Value 10000 /*1000Hz*/  //freq of the interrupt is 1000Hz , Crystal: 20MHz  prescaler 2  // it is a frequency of sampling of ADC
 void TIMER0forADC_Setup(void);
 
 

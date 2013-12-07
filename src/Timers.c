@@ -25,7 +25,7 @@ void TIMER0forADC_Setup(void){
 	  {
 	    .enable     = true,
 	    .debugRun   = true,
-	    .prescale   = timerPrescale256,
+	    .prescale   = timerPrescale2,
 	    .clkSel     = timerClkSelHFPerClk,
 	    .fallAction = timerInputActionNone,
 	    .riseAction = timerInputActionNone,
@@ -40,6 +40,7 @@ void TIMER0forADC_Setup(void){
 	  TIMER_IntEnable(TIMER0, TIMER_IF_OF);
 
 	  /* Enable TIMER0 interrupt vector in NVIC */
+	  NVIC_SetPriority(TIMER0_IRQn,0);
 	  NVIC_EnableIRQ(TIMER0_IRQn);
 
 	  /* Set TIMER Top value */
