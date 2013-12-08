@@ -15,57 +15,52 @@
 #define RIGHT 14
 #define LEFT  12
 
-
 // defines for RTC module
 #define LFRCO_FREQUENCY              32768
 #define WAKEUP_INTERVAL_MS            500
 #define RTC_COUNT_BETWEEN_WAKEUP    (((LFRCO_FREQUENCY * WAKEUP_INTERVAL_MS) / 1000)-1)
 
-extern volatile METER_STATE STATE;
-extern bool rtcFlag;
+////////////////////////////// enums that describe a state of following modes
 
-extern  uint8_t menuPosition;
+volatile states State;
 
-
+//////////////////////////
+//static uint8_t main_menu_position_tab[6]{};
 /**************************************************************************//**
  * @brief  Start LFRCO for RTC
  * Starts the low frequency RC oscillator (LFRCO) and routes it to the RTC
  *****************************************************************************/
-static void startLfxoForRtc(void)
-{
+static void startLfxoForRtc(void) {
 
-  CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-  CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFRCO);
-  CMU_ClockEnable(cmuClock_RTC, true);
-  CMU_ClockEnable(cmuClock_CORELE, true);
+	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+	CMU_ClockEnable(cmuClock_RTC, true);
+	CMU_ClockEnable(cmuClock_CORELE, true);
 }
-
-
 
 /**************************************************************************//**
  * @brief  Setup RTC
  * On compare match with COMP0, clear counter and set interrupt
  *****************************************************************************/
-static void setupRtc(void)
-{
+static void setupRtc(void) {
 
-  startLfxoForRtc();
-  RTC_Init_TypeDef rtcInit = RTC_INIT_DEFAULT;
+	startLfxoForRtc();
+	RTC_Init_TypeDef rtcInit = RTC_INIT_DEFAULT;
 
-  rtcInit.enable   = true;      /* Enable RTC after init has run */
-  rtcInit.comp0Top = true;      /* Clear counter on compare match */
-  rtcInit.debugRun = false;     /* Counter shall keep running during debug halt. */
+	rtcInit.enable = true; /* Enable RTC after init has run */
+	rtcInit.comp0Top = true; /* Clear counter on compare match */
+	rtcInit.debugRun = false; /* Counter shall keep running during debug halt. */
 
-  /* Setting the compare value of the RTC */
-  RTC_CompareSet(0, RTC_COUNT_BETWEEN_WAKEUP);
+	/* Setting the compare value of the RTC */
+	RTC_CompareSet(0, RTC_COUNT_BETWEEN_WAKEUP);
 
-  /* Enabling Interrupt from RTC */
-  RTC_IntEnable(RTC_IFC_COMP0);
-  NVIC_SetPriority(RTC_IRQn,3);
-  NVIC_EnableIRQ(RTC_IRQn);
+	/* Enabling Interrupt from RTC */
+	RTC_IntEnable(RTC_IFC_COMP0);
+	NVIC_SetPriority(RTC_IRQn, 3);
+	NVIC_EnableIRQ(RTC_IRQn);
 
-  /* Initialize the RTC */
-  RTC_Init(&rtcInit);
+	/* Initialize the RTC */
+	RTC_Init(&rtcInit);
 }
 
 ////static void (*rtcCallback)(uint8_t numRow, bool onORoff);//sluzy do wywolywania odpowiedniej funkcji w przerwaniu od rtc
@@ -76,11 +71,11 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 	/////////////////////////////////////////rtcCallback=Callback;
 	CMU_ClockEnable(cmuClock_GPIO, true);
 	/* Configure OK,DOWN<UP, LEFT, RIGHT  as input */
-	GPIO_PinModeSet(gpioPortE, OK, gpioModeInput, 0);
-	GPIO_PinModeSet(gpioPortE, UP, gpioModeInput, 0);
-	GPIO_PinModeSet(gpioPortE, DOWN, gpioModeInput, 0);
-	GPIO_PinModeSet(gpioPortE, RIGHT, gpioModeInput, 0);
-	GPIO_PinModeSet(gpioPortE, LEFT, gpioModeInput, 0);
+	GPIO_PinModeSet(gpioPortE, OK, gpioModeInputPullFilter, 1);
+	GPIO_PinModeSet(gpioPortE, UP, gpioModeInputPullFilter, 1);
+	GPIO_PinModeSet(gpioPortE, DOWN, gpioModeInputPullFilter, 1);
+	GPIO_PinModeSet(gpioPortE, RIGHT, gpioModeInputPullFilter, 1);
+	GPIO_PinModeSet(gpioPortE, LEFT, gpioModeInputPullFilter, 1);
 
 	GPIO_IntConfig(gpioPortE, OK, false, true, true); // switch OK falling edge
 	GPIO_IntConfig(gpioPortE, UP, false, true, true); // switch UP falling edge
@@ -88,60 +83,87 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 	GPIO_IntConfig(gpioPortE, RIGHT, false, true, true); // switch RIGHT falling edge
 	GPIO_IntConfig(gpioPortE, LEFT, false, true, true); // switch LEFT falling edge
 
+	NVIC_SetPriority(GPIO_EVEN_IRQn, 1);
+	NVIC_SetPriority(GPIO_ODD_IRQn, 1);
 	NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn); // set interrupts for EVEN and ODD input signals
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 	NVIC_EnableIRQ(GPIO_ODD_IRQn);
-	NVIC_SetPriority(GPIO_EVEN_IRQn,1);
-	NVIC_SetPriority(GPIO_ODD_IRQn,1);
 	setupRtc();  // setup RTC
 }
 
 void GPIO_ODD_IRQHandler(void) {
-	if (GPIO_IntGet() == 1 << OK) {
-		GPIO_IntClear(1 << OK);
-		if (STATE == WAITFORENABLE) {
-			STATE = ENABLING;
-		}
-	} else if (GPIO_IntGet() == 1 << UP) {
-		GPIO_IntClear(1 << UP);
-		if (STATE == MAIN_MENU) {
-			if(menuPosition==0)menuPosition=5;
-				menuPosition--;
-			    menuPosition%=5;
+	if (GPIO ->IF & (1 << OK)) {
 
-						}
+		if (State.MODE == WAITFORENABLE) {
+			State.init=false;
+			State.MODE = ENABLING;
+
+		}
+
+		else if (State.MODE == MAIN_MENU) {
+			State.init=false;
+			State.MODE = MAIN_MENU_OPTION;
+		}
+		else if (State.MODE == MAIN_MENU_OPTION){
+
+			if(State.MAIN_MENU_CURRENT_OPTION==START){
+
+				//TODO SAVE NA KARTE
+
+			}
+
+
+
+		}
+
+		GPIO ->IFC = 1 << OK;
+	} else if (GPIO ->IF & (1 << UP)) {
+		if (State.MODE == MAIN_MENU) {
+
+			if (State.MAIN_MENU_CURRENT_OPTION == 0)
+				State.MAIN_MENU_CURRENT_OPTION = NUMBER_OF_OPTIONS;
+			State.MAIN_MENU_CURRENT_OPTION--;
+			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
+
+		}
+		GPIO ->IFC = 1 << UP;
 	}
 }
 
 void GPIO_EVEN_IRQHandler(void) {
-	if (GPIO_IntGet() == 1 << DOWN) {
-		GPIO_IntClear(1 << DOWN);
+	if (GPIO ->IF & (1 << DOWN)) {
+		GPIO ->IFC = 1 << DOWN;
+		if (State.MODE == MAIN_MENU) {
 
-		if (STATE == MAIN_MENU) {
-						menuPosition++;
-						menuPosition%=5;
+			State.MAIN_MENU_CURRENT_OPTION++;
+			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
 
-							}
+		}
+	} else if (GPIO ->IF & (1 << RIGHT)) {
+		GPIO ->IFC = 1 << RIGHT;
+	} else if (GPIO ->IF & (1 << LEFT)) {
+
+		if (State.MODE == MAIN_MENU_OPTION){
+
+					if(State.MAIN_MENU_CURRENT_OPTION==START){
+						State.init=false;
+						State.MODE=MAIN_MENU;
+
+					}
+		}
 
 
-	} else if (GPIO_IntGet() == 1 << LEFT) {
-		GPIO_IntClear(1 << LEFT);
-	} else if (GPIO_IntGet() == 1 << RIGHT) {
-		GPIO_IntClear(1 << RIGHT);
+		GPIO ->IFC = 1 << LEFT;
 	}
 }
 
-
-
 //RTC INTERRUPTS -> very useful for keyboard delays and other stuff
 
-
-void RTC_IRQHandler(void)
-{  rtcFlag^=1;
+void RTC_IRQHandler(void) {
+	State.rtcFlag ^= 1;
 ////////////if(rtcCallback)(*rtcCallback)(menuPosition,rtcFlag);
-  /* Clear interrupt source */
-  RTC_IntClear(RTC_IFC_COMP0);
+	/* Clear interrupt source */
+	RTC_IntClear(RTC_IFC_COMP0);
 }
-
 
