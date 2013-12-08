@@ -12,7 +12,7 @@
 void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void);
 
 typedef enum {
-	WAITFORENABLE = 0, ENABLING, MAIN_MENU, MAIN_MENU_OPTION
+	WAITFORENABLE = 0, ENABLING, MAIN_MENU, MAIN_MENU_OPTION, BATTERY_ALARM
 
 } METER_STATE;
 

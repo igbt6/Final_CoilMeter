@@ -53,19 +53,45 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff);
  //	PE13	OK- data
  *
  */
+
+/////////////////////////////////////////////////////////////////////
+//functions that allow you to TURN ON/OFF the following module
+/////////////////////////////////////////////////////////////////////
 static void GLCD_Enable(void) {
 
-	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
-			| GPIO_P_MODEH_MODE13_PUSHPULL;
+	//GPIO ->P[0].MODEH |=  GPIO_P_MODEH_MODE13_PUSHPULL;
+	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
 	GPIO_PinOutClear(gpioPortA, 13);
 }
 
 static void GLCD_Disable(void) {
 
-	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
-			| GPIO_P_MODEH_MODE13_PUSHPULL;
+	//GPIO ->P[0].MODEH |= GPIO_P_MODEH_MODE13_PUSHPULL;
+	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
 	GPIO_PinOutSet(gpioPortA, 13);
 }
+static void BT_Enable(void) {
+	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 1);
+	GPIO_PinOutClear(gpioPortF, 6);
+}
+
+static void BT_Disable(void) {
+	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 1);
+	GPIO_PinOutSet(gpioPortF, 6);
+}
+
+static void SDCard_Enable(void) {
+
+	GPIO_PinModeSet(gpioPortF, 12, gpioModePushPull, 1);
+	GPIO_PinOutClear(gpioPortF, 12);
+}
+
+static void SDCard_Disable(void) {
+	GPIO_PinModeSet(gpioPortF, 12, gpioModePushPull, 1);
+	GPIO_PinOutSet(gpioPortF, 12);
+}
+
+/////////////////////////////////////////////////////////////////////
 
 static void Set20MHzFrequency_Init(void) {
 	/* Use crystal oscillator for HFXO */
@@ -77,6 +103,7 @@ static void Set20MHzFrequency_Init(void) {
 	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
 }
+////////////////////////////////////////////////////////////////////////////////
 //volatile METER_STATE STATE = WAITFORENABLE; // extern global enym type
 
 volatile states State;
@@ -124,7 +151,7 @@ int main(void) {
 		switch (State.MODE) {
 
 		case WAITFORENABLE:
-			GLCD_Disable();
+
 			EMU_EnterEM2(true);   // deep sleep mode
 
 			break;
@@ -134,7 +161,8 @@ int main(void) {
 			if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
 				while (1)
 					;
-			GLCD_Enable();
+			//GLCD_Disable();
+			//GLCD_Enable();
 			GLCD_Init();
 			GLCD_ClearScreen();
 			GLCD_GoTo(40, 3);
@@ -153,6 +181,7 @@ int main(void) {
 			break;
 
 		case MAIN_MENU:
+			//GLCD_Disable();
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(main_menu);
@@ -197,7 +226,6 @@ int main(void) {
 					if (ADC_RESULT.Buf_isFull) {
 						BTMcounter++;
 						if (BTMcounter == 1000) {
-
 							results.avg = avg(&ADC_RESULT);
 							results.max = max(&ADC_RESULT);
 							results.min = min(&ADC_RESULT);
@@ -225,12 +253,20 @@ int main(void) {
 						//BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
 					}
 				}
-				//EMU_EnterEM1();
 
 				break;
 			case SETTINGS:
 				break;
 			case BT_STATE:
+				if (!State.init) {
+					GLCD_ClearScreen();
+					GLCD_bmp(bt_state);
+					State.init = true;
+				}
+				GLCD_GoTo(2, 3);
+				GLCD_WriteString("CONNECTED");
+				GLCD_GoTo(2, 5);
+				GLCD_WriteString(" MAC ...");
 				break;
 			case BAT_LEVEL:
 				if (!State.init) {
@@ -252,10 +288,14 @@ int main(void) {
 			}
 			EMU_EnterEM1();
 			break;
-
+		case BATTERY_ALARM:
+			if (!State.init) {
+				GLCD_ClearScreen();
+				GLCD_bmp(battery_alarm);
+				State.init = true;
+			}
 		}
 	}
-
 }
 
 void SysTick_Handler(void) {
@@ -274,7 +314,6 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff) {
 	if (numberMenuRow > NUMBER_OF_OPTIONS)
 		return;
 	static uint8_t lastNumberRow;
-
 	if (lastNumberRow != numberMenuRow) {
 		for (uint8_t x = 0; x < 17; x++) {
 			for (uint8_t y = 0; y < 5; y++) {
@@ -291,8 +330,6 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff) {
 					onORoff ? true : false);
 		}
 	}
-
 	lastNumberRow = numberMenuRow;
-
 }
 

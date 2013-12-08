@@ -21,6 +21,8 @@
 
 #define SOFTWARE_SPI 1
 
+const double ADC_COEFFICIENT = 0.00122;
+
 uint16_t* masterRxBuffer;
 uint16_t* masterRxBuffer;
 int masterRxBufferSize;
@@ -199,23 +201,27 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static bool checkData(double *data) {
-	if (((int)*data) < 1.000000) {
+	if (((*data) < 0.006) && ((*data) > -0.006)) {
 		*data = 0;
 		return false;
 	}
- return true;
+	return true;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
-	const double COEFFICIENT = 0.00122*184 ;
-
+	const double SCALLING_FACTOR = 184.345;
+	//digit *=ADC_COEFFICIENT;
 	if (checkData(&digit)) {
-		digit = digit * COEFFICIENT ;
+		digit *= SCALLING_FACTOR;
+		gcvt(digit, 4, StringOutput);
+	} else {
+		StringOutput[0] = '0';
+		StringOutput[1] = '.';
+		StringOutput[2] = '0';
+		StringOutput[3] = '0';
+		StringOutput[4] = '0';
 	}
-	else digit=0;
-	gcvt(digit, 4, StringOutput);
-
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
@@ -307,9 +313,9 @@ double rms(CircularBufferADC_Result *v) {
 	double sum = 0.0;
 	for (int i = 0; i < v->size; i++) {
 		TemporaryVariable = ConvertU16_from_ADCToINT(v->Values[i]);
-		sum += (TemporaryVariable * TemporaryVariable);
+		sum += (double) (TemporaryVariable * TemporaryVariable);
 	}
-	return sqrt(sum / v->size);
+	return ADC_COEFFICIENT * sqrt(sum / v->size);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,25 +323,35 @@ double rms(CircularBufferADC_Result *v) {
 double min(CircularBufferADC_Result *v) {
 	double minValue = 0.0;
 	double minTempValue = 0.0;
+	double rmsValue = rms(v);
+	if (!checkData(&rmsValue)) {
+		minValue = 0;
+		return minValue;
+	} // to avoid if rms is around 0 and max or min could be then bigger value
 	for (int i = 0; i < v->size; i++) {
 		minTempValue = ConvertU16_from_ADCToINT(v->Values[i]);
 		if (minTempValue < minValue) {
 			minValue = minTempValue;
 		}
 	}
-	return minValue;
+	return ADC_COEFFICIENT * minValue;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double max(CircularBufferADC_Result *v) {
 	double maxValue = 0.0;
 	double maxTempValue = 0.0;
+	double rmsValue = rms(v);
+	if (!checkData(&rmsValue)) {
+		maxValue = 0;
+		return maxValue;
+	} // to avoid if rms is around 0 and max or min could be then bigger value
 	for (int i = 0; i < v->size; i++) {
 		maxTempValue = ConvertU16_from_ADCToINT(v->Values[i]);
 		if (maxTempValue > maxValue) {
 			maxValue = maxTempValue;
 		}
 	}
-	return maxValue;
+	return ADC_COEFFICIENT * maxValue;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double avg(CircularBufferADC_Result *v) {
@@ -343,7 +359,7 @@ double avg(CircularBufferADC_Result *v) {
 	for (int i = 0; i < v->size; i++) {
 		avg += ConvertU16_from_ADCToINT(v->Values[i]);
 	}
-	return (avg / v->size);
+	return ADC_COEFFICIENT * (avg / v->size);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //goertzel
@@ -363,10 +379,10 @@ float doGoertzelAlgorithm(CircularBufferADC_Result *v) {
 	/*basic algorithm*/
 	GetRealImag(&real, &imag);
 	magnitudeSquared = real*real + imag*imag;
-	return sqrt(magnitudeSquared); //relative magntude
+	return ADC_COEFFICIENT*sqrt(magnitudeSquared); //relative magntude
 #endif
 
-	return goertzel_mag(100, 50, 1000, v->Values);
+	return ADC_COEFFICIENT * goertzel_mag(100, 50, 1000, v->Values);
 
 }
 

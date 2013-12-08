@@ -9,15 +9,17 @@
 #include "keyboard.h"
 #include "em_rtc.h"
 #include "stdbool.h"
-#define OK    13
+// defines keyboard signals
+#define OK    13  // PORT E
 #define UP    11
 #define DOWN  10
 #define RIGHT 14
 #define LEFT  12
+#define BATTERY_LOW 7
 
 // defines for RTC module
 #define LFRCO_FREQUENCY              32768
-#define WAKEUP_INTERVAL_MS            500
+#define WAKEUP_INTERVAL_MS            300 // 300 ms interrupt
 #define RTC_COUNT_BETWEEN_WAKEUP    (((LFRCO_FREQUENCY * WAKEUP_INTERVAL_MS) / 1000)-1)
 
 ////////////////////////////// enums that describe a state of following modes
@@ -32,8 +34,7 @@ volatile states State;
  *****************************************************************************/
 static void startLfxoForRtc(void) {
 
-
-	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+ 	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
 	CMU_ClockEnable(cmuClock_RTC, true);
 	CMU_ClockEnable(cmuClock_CORELE, true);
@@ -77,12 +78,14 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 	GPIO_PinModeSet(gpioPortE, DOWN, gpioModeInputPullFilter, 1);
 	GPIO_PinModeSet(gpioPortE, RIGHT, gpioModeInputPullFilter, 1);
 	GPIO_PinModeSet(gpioPortE, LEFT, gpioModeInputPullFilter, 1);
+	GPIO_PinModeSet(gpioPortE, BATTERY_LOW, gpioModeInputPullFilter, 1); // info about battery low level
 
 	GPIO_IntConfig(gpioPortE, OK, false, true, true); // switch OK falling edge
 	GPIO_IntConfig(gpioPortE, UP, false, true, true); // switch UP falling edge
 	GPIO_IntConfig(gpioPortE, DOWN, false, true, true); // switch DOWN falling edge
 	GPIO_IntConfig(gpioPortE, RIGHT, false, true, true); // switch RIGHT falling edge
 	GPIO_IntConfig(gpioPortE, LEFT, false, true, true); // switch LEFT falling edge
+	GPIO_IntConfig(gpioPortE, BATTERY_LOW, true, false, true); // BATTERY LOW rising edge
 
 	NVIC_SetPriority(GPIO_EVEN_IRQn, 1);
 	NVIC_SetPriority(GPIO_ODD_IRQn, 1);
@@ -94,43 +97,37 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 }
 
 void GPIO_ODD_IRQHandler(void) {
- uint32_t flags =GPIO->IF;
- GPIO ->IFC = 0xFFFFFFFF;
+	uint32_t flags = GPIO ->IF;
+	GPIO ->IFC = 0xFFFFFFFF;
 	if (flags & (1 << OK)) {
 
 		if (State.MODE == WAITFORENABLE) {
-			State.init=false;
+			State.init = false;
 			State.MODE = ENABLING;
-
-		}
-
-		else if (State.MODE == MAIN_MENU) {
-			State.init=false;
+		} else if (State.MODE == MAIN_MENU) {
+			State.init = false;
 			State.MODE = MAIN_MENU_OPTION;
-		}
-		else if (State.MODE == MAIN_MENU_OPTION){
-
-			if(State.MAIN_MENU_CURRENT_OPTION==START){
-
+		} else if (State.MODE == MAIN_MENU_OPTION) {
+			if (State.MAIN_MENU_CURRENT_OPTION == START) {
 				//TODO SAVE NA KARTE
-
 			}
-
-
-
+		} else if (State.MODE == BATTERY_ALARM) {
+			State.init = false;
+			State.MODE = MAIN_MENU_OPTION;   // wracam do ostatnio uruchomionego
 		}
 
-		GPIO ->IFC = 1 << OK;
+		//GPIO ->IFC = 1 << OK;
 	} else if (flags & (1 << UP)) {
 		if (State.MODE == MAIN_MENU) {
-
 			if (State.MAIN_MENU_CURRENT_OPTION == 0)
 				State.MAIN_MENU_CURRENT_OPTION = NUMBER_OF_OPTIONS;
 			State.MAIN_MENU_CURRENT_OPTION--;
 			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
-
 		}
-		GPIO ->IFC = 1 << UP;
+		//GPIO ->IFC = 1 << UP;
+	} else if (flags & (1 << BATTERY_LOW)) {
+		State.MODE = BATTERY_ALARM;
+		State.init = false;  // battery alarm occured
 	}
 	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 }
@@ -139,7 +136,6 @@ void GPIO_EVEN_IRQHandler(void) {
 	if (GPIO ->IF & (1 << DOWN)) {
 		GPIO ->IFC = 1 << DOWN;
 		if (State.MODE == MAIN_MENU) {
-
 			State.MAIN_MENU_CURRENT_OPTION++;
 			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
 
@@ -148,21 +144,19 @@ void GPIO_EVEN_IRQHandler(void) {
 		GPIO ->IFC = 1 << RIGHT;
 	} else if (GPIO ->IF & (1 << LEFT)) {
 
-		if (State.MODE == MAIN_MENU_OPTION){
-
-					State.init=false;   // flaga init cancel
-					State.MODE=MAIN_MENU;
-
-
+		if (State.MODE == MAIN_MENU_OPTION) {
+			State.init = false;   // flaga init cancel
+			State.MODE = MAIN_MENU;
 		}
-
-
+		else if (State.MODE == BATTERY_ALARM) {
+			State.init = false;
+			State.MODE = MAIN_MENU_OPTION;   // wracam do ostatnio uruchomionego
+		}
 		GPIO ->IFC = 1 << LEFT;
 	}
 }
 
 //RTC INTERRUPTS -> very useful for keyboard delays and other stuff
-
 void RTC_IRQHandler(void) {
 	State.rtcFlag ^= 1;
 ////////////if(rtcCallback)(*rtcCallback)(menuPosition,rtcFlag);
