@@ -53,6 +53,19 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff);
  //	PE13	OK- data
  *
  */
+static void GLCD_Enable(void) {
+
+	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
+			| GPIO_P_MODEH_MODE13_PUSHPULL;
+	GPIO_PinOutClear(gpioPortA, 13);
+}
+
+static void GLCD_Disable(void) {
+
+	GPIO ->P[0].MODEH = (GPIO ->P[0].MODEH & ~_GPIO_P_MODEH_MODE13_MASK)
+			| GPIO_P_MODEH_MODE13_PUSHPULL;
+	GPIO_PinOutSet(gpioPortA, 13);
+}
 
 static void Set20MHzFrequency_Init(void) {
 	/* Use crystal oscillator for HFXO */
@@ -111,7 +124,7 @@ int main(void) {
 		switch (State.MODE) {
 
 		case WAITFORENABLE:
-
+			GLCD_Disable();
 			EMU_EnterEM2(true);   // deep sleep mode
 
 			break;
@@ -121,6 +134,7 @@ int main(void) {
 			if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
 				while (1)
 					;
+			GLCD_Enable();
 			GLCD_Init();
 			GLCD_ClearScreen();
 			GLCD_GoTo(40, 3);
@@ -136,52 +150,6 @@ int main(void) {
 
 			char respBuf1[10];
 
-			//GLCD_WriteCommand(SPLC501C_PAGE_BLINKING_MODE);
-			/*
-			 while (1) {
-
-			 //BTM222_ReadData(respBuf1);
-			 //GLCD_GoTo(1, 6);
-			 //GLCD_WriteString(respBuf1);
-
-			 if (endOfADCInterrupt) {
-			 endOfADCInterrupt = false;
-
-			 ResultADC_Buf_Write(&ADC_RESULT, FRAME);
-			 if (ADC_RESULT.Buf_isFull) {
-			 BTMcounter++;
-			 if (BTMcounter == 1000) {
-
-			 results.avg = avg(&ADC_RESULT);
-			 results.max = max(&ADC_RESULT);
-			 results.min = min(&ADC_RESULT);
-			 ConvertDOUBLEtoLCD(results.max, bufoo);
-			 GLCD_GoTo(1, 3);
-			 GLCD_WriteString(bufoo);
-			 ConvertDOUBLEtoLCD(results.min, bufoo);
-			 GLCD_GoTo(1, 4);
-			 GLCD_WriteString(bufoo);
-			 ConvertDOUBLEtoLCD(results.avg, bufoo);
-			 GLCD_GoTo(1, 5);
-			 GLCD_WriteString(bufoo);
-			 BTMcounter = 0;
-			 }
-			 InitGoertzel();
-			 double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
-			 ConvertDOUBLEtoLCD(goertzel, bufoo);
-			 GLCD_GoTo(1, 1);
-			 GLCD_WriteString(bufoo);
-			 results.rms = rms(&ADC_RESULT);
-			 ConvertDOUBLEtoLCD(results.rms, bufoo);
-			 GLCD_GoTo(1, 2);
-			 GLCD_WriteString(bufoo);
-
-			 //BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
-			 }
-			 }
-			 EMU_EnterEM1();
-			 }
-			 */
 			break;
 
 		case MAIN_MENU:
@@ -257,7 +225,7 @@ int main(void) {
 						//BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
 					}
 				}
-				EMU_EnterEM1();
+				//EMU_EnterEM1();
 
 				break;
 			case SETTINGS:
@@ -265,6 +233,15 @@ int main(void) {
 			case BT_STATE:
 				break;
 			case BAT_LEVEL:
+				if (!State.init) {
+					GLCD_ClearScreen();
+					GLCD_bmp(battery);
+					State.init = true;
+				}
+				GLCD_GoTo(50, 3);
+				GLCD_WriteString("YES");
+				GLCD_GoTo(50, 5);
+				GLCD_WriteString("91 %");
 				break;
 			case SD_CARD:
 				break;
@@ -273,7 +250,7 @@ int main(void) {
 			default:
 				break;
 			}
-
+			EMU_EnterEM1();
 			break;
 
 		}

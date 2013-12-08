@@ -32,6 +32,7 @@ volatile states State;
  *****************************************************************************/
 static void startLfxoForRtc(void) {
 
+
 	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
 	CMU_ClockEnable(cmuClock_RTC, true);
@@ -93,7 +94,9 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 }
 
 void GPIO_ODD_IRQHandler(void) {
-	if (GPIO ->IF & (1 << OK)) {
+ uint32_t flags =GPIO->IF;
+ GPIO ->IFC = 0xFFFFFFFF;
+	if (flags & (1 << OK)) {
 
 		if (State.MODE == WAITFORENABLE) {
 			State.init=false;
@@ -118,7 +121,7 @@ void GPIO_ODD_IRQHandler(void) {
 		}
 
 		GPIO ->IFC = 1 << OK;
-	} else if (GPIO ->IF & (1 << UP)) {
+	} else if (flags & (1 << UP)) {
 		if (State.MODE == MAIN_MENU) {
 
 			if (State.MAIN_MENU_CURRENT_OPTION == 0)
@@ -129,6 +132,7 @@ void GPIO_ODD_IRQHandler(void) {
 		}
 		GPIO ->IFC = 1 << UP;
 	}
+	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 }
 
 void GPIO_EVEN_IRQHandler(void) {
@@ -146,11 +150,10 @@ void GPIO_EVEN_IRQHandler(void) {
 
 		if (State.MODE == MAIN_MENU_OPTION){
 
-					if(State.MAIN_MENU_CURRENT_OPTION==START){
-						State.init=false;
-						State.MODE=MAIN_MENU;
+					State.init=false;   // flaga init cancel
+					State.MODE=MAIN_MENU;
 
-					}
+
 		}
 
 
