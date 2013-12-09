@@ -47,13 +47,14 @@
 #define	SIGN_TEST 0
 
 void showWhereIam(uint8_t numberMenuRow, bool onORoff);
+void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff);
 /* OPIS DO PODL ADC TAM GDZIE SWITCHE
  //	PE12	left - clk
  //	PE14	right- conv
  //	PE13	OK- data
  *
  */
-
+void setLCDBrightness(void);
 /////////////////////////////////////////////////////////////////////
 //functions that allow you to TURN ON/OFF the following module
 /////////////////////////////////////////////////////////////////////
@@ -147,16 +148,18 @@ int main(void) {
 	 */
 	KeyboardGpioSetup(/*showWhereIam*/); // init keyboard , external events
 	State.MODE = WAITFORENABLE; // start
+	State.settings_menu = false;
 	while (1) {
 		switch (State.MODE) {
 
-		case WAITFORENABLE:
+		case WAITFORENABLE: {
 
 			EMU_EnterEM2(true);   // deep sleep mode
 
 			break;
+		}
 
-		case ENABLING:
+		case ENABLING: {
 			/* Setup SysTick Timer for 1 msec interrupts  */
 			if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
 				while (1)
@@ -179,8 +182,9 @@ int main(void) {
 			char respBuf1[10];
 
 			break;
+		}
 
-		case MAIN_MENU:
+		case MAIN_MENU: {
 			//GLCD_Disable();
 			if (!State.init) {
 				GLCD_ClearScreen();
@@ -195,8 +199,9 @@ int main(void) {
 			showWhereIam(State.MAIN_MENU_CURRENT_OPTION, State.rtcFlag);
 
 			break;
+		}
 
-		case MAIN_MENU_OPTION:
+		case MAIN_MENU_OPTION: {
 
 			//GLCD_GoTo(1, 1);
 			/*    licznik_kwiecinskigo++;
@@ -206,12 +211,13 @@ int main(void) {
 
 			switch (State.MAIN_MENU_CURRENT_OPTION) {
 
-			case START:
+			case START: {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(measure);
 					Set20MHzFrequency_Init();
 					SPI2_setupRXInt_SW(&FRAME);
+					BT_Enable();
 					//BTM222_Init();
 					State.init = true;
 				}
@@ -255,9 +261,39 @@ int main(void) {
 				}
 
 				break;
-			case SETTINGS:
+			}
+			case SETTINGS: {
+				if (!State.init) {
+					GLCD_ClearScreen();
+					GLCD_bmp(settings);
+					State.init = true;
+				}
+
+				if (State.settings_menu) {
+					switch (State.SETTINGS_CURRENT_OPTION) {
+					case SLAVE_MODE:
+						GLCD_ClearScreen();
+						GLCD_GoTo(40, 3);
+						GLCD_WriteString("SLAVE MODE.");
+						break;
+					case SET_TIME:
+						break;
+					case SLEEP_TIME:
+						break;
+					case LCD_BRIGHTNESS:
+						setLCDBrightness();
+						State.settings_menu=false;
+						State.init = false; //powrot re-draw again
+						break;
+					default:
+						break;
+					}
+				} else
+					showWhereIamSettings(State.SETTINGS_CURRENT_OPTION,
+							State.rtcFlag);
 				break;
-			case BT_STATE:
+			}
+			case BT_STATE: {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(bt_state);
@@ -268,7 +304,8 @@ int main(void) {
 				GLCD_GoTo(2, 5);
 				GLCD_WriteString(" MAC ...");
 				break;
-			case BAT_LEVEL:
+			}
+			case BAT_LEVEL: {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(battery);
@@ -279,21 +316,28 @@ int main(void) {
 				GLCD_GoTo(50, 5);
 				GLCD_WriteString("91 %");
 				break;
-			case SD_CARD:
+			}
+			case SD_CARD: {
 				break;
-			case CALIBRATION:
+			}
+			case CALIBRATION: {
 				break;
-			default:
+			}
+			default: {
 				break;
+			}
 			}
 			EMU_EnterEM1();
 			break;
-		case BATTERY_ALARM:
+		}
+		case BATTERY_ALARM: {
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(battery_alarm);
 				State.init = true;
+				break;
 			}
+		}
 		}
 	}
 }
@@ -332,4 +376,65 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff) {
 	}
 	lastNumberRow = numberMenuRow;
 }
+/////////////////////////////////////////////////////////////////
 
+void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff) {
+	if (numberMenuRow > NUMBER_OF_SETTINGS_OPTIONS)
+		return;
+	static uint8_t lastNumberRow;
+	if (lastNumberRow != numberMenuRow) {
+		for (uint8_t x = 0; x < 17; x++) {
+			for (uint8_t y = 0; y < 5; y++) {
+				GLCD_SetPixel(x + 2, y + 17 + 8 * lastNumberRow, true);
+				GLCD_SetPixel(x + 113, y + 17 + 8 * lastNumberRow, true);
+			}
+		}
+	}
+	for (uint8_t x = 0; x < 17; x++) {
+		for (uint8_t y = 0; y < 5; y++) {
+			GLCD_SetPixel(x + 2, y + 17 + 8 * numberMenuRow,
+					onORoff ? true : false);
+			GLCD_SetPixel(x + 113, y + 17 + 8 * numberMenuRow,
+					onORoff ? true : false);
+		}
+	}
+	lastNumberRow = numberMenuRow;
+}
+
+void setLCDBrightness(void) {
+
+	GPIO_IntConfig(gpioPortE, OK, false, true, false); // turn off during setting
+	GPIO_IntConfig(gpioPortE, UP, false, true, false);
+	GPIO_IntConfig(gpioPortE, DOWN, false, true, false);
+
+	GLCD_ClearScreen();
+	GLCD_bmp(lcd_brightness);
+	uint8_t brightness = 20;
+	uint8_t percentValue=(brightness*100)/(64);
+	char str[5];
+	Delay(300);
+	while (GPIO_PinInGet(gpioPortE, OK)) {
+		GLCD_WriteCommand(SPLC501C_VOLUME_MODE);
+		GLCD_WriteCommand(brightness);
+		snprintf(str, 4, " %d ", percentValue);
+		str[4]='%';
+		GLCD_GoTo(60, 5);
+		GLCD_WriteString(str);
+
+		if (!GPIO_PinInGet(gpioPortE, DOWN)) {
+			brightness -= 4;
+			brightness %= 64;
+			Delay(500);
+		}
+		if (!GPIO_PinInGet(gpioPortE, UP)) {
+			brightness += 4;
+			brightness %= 64;
+			Delay(500);
+		}
+		percentValue=(brightness*100)/(64);
+	}
+	GPIO_IntConfig(gpioPortE, OK, false, true, true); // turn on back after setting
+	GPIO_IntConfig(gpioPortE, UP, false, true, true);
+	GPIO_IntConfig(gpioPortE, DOWN, false, true, true);
+	Delay(300);
+}

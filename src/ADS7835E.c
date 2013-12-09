@@ -181,16 +181,15 @@ void TIMER0_IRQHandler(void) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
-	const float CONST_of_MULTIPLICATION = 0.00122;
-	float signedDigit;
 
+	float signedDigit;
 	if (digit & 0x0800) {
 		digit &= 0x07FF;
-		signedDigit = (0x7FF - digit) * CONST_of_MULTIPLICATION;
+		signedDigit = (0x7FF - digit) * ADC_COEFFICIENT;
 
 		snprintf(StringOutput, 5, "-%.3f", signedDigit);
 	} else {
-		signedDigit = digit * CONST_of_MULTIPLICATION;
+		signedDigit = digit * ADC_COEFFICIENT;
 
 		// snprintf(StringOutput, 5, "%2f,%1f", (signedDigit / 10), (signedDigit / 10));
 		snprintf(StringOutput, 5, " %.3f", signedDigit);
@@ -201,7 +200,7 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static bool checkData(double *data) {
-	if (((*data) < 0.006) && ((*data) > -0.006)) {
+	if (((*data) < 0.009) && ((*data) > -0.009)) {
 		*data = 0;
 		return false;
 	}

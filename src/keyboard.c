@@ -9,13 +9,7 @@
 #include "keyboard.h"
 #include "em_rtc.h"
 #include "stdbool.h"
-// defines keyboard signals
-#define OK    13  // PORT E
-#define UP    11
-#define DOWN  10
-#define RIGHT 14
-#define LEFT  12
-#define BATTERY_LOW 7
+
 
 // defines for RTC module
 #define LFRCO_FREQUENCY              32768
@@ -34,7 +28,7 @@ volatile states State;
  *****************************************************************************/
 static void startLfxoForRtc(void) {
 
- 	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
 	CMU_ClockEnable(cmuClock_RTC, true);
 	CMU_ClockEnable(cmuClock_CORELE, true);
@@ -85,7 +79,7 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 	GPIO_IntConfig(gpioPortE, DOWN, false, true, true); // switch DOWN falling edge
 	GPIO_IntConfig(gpioPortE, RIGHT, false, true, true); // switch RIGHT falling edge
 	GPIO_IntConfig(gpioPortE, LEFT, false, true, true); // switch LEFT falling edge
-	GPIO_IntConfig(gpioPortE, BATTERY_LOW, true, false, true); // BATTERY LOW rising edge
+	GPIO_IntConfig(gpioPortE, BATTERY_LOW, false, true, true); // BATTERY LOW rising edge
 
 	NVIC_SetPriority(GPIO_EVEN_IRQn, 1);
 	NVIC_SetPriority(GPIO_ODD_IRQn, 1);
@@ -99,7 +93,7 @@ void KeyboardGpioSetup(/*void(*Callback)(uint8_t numRow, bool onORoff)*/void) {
 void GPIO_ODD_IRQHandler(void) {
 	uint32_t flags = GPIO ->IF;
 	GPIO ->IFC = 0xFFFFFFFF;
-	if (flags & (1 << OK)) {
+	if (flags & (1 << OK)) {                                 	//// OK _ KEY
 
 		if (State.MODE == WAITFORENABLE) {
 			State.init = false;
@@ -108,8 +102,12 @@ void GPIO_ODD_IRQHandler(void) {
 			State.init = false;
 			State.MODE = MAIN_MENU_OPTION;
 		} else if (State.MODE == MAIN_MENU_OPTION) {
+			State.init = false;
 			if (State.MAIN_MENU_CURRENT_OPTION == START) {
 				//TODO SAVE NA KARTE
+			} else if (State.MAIN_MENU_CURRENT_OPTION == SETTINGS) {
+				State.init = false;
+				State.settings_menu = true;
 			}
 		} else if (State.MODE == BATTERY_ALARM) {
 			State.init = false;
@@ -117,41 +115,61 @@ void GPIO_ODD_IRQHandler(void) {
 		}
 
 		//GPIO ->IFC = 1 << OK;
-	} else if (flags & (1 << UP)) {
+	} else if (flags & (1 << UP)) {                      		//// UP _ KEY
 		if (State.MODE == MAIN_MENU) {
 			if (State.MAIN_MENU_CURRENT_OPTION == 0)
 				State.MAIN_MENU_CURRENT_OPTION = NUMBER_OF_OPTIONS;
 			State.MAIN_MENU_CURRENT_OPTION--;
 			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
 		}
+
+		else if (State.MODE == MAIN_MENU_OPTION
+				&& State.MAIN_MENU_CURRENT_OPTION == SETTINGS) {
+			if (State.SETTINGS_CURRENT_OPTION == 0)
+				State.SETTINGS_CURRENT_OPTION = NUMBER_OF_SETTINGS_OPTIONS;
+			State.SETTINGS_CURRENT_OPTION--;
+			State.SETTINGS_CURRENT_OPTION %= NUMBER_OF_SETTINGS_OPTIONS;
+		}
+
 		//GPIO ->IFC = 1 << UP;
-	} else if (flags & (1 << BATTERY_LOW)) {
+	} else if (flags & (1 << BATTERY_LOW)) {          		//// BATTERY _ LOW
 		State.MODE = BATTERY_ALARM;
 		State.init = false;  // battery alarm occured
 	}
-	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+	///NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 }
 
 void GPIO_EVEN_IRQHandler(void) {
-	if (GPIO ->IF & (1 << DOWN)) {
+	if (GPIO ->IF & (1 << DOWN)) {             					//// DOWN _ KEY
 		GPIO ->IFC = 1 << DOWN;
 		if (State.MODE == MAIN_MENU) {
 			State.MAIN_MENU_CURRENT_OPTION++;
 			State.MAIN_MENU_CURRENT_OPTION %= NUMBER_OF_OPTIONS;
 
+		} else if (State.MODE == MAIN_MENU_OPTION // tutaj priorytety wsadzamy czyli dla kolejnego podmenu jeszcze wyzej
+		&& State.MAIN_MENU_CURRENT_OPTION == SETTINGS) {
+			State.SETTINGS_CURRENT_OPTION++;
+			State.SETTINGS_CURRENT_OPTION %= NUMBER_OF_SETTINGS_OPTIONS;
 		}
-	} else if (GPIO ->IF & (1 << RIGHT)) {
+
+	} else if (GPIO ->IF & (1 << RIGHT)) {       				//// RIGHT _ KEY
 		GPIO ->IFC = 1 << RIGHT;
-	} else if (GPIO ->IF & (1 << LEFT)) {
+	} else if (GPIO ->IF & (1 << LEFT)) {         				//// LEFT  _ KEY
 
 		if (State.MODE == MAIN_MENU_OPTION) {
-			State.init = false;   // flaga init cancel
-			State.MODE = MAIN_MENU;
-		}
-		else if (State.MODE == BATTERY_ALARM) {
+
+			if (State.settings_menu == true) { // podmenu settings , dodac 2 strukture z polami bitowymi moze
+				State.settings_menu = false;
+				State.init = false;
+			} else {
+				State.init = false;   // flaga init cancel
+				State.MODE = MAIN_MENU;
+			}
+		} else if (State.MODE == BATTERY_ALARM) {
 			State.init = false;
 			State.MODE = MAIN_MENU_OPTION;   // wracam do ostatnio uruchomionego
 		}
+
 		GPIO ->IFC = 1 << LEFT;
 	}
 }
