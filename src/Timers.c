@@ -5,67 +5,47 @@
  *      Author: lukasz
  */
 
-
 #include "Timers.h"
 #include "em_gpio.h"
 #include "em_timer.h"
 #include "em_cmu.h"
 
-  ///////////////////////////////////////////////////////////the start of configuration of Timer0//////////////////////////////////
+///////////////////////////////////////////////////////////the start of configuration of Timer0//////////////////////////////////
 
-void TIMER0forADC_Setup(void){
-	  /* Enable clock for GPIO module */
+void TIMER0forADC_Setup(void) {
+	/* Enable clock for GPIO module */
 ///////////////////////////////////////////////////////////////////////////////////////
+	/* Enable clock for TIMER0 module */
+	CMU_ClockEnable(cmuClock_TIMER0, true);
 
-	  /* Enable clock for TIMER0 module */
-	  CMU_ClockEnable(cmuClock_TIMER0, true);
+	/* Select TIMER0 parameters */
+	TIMER_Init_TypeDef timerInit =
+			{ .enable = true, .debugRun = true, .prescale = timerPrescale2,
+					.clkSel = timerClkSelHFPerClk, .fallAction =
+							timerInputActionNone, .riseAction =
+							timerInputActionNone, .mode = timerModeUp,
+					.dmaClrAct = false, .quadModeX4 = false, .oneShot = false,
+					.sync = false, };
 
-	  /* Select TIMER0 parameters */
-	  TIMER_Init_TypeDef timerInit =
-	  {
-	    .enable     = true,
-	    .debugRun   = true,
-	    .prescale   = timerPrescale2,
-	    .clkSel     = timerClkSelHFPerClk,
-	    .fallAction = timerInputActionNone,
-	    .riseAction = timerInputActionNone,
-	    .mode       = timerModeUp,
-	    .dmaClrAct  = false,
-	    .quadModeX4 = false,
-	    .oneShot    = false,
-	    .sync       = false,
-	  };
+	/* Enable overflow interrupt */
+	TIMER_IntEnable(TIMER0, TIMER_IF_OF);
 
-	  /* Enable overflow interrupt */
-	  TIMER_IntEnable(TIMER0, TIMER_IF_OF);
+	/* Enable TIMER0 interrupt vector in NVIC */
+	NVIC_SetPriority(TIMER0_IRQn, 0);
+	NVIC_EnableIRQ(TIMER0_IRQn);
 
-	  /* Enable TIMER0 interrupt vector in NVIC */
-	  NVIC_SetPriority(TIMER0_IRQn,0);
-	  NVIC_EnableIRQ(TIMER0_IRQn);
+	/* Set TIMER Top value */
+	TIMER_TopSet(TIMER0, TOP_Value);
 
-	  /* Set TIMER Top value */
-	  TIMER_TopSet(TIMER0, TOP_Value);
+	/* Configure TIMER */
+	TIMER_Init(TIMER0, &timerInit);
 
-	  /* Configure TIMER */
-	  TIMER_Init(TIMER0, &timerInit);
-
-	  }
-	  ///////////////////////////////////////////////////////////the end of configuration of Timer0//////////////////////////////////
-
-
-//It is declared in main.c
-
-/**************************************************************************//**
-
- * Interrupt Service Routine TIMER0 Interrupt Line
- *****************************************************************************/
-/*
-void TIMER0_IRQHandler(void)
-{
-  //Clear flag for TIMER0 overflow interrupt
-  TIMER_IntClear(TIMER0, TIMER_IF_OF);
-
-  // Toggle LED ON/OFF
-  GPIO_PinOutToggle(gpioPortE, 2);
 }
-*/
+
+void TIMER0forADC_Disable(void) {
+	TIMER_IntDisable(TIMER0, TIMER_IF_OF);
+	NVIC_DisableIRQ(TIMER0_IRQn);
+}
+///////////////////////////////////////////////////////////the end of configuration of Timer0//////////////////////////////////
+
+

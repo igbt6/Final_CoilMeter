@@ -135,7 +135,12 @@ static void SPI2_Init_SW(void) {
 void SPI2_setupRXInt_SW(uint16_t* receiveBuffer) {
 	SPI2_Init_SW();
 	RxFrame = receiveBuffer;
-	TIMER0forADC_Setup();
+	TIMER0forADC_Setup();       // start pomiaru
+}
+//////////////////////////////////////////////////////////////////
+void SPI2_disableRXInt_SW(void) {
+
+	TIMER0forADC_Disable();       // zakonczenie pomiaru
 }
 //////////////////////////////////////////////////////////////////
 static uint16_t ReadFrameFromSPI_SW(void) {
@@ -200,7 +205,7 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static bool checkData(double *data) {
-	if (((*data) < 0.009) && ((*data) > -0.009)) {
+	if (((*data) < 0.0122) && ((*data) > -0.0122)) {
 		*data = 0;
 		return false;
 	}
@@ -220,6 +225,8 @@ void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
 		StringOutput[2] = '0';
 		StringOutput[3] = '0';
 		StringOutput[4] = '0';
+		StringOutput[5] = NULL;
+
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -312,7 +319,7 @@ double rms(CircularBufferADC_Result *v) {
 	double sum = 0.0;
 	for (int i = 0; i < v->size; i++) {
 		TemporaryVariable = ConvertU16_from_ADCToINT(v->Values[i]);
-		sum += (double) (TemporaryVariable * TemporaryVariable);
+		sum += (TemporaryVariable * TemporaryVariable);
 	}
 	return ADC_COEFFICIENT * sqrt(sum / v->size);
 }

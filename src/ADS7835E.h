@@ -49,6 +49,7 @@ void SPI_setup(void); // hardware SPI
 void SPI2_Init(void);
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive);
 void SPI2_setupRXInt_SW(uint16_t* receiveBuffer); // software SPI
+void SPI2_disableRXInt_SW(void);
 void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 
 

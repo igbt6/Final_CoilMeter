@@ -5,7 +5,7 @@ c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/ar
 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
                               c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o) (_calloc_r)
 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
-                              src\ADS7835E.o (gcvt)
+                              src\main.o (gcvt)
 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
                               c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o) (_impure_ptr)
 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
@@ -184,14 +184,12 @@ Discarded input sections
  .text          0x00000000        0x0 src\main.o
  .data          0x00000000        0x0 src\main.o
  .bss           0x00000000        0x0 src\main.o
- .text.GPIO_PinOutSet
-                0x00000000       0x40 src\main.o
  .rodata.font5x7
                 0x00000000      0x1e0 src\main.o
- .text.GLCD_Enable
-                0x00000000       0x28 src\main.o
+ .rodata.callibration_over
+                0x00000000      0x420 src\main.o
  .text.GLCD_Disable
-                0x00000000       0x28 src\main.o
+                0x00000000       0x14 src\main.o
  .text.BT_Disable
                 0x00000000       0x28 src\main.o
  .text.SDCard_Enable
@@ -206,28 +204,37 @@ Discarded input sections
  .text          0x00000000        0x0 src\goertzel.o
  .data          0x00000000        0x0 src\goertzel.o
  .bss           0x00000000        0x0 src\goertzel.o
+ .text.ResetGoertzel
+                0x00000000       0x28 src\goertzel.o
+ .text.InitGoertzel
+                0x00000000      0x138 src\goertzel.o
  .text.ProcessSample
                 0x00000000       0x80 src\goertzel.o
  .text.GetRealImag
                 0x00000000       0x90 src\goertzel.o
  .text.GetMagnitudeSquared
                 0x00000000       0x9c src\goertzel.o
+ .text.goertzel_mag
+                0x00000000      0x210 src\goertzel.o
+ .debug_info    0x00000000      0x334 src\goertzel.o
+ .debug_abbrev  0x00000000       0xf7 src\goertzel.o
+ .debug_loc     0x00000000      0x146 src\goertzel.o
+ .debug_aranges
+                0x00000000       0x48 src\goertzel.o
+ .debug_ranges  0x00000000       0x38 src\goertzel.o
+ .debug_line    0x00000000      0x1a4 src\goertzel.o
+ .debug_str     0x00000000      0x25a src\goertzel.o
+ .comment       0x00000000       0x83 src\goertzel.o
+ .ARM.attributes
+                0x00000000       0x33 src\goertzel.o
+ .debug_frame   0x00000000       0xd0 src\goertzel.o
+ COMMON         0x00000000       0x14 src\goertzel.o
  .text          0x00000000        0x0 src\Timers.o
  .data          0x00000000        0x0 src\Timers.o
  .bss           0x00000000        0x0 src\Timers.o
  .text          0x00000000        0x0 src\BTM222.o
  .data          0x00000000        0x0 src\BTM222.o
  .bss           0x00000000        0x0 src\BTM222.o
- .text.NVIC_EnableIRQ
-                0x00000000       0x38 src\BTM222.o
- .text.NVIC_ClearPendingIRQ
-                0x00000000       0x3c src\BTM222.o
- .text.USART_IntEnable
-                0x00000000       0x20 src\BTM222.o
- .data.uart1Init
-                0x00000000       0x18 src\BTM222.o
- .text.uart1Setup
-                0x00000000      0x144 src\BTM222.o
  .text.uart1ReadChar
                 0x00000000       0x88 src\BTM222.o
  .text.uart1SendChar
@@ -236,10 +243,6 @@ Discarded input sections
                 0x00000000       0x90 src\BTM222.o
  .text.uart1ReadData
                 0x00000000       0xc4 src\BTM222.o
- .text.cmuSetup
-                0x00000000       0x28 src\BTM222.o
- .text.BTM222_Init
-                0x00000000        0xc src\BTM222.o
  .rodata        0x00000000       0x1c src\BTM222.o
  .text.BTM222_EnterATMode
                 0x00000000       0xd0 src\BTM222.o
@@ -261,6 +264,8 @@ Discarded input sections
                 0x00000000       0x84 src\ADS7835E.o
  .text.ResultADC_Buf_Free
                 0x00000000       0x1c src\ADS7835E.o
+ .text.doGoertzelAlgorithm
+                0x00000000       0x54 src\ADS7835E.o
  .text          0x00000000        0x0 Libraries\emlib\src\em_wdog.o
  .data          0x00000000        0x0 Libraries\emlib\src\em_wdog.o
  .bss           0x00000000        0x0 Libraries\emlib\src\em_wdog.o
@@ -314,18 +319,12 @@ Discarded input sections
  .text          0x00000000        0x0 Libraries\emlib\src\em_usart.o
  .data          0x00000000        0x0 Libraries\emlib\src\em_usart.o
  .bss           0x00000000        0x0 Libraries\emlib\src\em_usart.o
- .text.USART_BaudrateAsyncSet
-                0x00000000       0xc8 Libraries\emlib\src\em_usart.o
  .text.USART_BaudrateCalc
                 0x00000000       0xcc Libraries\emlib\src\em_usart.o
  .text.USART_BaudrateGet
                 0x00000000       0x58 Libraries\emlib\src\em_usart.o
  .text.USART_BaudrateSyncSet
                 0x00000000       0x7c Libraries\emlib\src\em_usart.o
- .text.USART_Enable
-                0x00000000       0x38 Libraries\emlib\src\em_usart.o
- .text.USART_InitAsync
-                0x00000000       0x78 Libraries\emlib\src\em_usart.o
  .text.USART_InitSync
                 0x00000000       0xac Libraries\emlib\src\em_usart.o
  .text.USART_InitIrDA
@@ -334,8 +333,6 @@ Discarded input sections
                 0x00000000       0x8c Libraries\emlib\src\em_usart.o
  .text.USART_InitPrsTrigger
                 0x00000000       0x60 Libraries\emlib\src\em_usart.o
- .text.USART_Reset
-                0x00000000       0x94 Libraries\emlib\src\em_usart.o
  .text.USART_RxDouble
                 0x00000000       0x28 Libraries\emlib\src\em_usart.o
  .text.USART_RxDoubleExt
@@ -1215,39 +1212,93 @@ Discarded input sections
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
+ .text.cos      0x00000000       0x6c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
+ .debug_frame   0x00000000       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
+ .text.sin      0x00000000       0x74 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
+ .debug_frame   0x00000000       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
+ .text.sqrtf    0x00000000       0x9c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
+ .rodata.str1.1
+                0x00000000        0x6 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
+ .debug_frame   0x00000000       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+ .text.__ieee754_rem_pio2
+                0x00000000      0x410 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+ .rodata.npio2_hw
+                0x00000000       0x80 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+ .rodata.two_over_pi
+                0x00000000      0x108 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+ .debug_frame   0x00000000       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
+ .text.__ieee754_sqrtf
+                0x00000000       0x9e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
+ .debug_frame   0x00000000       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
+ .text.__kernel_cos
+                0x00000000      0x1d8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
+ .debug_frame   0x00000000       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+ .text.__kernel_rem_pio2
+                0x00000000      0x6a8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+ .rodata.init_jk
+                0x00000000       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+ .rodata.PIo2   0x00000000       0x40 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+ .debug_frame   0x00000000       0x3c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
+ .text.__kernel_sin
+                0x00000000      0x180 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
+ .debug_frame   0x00000000       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
+ .text.fabs     0x00000000        0x6 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
+ .debug_frame   0x00000000       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
+ .text.floor    0x00000000      0x108 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
+ .debug_frame   0x00000000       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
@@ -1260,12 +1311,26 @@ Discarded input sections
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
+ .text.scalbn   0x00000000       0xf0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
+ .debug_frame   0x00000000       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
+ .text.__fpclassifyf
+                0x00000000       0x54 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
+ .debug_frame   0x00000000       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
+ .text.copysign
+                0x00000000       0x14 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
+ .ARM.attributes
+                0x00000000       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
+ .debug_frame   0x00000000       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
@@ -1277,14 +1342,26 @@ Discarded input sections
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpdf2.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_fixdfsi.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_fixdfsi.o)
+ .text          0x00000000       0xa0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
+ .ARM.attributes
+                0x00000000       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
+ .text          0x00000000      0x21c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
+ .ARM.attributes
+                0x00000000       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
+ .text          0x00000000      0x2a0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
+ .ARM.attributes
+                0x00000000       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
+ .text          0x00000000       0xec c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
+ .ARM.attributes
+                0x00000000       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
  .text          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtend.o
  .data          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtend.o
  .bss           0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtend.o
@@ -1370,7 +1447,7 @@ LOAD c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/g
                 0x00000000                InterruptVector
                 0x000000dc                . = ALIGN (0x4)
 
-.text           0x000000e0     0x8344
+.text           0x000000e0     0x7088
                 0x000000e0                . = ALIGN (0x4)
  *(.text)
  .text          0x000000e0       0x54 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
@@ -1414,634 +1491,600 @@ LOAD c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/g
  .text          0x000009d8       0x50 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_fixdfsi.o)
                 0x000009d8                __aeabi_d2iz
                 0x000009d8                __fixdfsi
- .text          0x00000a28       0xa0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
-                0x00000a28                __truncdfsf2
-                0x00000a28                __aeabi_d2f
- .text          0x00000ac8      0x21c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
-                0x00000ac8                __aeabi_frsub
-                0x00000ad0                __subsf3
-                0x00000ad0                __aeabi_fsub
-                0x00000ad4                __aeabi_fadd
-                0x00000ad4                __addsf3
-                0x00000c34                __aeabi_ui2f
-                0x00000c34                __floatunsisf
-                0x00000c3c                __aeabi_i2f
-                0x00000c3c                __floatsisf
-                0x00000c58                __aeabi_ul2f
-                0x00000c58                __floatundisf
-                0x00000c68                __aeabi_l2f
-                0x00000c68                __floatdisf
- .text          0x00000ce4      0x2a0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
-                0x00000ce4                __mulsf3
-                0x00000ce4                __aeabi_fmul
-                0x00000e4c                __aeabi_fdiv
-                0x00000e4c                __divsf3
- .text          0x00000f84       0xec c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
-                0x00000f84                __gesf2
-                0x00000f84                __gtsf2
-                0x00000f8c                __lesf2
-                0x00000f8c                __ltsf2
-                0x00000f94                __nesf2
-                0x00000f94                __eqsf2
-                0x00000f94                __cmpsf2
-                0x00000ff4                __aeabi_cfrcmple
-                0x00000ffc                __aeabi_cfcmpeq
-                0x00000ffc                __aeabi_cfcmple
-                0x0000100c                __aeabi_fcmpeq
-                0x00001020                __aeabi_fcmplt
-                0x00001034                __aeabi_fcmple
-                0x00001048                __aeabi_fcmpge
-                0x0000105c                __aeabi_fcmpgt
  *(.text*)
  .text.GetProdRev
-                0x00001070       0x1c src\system_efm32gg.o
+                0x00000a28       0x1c src\system_efm32gg.o
  .text.SystemCoreClockGet
-                0x0000108c       0x58 src\system_efm32gg.o
-                0x0000108c                SystemCoreClockGet
+                0x00000a44       0x58 src\system_efm32gg.o
+                0x00000a44                SystemCoreClockGet
  .text.SystemHFClockGet
-                0x000010e4      0x110 src\system_efm32gg.o
-                0x000010e4                SystemHFClockGet
+                0x00000a9c      0x110 src\system_efm32gg.o
+                0x00000a9c                SystemHFClockGet
  .text.SystemHFXOClockGet
-                0x000011f4       0x18 src\system_efm32gg.o
-                0x000011f4                SystemHFXOClockGet
+                0x00000bac       0x18 src\system_efm32gg.o
+                0x00000bac                SystemHFXOClockGet
  .text.SystemInit
-                0x0000120c        0xc src\system_efm32gg.o
-                0x0000120c                SystemInit
+                0x00000bc4        0xc src\system_efm32gg.o
+                0x00000bc4                SystemInit
  .text.SystemLFRCOClockGet
-                0x00001218       0x10 src\system_efm32gg.o
-                0x00001218                SystemLFRCOClockGet
+                0x00000bd0       0x10 src\system_efm32gg.o
+                0x00000bd0                SystemLFRCOClockGet
  .text.SystemULFRCOClockGet
-                0x00001228       0x10 src\system_efm32gg.o
-                0x00001228                SystemULFRCOClockGet
+                0x00000be0       0x10 src\system_efm32gg.o
+                0x00000be0                SystemULFRCOClockGet
  .text.SystemLFXOClockGet
-                0x00001238       0x18 src\system_efm32gg.o
-                0x00001238                SystemLFXOClockGet
+                0x00000bf0       0x18 src\system_efm32gg.o
+                0x00000bf0                SystemLFXOClockGet
  .text.Reset_Handler
-                0x00001250       0x58 src\startup_efm32gg.o
-                0x00001250                Reset_Handler
+                0x00000c08       0x58 src\startup_efm32gg.o
+                0x00000c08                Reset_Handler
  .text.Default_Handler
-                0x000012a8        0x4 src\startup_efm32gg.o
-                0x000012a8                TIMER2_IRQHandler
-                0x000012a8                USART0_TX_IRQHandler
-                0x000012a8                I2C0_IRQHandler
-                0x000012a8                HardFault_Handler
-                0x000012a8                LEUART1_IRQHandler
-                0x000012a8                USART1_RX_IRQHandler
-                0x000012a8                PendSV_Handler
-                0x000012a8                NMI_Handler
-                0x000012a8                I2C1_IRQHandler
-                0x000012a8                TIMER3_IRQHandler
-                0x000012a8                USART1_TX_IRQHandler
-                0x000012a8                MSC_IRQHandler
-                0x000012a8                ADC0_IRQHandler
-                0x000012a8                UsageFault_Handler
-                0x000012a8                LEUART0_IRQHandler
-                0x000012a8                UART0_TX_IRQHandler
-                0x000012a8                LCD_IRQHandler
-                0x000012a8                PCNT2_IRQHandler
-                0x000012a8                UART0_RX_IRQHandler
-                0x000012a8                LETIMER0_IRQHandler
-                0x000012a8                TIMER1_IRQHandler
-                0x000012a8                USART2_RX_IRQHandler
-                0x000012a8                Default_Handler
-                0x000012a8                EMU_IRQHandler
-                0x000012a8                PCNT0_IRQHandler
-                0x000012a8                USB_IRQHandler
-                0x000012a8                BURTC_IRQHandler
-                0x000012a8                PCNT1_IRQHandler
-                0x000012a8                ACMP0_IRQHandler
-                0x000012a8                USART0_RX_IRQHandler
-                0x000012a8                MemManage_Handler
-                0x000012a8                SVC_Handler
-                0x000012a8                DAC0_IRQHandler
-                0x000012a8                CMU_IRQHandler
-                0x000012a8                EBI_IRQHandler
-                0x000012a8                LESENSE_IRQHandler
-                0x000012a8                AES_IRQHandler
-                0x000012a8                VCMP_IRQHandler
-                0x000012a8                BusFault_Handler
-                0x000012a8                USART2_TX_IRQHandler
-                0x000012a8                DebugMonitor_Handler
+                0x00000c60        0x4 src\startup_efm32gg.o
+                0x00000c60                TIMER2_IRQHandler
+                0x00000c60                USART0_TX_IRQHandler
+                0x00000c60                I2C0_IRQHandler
+                0x00000c60                HardFault_Handler
+                0x00000c60                LEUART1_IRQHandler
+                0x00000c60                USART1_RX_IRQHandler
+                0x00000c60                PendSV_Handler
+                0x00000c60                NMI_Handler
+                0x00000c60                I2C1_IRQHandler
+                0x00000c60                TIMER3_IRQHandler
+                0x00000c60                USART1_TX_IRQHandler
+                0x00000c60                MSC_IRQHandler
+                0x00000c60                ADC0_IRQHandler
+                0x00000c60                UsageFault_Handler
+                0x00000c60                LEUART0_IRQHandler
+                0x00000c60                UART0_TX_IRQHandler
+                0x00000c60                LCD_IRQHandler
+                0x00000c60                PCNT2_IRQHandler
+                0x00000c60                UART0_RX_IRQHandler
+                0x00000c60                LETIMER0_IRQHandler
+                0x00000c60                TIMER1_IRQHandler
+                0x00000c60                USART2_RX_IRQHandler
+                0x00000c60                Default_Handler
+                0x00000c60                EMU_IRQHandler
+                0x00000c60                PCNT0_IRQHandler
+                0x00000c60                USB_IRQHandler
+                0x00000c60                BURTC_IRQHandler
+                0x00000c60                PCNT1_IRQHandler
+                0x00000c60                ACMP0_IRQHandler
+                0x00000c60                USART0_RX_IRQHandler
+                0x00000c60                MemManage_Handler
+                0x00000c60                SVC_Handler
+                0x00000c60                DAC0_IRQHandler
+                0x00000c60                CMU_IRQHandler
+                0x00000c60                EBI_IRQHandler
+                0x00000c60                LESENSE_IRQHandler
+                0x00000c60                AES_IRQHandler
+                0x00000c60                VCMP_IRQHandler
+                0x00000c60                BusFault_Handler
+                0x00000c60                USART2_TX_IRQHandler
+                0x00000c60                DebugMonitor_Handler
  .text.GPIO_PinOutClear
-                0x000012ac       0x40 src\splc501c.o
+                0x00000c64       0x40 src\splc501c.o
  .text.GPIO_PinOutSet
-                0x000012ec       0x40 src\splc501c.o
+                0x00000ca4       0x40 src\splc501c.o
  .text.GPIO_PortOutClear
-                0x0000132c       0x40 src\splc501c.o
+                0x00000ce4       0x40 src\splc501c.o
  .text.GPIO_PortOutSet
-                0x0000136c       0x40 src\splc501c.o
+                0x00000d24       0x40 src\splc501c.o
  .text.GLCD_InitPorts
-                0x000013ac       0x7c src\splc501c.o
-                0x000013ac                GLCD_InitPorts
+                0x00000d64       0x7c src\splc501c.o
+                0x00000d64                GLCD_InitPorts
  .text.GLCD_Init
-                0x00001428       0x90 src\splc501c.o
-                0x00001428                GLCD_Init
+                0x00000de0       0x90 src\splc501c.o
+                0x00000de0                GLCD_Init
  .text.GLCD_WriteData
-                0x000014b8       0x6c src\splc501c.o
-                0x000014b8                GLCD_WriteData
+                0x00000e70       0x6c src\splc501c.o
+                0x00000e70                GLCD_WriteData
  .text.GLCD_WriteCommand
-                0x00001524       0x50 src\splc501c.o
-                0x00001524                GLCD_WriteCommand
+                0x00000edc       0x50 src\splc501c.o
+                0x00000edc                GLCD_WriteCommand
  .text.GLCD_ReadData
-                0x00001574       0x78 src\splc501c.o
-                0x00001574                GLCD_ReadData
+                0x00000f2c       0x78 src\splc501c.o
+                0x00000f2c                GLCD_ReadData
  .text.GLCD_ReadStatus
-                0x000015ec       0x58 src\splc501c.o
-                0x000015ec                GLCD_ReadStatus
+                0x00000fa4       0x58 src\splc501c.o
+                0x00000fa4                GLCD_ReadStatus
  .text.GLCD_GoTo
-                0x00001644       0x64 src\splc501c.o
-                0x00001644                GLCD_GoTo
+                0x00000ffc       0x64 src\splc501c.o
+                0x00000ffc                GLCD_GoTo
  .text.GLCD_SetPixel
-                0x000016a8       0x94 src\splc501c.o
-                0x000016a8                GLCD_SetPixel
+                0x00001060       0x94 src\splc501c.o
+                0x00001060                GLCD_SetPixel
  .text.GLCD_ClearScreen
-                0x0000173c       0x5c src\splc501c.o
-                0x0000173c                GLCD_ClearScreen
+                0x000010f4       0x5c src\splc501c.o
+                0x000010f4                GLCD_ClearScreen
  .text.GLCD_WriteChar
-                0x00001798       0x54 src\splc501c.o
-                0x00001798                GLCD_WriteChar
+                0x00001150       0x54 src\splc501c.o
+                0x00001150                GLCD_WriteChar
  .text.GLCD_WriteString
-                0x000017ec       0x2c src\splc501c.o
-                0x000017ec                GLCD_WriteString
+                0x000011a4       0x2c src\splc501c.o
+                0x000011a4                GLCD_WriteString
  .text.GLCD_bmp
-                0x00001818       0x78 src\splc501c.o
-                0x00001818                GLCD_bmp
+                0x000011d0       0x78 src\splc501c.o
+                0x000011d0                GLCD_bmp
+ .text.NVIC_EnableIRQ
+                0x00001248       0x38 src\main.o
+ .text.NVIC_DisableIRQ
+                0x00001280       0x3c src\main.o
  .text.NVIC_SetPriority
-                0x00001890       0x5c src\main.o
+                0x000012bc       0x5c src\main.o
  .text.SysTick_Config
-                0x000018ec       0x64 src\main.o
+                0x00001318       0x64 src\main.o
  .text.CHIP_Init
-                0x00001950       0x50 src\main.o
+                0x0000137c       0x50 src\main.o
  .text.GPIO_PinInGet
-                0x000019a0       0x40 src\main.o
+                0x000013cc       0x40 src\main.o
  .text.GPIO_PinOutClear
-                0x000019e0       0x40 src\main.o
+                0x0000140c       0x40 src\main.o
+ .text.GPIO_PinOutSet
+                0x0000144c       0x40 src\main.o
  .text.EMU_EnterEM1
-                0x00001a20       0x24 src\main.o
+                0x0000148c       0x24 src\main.o
+ .text.GLCD_Enable
+                0x000014b0       0x28 src\main.o
  .text.BT_Enable
-                0x00001a44       0x28 src\main.o
+                0x000014d8       0x28 src\main.o
  .text.Set20MHzFrequency_Init
-                0x00001a6c       0x40 src\main.o
- .text.main     0x00001aac      0x550 src\main.o
-                0x00001aac                main
+                0x00001500       0x40 src\main.o
+ .text.main     0x00001540      0x560 src\main.o
+                0x00001540                main
  .text.SysTick_Handler
-                0x00001ffc       0x24 src\main.o
-                0x00001ffc                SysTick_Handler
- .text.Delay    0x00002020       0x34 src\main.o
-                0x00002020                Delay
+                0x00001aa0       0x24 src\main.o
+                0x00001aa0                SysTick_Handler
+ .text.Delay    0x00001ac4       0x34 src\main.o
+                0x00001ac4                Delay
  .text.showWhereIam
-                0x00002054      0x15c src\main.o
-                0x00002054                showWhereIam
+                0x00001af8      0x15c src\main.o
+                0x00001af8                showWhereIam
  .text.showWhereIamSettings
-                0x000021b0      0x15c src\main.o
-                0x000021b0                showWhereIamSettings
+                0x00001c54      0x15c src\main.o
+                0x00001c54                showWhereIamSettings
  .text.setLCDBrightness
-                0x0000230c      0x1a8 src\main.o
-                0x0000230c                setLCDBrightness
+                0x00001db0      0x1a8 src\main.o
+                0x00001db0                setLCDBrightness
+ .text.calibrationMode
+                0x00001f58      0x2a4 src\main.o
+                0x00001f58                calibrationMode
+ .text.setCalibrateFactor
+                0x000021fc      0x1b0 src\main.o
+                0x000021fc                setCalibrateFactor
  .text.NVIC_EnableIRQ
-                0x000024b4       0x38 src\keyboard.o
+                0x000023ac       0x38 src\keyboard.o
  .text.NVIC_ClearPendingIRQ
-                0x000024ec       0x3c src\keyboard.o
+                0x000023e4       0x3c src\keyboard.o
  .text.NVIC_SetPriority
-                0x00002528       0x5c src\keyboard.o
+                0x00002420       0x5c src\keyboard.o
  .text.RTC_IntClear
-                0x00002584       0x20 src\keyboard.o
+                0x0000247c       0x20 src\keyboard.o
  .text.RTC_IntEnable
-                0x000025a4       0x2c src\keyboard.o
+                0x0000249c       0x2c src\keyboard.o
  .text.startLfxoForRtc
-                0x000025d0       0x48 src\keyboard.o
+                0x000024c8       0x48 src\keyboard.o
  .text.setupRtc
-                0x00002618       0x6c src\keyboard.o
+                0x00002510       0x6c src\keyboard.o
  .text.KeyboardGpioSetup
-                0x00002684      0x16c src\keyboard.o
-                0x00002684                KeyboardGpioSetup
+                0x0000257c      0x16c src\keyboard.o
+                0x0000257c                KeyboardGpioSetup
  .text.GPIO_ODD_IRQHandler
-                0x000027f0      0x250 src\keyboard.o
-                0x000027f0                GPIO_ODD_IRQHandler
+                0x000026e8      0x250 src\keyboard.o
+                0x000026e8                GPIO_ODD_IRQHandler
  .text.GPIO_EVEN_IRQHandler
-                0x00002a40      0x1c4 src\keyboard.o
-                0x00002a40                GPIO_EVEN_IRQHandler
+                0x00002938      0x1c4 src\keyboard.o
+                0x00002938                GPIO_EVEN_IRQHandler
  .text.RTC_IRQHandler
-                0x00002c04       0x34 src\keyboard.o
-                0x00002c04                RTC_IRQHandler
- .text.ResetGoertzel
-                0x00002c38       0x28 src\goertzel.o
-                0x00002c38                ResetGoertzel
- .text.InitGoertzel
-                0x00002c60      0x138 src\goertzel.o
-                0x00002c60                InitGoertzel
- .text.goertzel_mag
-                0x00002d98      0x210 src\goertzel.o
-                0x00002d98                goertzel_mag
+                0x00002afc       0x34 src\keyboard.o
+                0x00002afc                RTC_IRQHandler
  .text.NVIC_EnableIRQ
-                0x00002fa8       0x38 src\Timers.o
+                0x00002b30       0x38 src\Timers.o
+ .text.NVIC_DisableIRQ
+                0x00002b68       0x3c src\Timers.o
  .text.NVIC_SetPriority
-                0x00002fe0       0x5c src\Timers.o
+                0x00002ba4       0x5c src\Timers.o
+ .text.TIMER_IntDisable
+                0x00002c00       0x24 src\Timers.o
  .text.TIMER_IntEnable
-                0x0000303c       0x20 src\Timers.o
+                0x00002c24       0x20 src\Timers.o
  .text.TIMER_TopSet
-                0x0000305c       0x1c src\Timers.o
+                0x00002c44       0x1c src\Timers.o
  .text.TIMER0forADC_Setup
-                0x00003078       0xa0 src\Timers.o
-                0x00003078                TIMER0forADC_Setup
+                0x00002c60       0xa0 src\Timers.o
+                0x00002c60                TIMER0forADC_Setup
+ .text.TIMER0forADC_Disable
+                0x00002d00       0x20 src\Timers.o
+                0x00002d00                TIMER0forADC_Disable
+ .text.NVIC_EnableIRQ
+                0x00002d20       0x38 src\BTM222.o
+ .text.NVIC_ClearPendingIRQ
+                0x00002d58       0x3c src\BTM222.o
  .text.USART_IntClear
-                0x00003118       0x1c src\BTM222.o
+                0x00002d94       0x1c src\BTM222.o
  .text.USART_IntDisable
-                0x00003134       0x24 src\BTM222.o
+                0x00002db0       0x24 src\BTM222.o
+ .text.USART_IntEnable
+                0x00002dd4       0x20 src\BTM222.o
  .text.USART_IntGet
-                0x00003158       0x18 src\BTM222.o
+                0x00002df4       0x18 src\BTM222.o
+ .text.uart1Setup
+                0x00002e0c      0x144 src\BTM222.o
+                0x00002e0c                uart1Setup
+ .text.cmuSetup
+                0x00002f50       0x28 src\BTM222.o
+                0x00002f50                cmuSetup
  .text.UART1_RX_IRQHandler
-                0x00003170       0xbc src\BTM222.o
-                0x00003170                UART1_RX_IRQHandler
+                0x00002f78       0xbc src\BTM222.o
+                0x00002f78                UART1_RX_IRQHandler
  .text.UART1_TX_IRQHandler
-                0x0000322c       0x7c src\BTM222.o
-                0x0000322c                UART1_TX_IRQHandler
+                0x00003034       0x7c src\BTM222.o
+                0x00003034                UART1_TX_IRQHandler
+ .text.BTM222_Init
+                0x000030b0        0xc src\BTM222.o
+                0x000030b0                BTM222_Init
  .text.TIMER_IntClear
-                0x000032a8       0x1c src\ADS7835E.o
+                0x000030bc       0x1c src\ADS7835E.o
  .text.SPI2_Init_SW
-                0x000032c4       0xb8 src\ADS7835E.o
+                0x000030d8       0xb8 src\ADS7835E.o
  .text.SPI2_setupRXInt_SW
-                0x0000337c       0x24 src\ADS7835E.o
-                0x0000337c                SPI2_setupRXInt_SW
+                0x00003190       0x24 src\ADS7835E.o
+                0x00003190                SPI2_setupRXInt_SW
+ .text.SPI2_disableRXInt_SW
+                0x000031b4        0xc src\ADS7835E.o
+                0x000031b4                SPI2_disableRXInt_SW
  .text.ReadFrameFromSPI_SW
-                0x000033a0       0xcc src\ADS7835E.o
+                0x000031c0       0xcc src\ADS7835E.o
  .text.TIMER0_IRQHandler
-                0x0000346c       0x38 src\ADS7835E.o
-                0x0000346c                TIMER0_IRQHandler
- *fill*         0x000034a4        0x4 00
+                0x0000328c       0x38 src\ADS7835E.o
+                0x0000328c                TIMER0_IRQHandler
+ *fill*         0x000032c4        0x4 00
  .text.checkData
-                0x000034a8       0x70 src\ADS7835E.o
+                0x000032c8       0x70 src\ADS7835E.o
  .text.ConvertDOUBLEtoLCD
-                0x00003518       0xa0 src\ADS7835E.o
-                0x00003518                ConvertDOUBLEtoLCD
+                0x00003338       0xa8 src\ADS7835E.o
+                0x00003338                ConvertDOUBLEtoLCD
  .text.ConvertU16_from_ADCToINT
-                0x000035b8       0x3c src\ADS7835E.o
-                0x000035b8                ConvertU16_from_ADCToINT
+                0x000033e0       0x3c src\ADS7835E.o
+                0x000033e0                ConvertU16_from_ADCToINT
  .text.ResultADC_Buf_Write
-                0x000035f4       0xe8 src\ADS7835E.o
-                0x000035f4                ResultADC_Buf_Write
+                0x0000341c       0xe8 src\ADS7835E.o
+                0x0000341c                ResultADC_Buf_Write
  .text.ResultADC_Buf_Init
-                0x000036dc       0x48 src\ADS7835E.o
-                0x000036dc                ResultADC_Buf_Init
- .text.rms      0x00003724       0xa8 src\ADS7835E.o
-                0x00003724                rms
- .text.min      0x000037cc       0xd8 src\ADS7835E.o
-                0x000037cc                min
- .text.max      0x000038a4       0xd8 src\ADS7835E.o
-                0x000038a4                max
- .text.avg      0x0000397c       0x9c src\ADS7835E.o
-                0x0000397c                avg
- .text.doGoertzelAlgorithm
-                0x00003a18       0x54 src\ADS7835E.o
-                0x00003a18                doGoertzelAlgorithm
+                0x00003504       0x48 src\ADS7835E.o
+                0x00003504                ResultADC_Buf_Init
+ .text.rms      0x0000354c       0xa8 src\ADS7835E.o
+                0x0000354c                rms
+ .text.min      0x000035f4       0xd8 src\ADS7835E.o
+                0x000035f4                min
+ .text.max      0x000036cc       0xd8 src\ADS7835E.o
+                0x000036cc                max
+ .text.avg      0x000037a4       0x9c src\ADS7835E.o
+                0x000037a4                avg
+ .text.USART_BaudrateAsyncSet
+                0x00003840       0xc8 Libraries\emlib\src\em_usart.o
+                0x00003840                USART_BaudrateAsyncSet
+ .text.USART_Enable
+                0x00003908       0x38 Libraries\emlib\src\em_usart.o
+                0x00003908                USART_Enable
+ .text.USART_InitAsync
+                0x00003940       0x78 Libraries\emlib\src\em_usart.o
+                0x00003940                USART_InitAsync
+ .text.USART_Reset
+                0x000039b8       0x94 Libraries\emlib\src\em_usart.o
+                0x000039b8                USART_Reset
  .text.USART_Rx
-                0x00003a6c       0x28 Libraries\emlib\src\em_usart.o
-                0x00003a6c                USART_Rx
+                0x00003a4c       0x28 Libraries\emlib\src\em_usart.o
+                0x00003a4c                USART_Rx
  .text.USART_Tx
-                0x00003a94       0x2c Libraries\emlib\src\em_usart.o
-                0x00003a94                USART_Tx
+                0x00003a74       0x2c Libraries\emlib\src\em_usart.o
+                0x00003a74                USART_Tx
  .text.TIMER_Init
-                0x00003ac0      0x100 Libraries\emlib\src\em_timer.o
-                0x00003ac0                TIMER_Init
+                0x00003aa0      0x100 Libraries\emlib\src\em_timer.o
+                0x00003aa0                TIMER_Init
  .text.SYSTEM_ChipRevisionGet
-                0x00003bc0       0x5c Libraries\emlib\src\em_system.o
-                0x00003bc0                SYSTEM_ChipRevisionGet
+                0x00003ba0       0x5c Libraries\emlib\src\em_system.o
+                0x00003ba0                SYSTEM_ChipRevisionGet
  .text.RTC_CompareSet
-                0x00003c1c       0x40 Libraries\emlib\src\em_rtc.o
-                0x00003c1c                RTC_CompareSet
+                0x00003bfc       0x40 Libraries\emlib\src\em_rtc.o
+                0x00003bfc                RTC_CompareSet
  .text.RTC_Init
-                0x00003c5c       0x54 Libraries\emlib\src\em_rtc.o
-                0x00003c5c                RTC_Init
+                0x00003c3c       0x54 Libraries\emlib\src\em_rtc.o
+                0x00003c3c                RTC_Init
  .text.BITBAND_Peripheral
-                0x00003cb0       0x30 Libraries\emlib\src\em_gpio.o
+                0x00003c90       0x30 Libraries\emlib\src\em_gpio.o
  .text.GPIO_IntConfig
-                0x00003ce0       0xe8 Libraries\emlib\src\em_gpio.o
-                0x00003ce0                GPIO_IntConfig
+                0x00003cc0       0xe8 Libraries\emlib\src\em_gpio.o
+                0x00003cc0                GPIO_IntConfig
  .text.GPIO_PinModeSet
-                0x00003dc8      0x1ac Libraries\emlib\src\em_gpio.o
-                0x00003dc8                GPIO_PinModeSet
+                0x00003da8      0x1ac Libraries\emlib\src\em_gpio.o
+                0x00003da8                GPIO_PinModeSet
  .text.SystemCoreClockUpdate
-                0x00003f74        0xc Libraries\emlib\src\em_emu.o
+                0x00003f54        0xc Libraries\emlib\src\em_emu.o
  .text.CMU_Lock
-                0x00003f80       0x1c Libraries\emlib\src\em_emu.o
+                0x00003f60       0x1c Libraries\emlib\src\em_emu.o
  .text.CMU_Unlock
-                0x00003f9c       0x1c Libraries\emlib\src\em_emu.o
+                0x00003f7c       0x1c Libraries\emlib\src\em_emu.o
  .text.EMU_Restore
-                0x00003fb8       0xf8 Libraries\emlib\src\em_emu.o
+                0x00003f98       0xf8 Libraries\emlib\src\em_emu.o
  .text.EMU_EnterEM2
-                0x000040b0       0x64 Libraries\emlib\src\em_emu.o
-                0x000040b0                EMU_EnterEM2
+                0x00004090       0x64 Libraries\emlib\src\em_emu.o
+                0x00004090                EMU_EnterEM2
  .text.EMU_UpdateOscConfig
-                0x00004114       0x20 Libraries\emlib\src\em_emu.o
-                0x00004114                EMU_UpdateOscConfig
+                0x000040f4       0x20 Libraries\emlib\src\em_emu.o
+                0x000040f4                EMU_UpdateOscConfig
  .text.DMA_IRQHandler
-                0x00004134      0x110 Libraries\emlib\src\em_dma.o
-                0x00004134                DMA_IRQHandler
+                0x00004114      0x110 Libraries\emlib\src\em_dma.o
+                0x00004114                DMA_IRQHandler
  .text.BITBAND_Peripheral
-                0x00004244       0x30 Libraries\emlib\src\em_cmu.o
+                0x00004224       0x30 Libraries\emlib\src\em_cmu.o
  .text.CMU_FlashWaitStateMax
-                0x00004274       0x68 Libraries\emlib\src\em_cmu.o
+                0x00004254       0x68 Libraries\emlib\src\em_cmu.o
  .text.CMU_Log2ToDiv
-                0x000042dc       0x20 Libraries\emlib\src\em_cmu.o
+                0x000042bc       0x20 Libraries\emlib\src\em_cmu.o
  .text.CMU_FlashWaitStateControl
-                0x000042fc       0xf4 Libraries\emlib\src\em_cmu.o
+                0x000042dc       0xf4 Libraries\emlib\src\em_cmu.o
  .text.CMU_USBCClkGet
-                0x000043f0       0x50 Libraries\emlib\src\em_cmu.o
+                0x000043d0       0x50 Libraries\emlib\src\em_cmu.o
  .text.CMU_AUXClkGet
-                0x00004440       0x9c Libraries\emlib\src\em_cmu.o
+                0x00004420       0x9c Libraries\emlib\src\em_cmu.o
  .text.CMU_DBGClkGet
-                0x000044dc       0x64 Libraries\emlib\src\em_cmu.o
+                0x000044bc       0x64 Libraries\emlib\src\em_cmu.o
  .text.CMU_LFClkGet
-                0x00004540       0xcc Libraries\emlib\src\em_cmu.o
+                0x00004520       0xcc Libraries\emlib\src\em_cmu.o
  .text.CMU_Sync
-                0x0000460c       0x3c Libraries\emlib\src\em_cmu.o
+                0x000045ec       0x3c Libraries\emlib\src\em_cmu.o
  .text.CMU_ClockDivGet
-                0x00004648      0x184 Libraries\emlib\src\em_cmu.o
-                0x00004648                CMU_ClockDivGet
+                0x00004628      0x184 Libraries\emlib\src\em_cmu.o
+                0x00004628                CMU_ClockDivGet
  .text.CMU_ClockEnable
-                0x000047cc      0x124 Libraries\emlib\src\em_cmu.o
-                0x000047cc                CMU_ClockEnable
+                0x000047ac      0x124 Libraries\emlib\src\em_cmu.o
+                0x000047ac                CMU_ClockEnable
  .text.CMU_ClockFreqGet
-                0x000048f0      0x1e8 Libraries\emlib\src\em_cmu.o
-                0x000048f0                CMU_ClockFreqGet
+                0x000048d0      0x1e8 Libraries\emlib\src\em_cmu.o
+                0x000048d0                CMU_ClockFreqGet
  .text.CMU_ClockSelectGet
-                0x00004ad8      0x1a4 Libraries\emlib\src\em_cmu.o
-                0x00004ad8                CMU_ClockSelectGet
+                0x00004ab8      0x1a4 Libraries\emlib\src\em_cmu.o
+                0x00004ab8                CMU_ClockSelectGet
  .text.CMU_ClockSelectSet
-                0x00004c7c      0x38c Libraries\emlib\src\em_cmu.o
-                0x00004c7c                CMU_ClockSelectSet
+                0x00004c5c      0x38c Libraries\emlib\src\em_cmu.o
+                0x00004c5c                CMU_ClockSelectSet
  .text.CMU_OscillatorEnable
-                0x00005008       0xe8 Libraries\emlib\src\em_cmu.o
-                0x00005008                CMU_OscillatorEnable
- .text.calloc   0x000050f0       0x14 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
-                0x000050f0                calloc
+                0x00004fe8       0xe8 Libraries\emlib\src\em_cmu.o
+                0x00004fe8                CMU_OscillatorEnable
+ .text.calloc   0x000050d0       0x14 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
+                0x000050d0                calloc
  .text._calloc_r
-                0x00005104       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
-                0x00005104                _calloc_r
- .text.gcvt     0x00005120       0x48 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
-                0x00005120                gcvt
+                0x000050e4       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
+                0x000050e4                _calloc_r
+ .text.gcvt     0x00005100       0x48 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
+                0x00005100                gcvt
  .text.__libc_init_array
-                0x00005168       0x4c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
-                0x00005168                __libc_init_array
- .text.malloc   0x000051b4       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
-                0x000051b4                malloc
+                0x00005148       0x4c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
+                0x00005148                __libc_init_array
+ .text.malloc   0x00005194       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
+                0x00005194                malloc
  .text._malloc_r
-                0x000051c4       0x94 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
-                0x000051c4                _malloc_r
- .text.memset   0x00005258       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
-                0x00005258                memset
- .text._sbrk_r  0x00005268       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
-                0x00005268                _sbrk_r
+                0x000051a4       0x94 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
+                0x000051a4                _malloc_r
+ .text.memset   0x00005238       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
+                0x00005238                memset
+ .text._sbrk_r  0x00005248       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
+                0x00005248                _sbrk_r
  .text.snprintf
-                0x00005288       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
-                0x00005288                sniprintf
-                0x00005288                snprintf
- .text.strlen   0x000052ec       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
-                0x000052ec                strlen
+                0x00005268       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
+                0x00005268                sniprintf
+                0x00005268                snprintf
+ .text.strlen   0x000052cc       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
+                0x000052cc                strlen
  .text.__ssputc_r
-                0x000052fc       0xae c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
-                0x000052fc                __ssputc_r
- *fill*         0x000053aa        0x2 00
+                0x000052dc       0xae c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
+                0x000052dc                __ssputc_r
+ *fill*         0x0000538a        0x2 00
  .text._svfprintf_r
-                0x000053ac      0x1f4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
-                0x000053ac                _svfiprintf_r
-                0x000053ac                _svfprintf_r
- .text._sbrk    0x000055a0       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
-                0x000055a0                _sbrk
+                0x0000538c      0x1f4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
+                0x0000538c                _svfiprintf_r
+                0x0000538c                _svfprintf_r
+ .text._sbrk    0x00005580       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
+                0x00005580                _sbrk
  .text._printf_common
-                0x000055d4       0xde c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
-                0x000055d4                _printf_common
- *fill*         0x000056b2        0x2 00
+                0x000055b4       0xde c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
+                0x000055b4                _printf_common
+ *fill*         0x00005692        0x2 00
  .text._printf_i
-                0x000056b4      0x248 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
-                0x000056b4                _printf_i
- .text.print_e  0x000058fc       0xee c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
- *fill*         0x000059ea        0x6 00
- .text._gcvt    0x000059f0      0x188 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
-                0x000059f0                _gcvt
- .text._free_r  0x00005b78       0x88 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
-                0x00005b78                _free_r
- .text.memchr   0x00005c00       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
-                0x00005c00                memchr
- .text.memcpy   0x00005c1c       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
-                0x00005c1c                memcpy
- .text._Balloc  0x00005c2e       0x6a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005c2e                _Balloc
- .text._Bfree   0x00005c98       0x2e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005c98                _Bfree
+                0x00005694      0x248 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
+                0x00005694                _printf_i
+ .text.print_e  0x000058dc       0xee c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
+ *fill*         0x000059ca        0x6 00
+ .text._gcvt    0x000059d0      0x188 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
+                0x000059d0                _gcvt
+ .text._free_r  0x00005b58       0x88 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
+                0x00005b58                _free_r
+ .text.memchr   0x00005be0       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
+                0x00005be0                memchr
+ .text.memcpy   0x00005bfc       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
+                0x00005bfc                memcpy
+ .text._Balloc  0x00005c0e       0x6a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005c0e                _Balloc
+ .text._Bfree   0x00005c78       0x2e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005c78                _Bfree
  .text.__multadd
-                0x00005cc6       0x78 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005cc6                __multadd
+                0x00005ca6       0x78 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005ca6                __multadd
  .text.__hi0bits
-                0x00005d3e       0x3e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005d3e                __hi0bits
+                0x00005d1e       0x3e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005d1e                __hi0bits
  .text.__lo0bits
-                0x00005d7c       0x5a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005d7c                __lo0bits
- .text.__i2b    0x00005dd6       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005dd6                __i2b
+                0x00005d5c       0x5a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005d5c                __lo0bits
+ .text.__i2b    0x00005db6       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005db6                __i2b
  .text.__multiply
-                0x00005de8      0x122 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005de8                __multiply
- *fill*         0x00005f0a        0x2 00
+                0x00005dc8      0x122 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005dc8                __multiply
+ *fill*         0x00005eea        0x2 00
  .text.__pow5mult
-                0x00005f0c       0xa4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005f0c                __pow5mult
+                0x00005eec       0xa4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005eec                __pow5mult
  .text.__lshift
-                0x00005fb0       0xa8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00005fb0                __lshift
- .text.__mcmp   0x00006058       0x3a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00006058                __mcmp
- .text.__mdiff  0x00006092       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00006092                __mdiff
- .text.__d2b    0x00006156       0xa8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00006156                __d2b
- *fill*         0x000061fe        0x2 00
+                0x00005f90       0xa8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00005f90                __lshift
+ .text.__mcmp   0x00006038       0x3a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00006038                __mcmp
+ .text.__mdiff  0x00006072       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00006072                __mdiff
+ .text.__d2b    0x00006136       0xa8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x00006136                __d2b
+ *fill*         0x000061de        0x2 00
  .text._mprec_log10
-                0x00006200       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x00006200                _mprec_log10
+                0x000061e0       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x000061e0                _mprec_log10
  .text._realloc_r
-                0x00006234       0x48 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
-                0x00006234                _realloc_r
- .text.strcpy   0x0000627c       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
-                0x0000627c                strcpy
- .text.quorem   0x0000628c      0x11a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
- *fill*         0x000063a6        0x2 00
- .text._dtoa_r  0x000063a8      0xb40 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
-                0x000063a8                _dtoa_r
+                0x00006214       0x48 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
+                0x00006214                _realloc_r
+ .text.strcpy   0x0000625c       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
+                0x0000625c                strcpy
+ .text.quorem   0x0000626c      0x11a c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
+ *fill*         0x00006386        0x2 00
+ .text._dtoa_r  0x00006388      0xb40 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
+                0x00006388                _dtoa_r
  .text._malloc_usable_size_r
-                0x00006ee8       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
-                0x00006ee8                _malloc_usable_size_r
- *fill*         0x00006efa        0x2 00
- .text.cos      0x00006efc       0x6c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
-                0x00006efc                cos
- .text.sin      0x00006f68       0x74 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
-                0x00006f68                sin
- .text.sqrt     0x00006fdc       0xa4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
-                0x00006fdc                sqrt
- .text.sqrtf    0x00007080       0x9c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
-                0x00007080                sqrtf
- *fill*         0x0000711c        0x4 00
- .text.__ieee754_rem_pio2
-                0x00007120      0x410 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
-                0x00007120                __ieee754_rem_pio2
+                0x00006ec8       0x12 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
+                0x00006ec8                _malloc_usable_size_r
+ *fill*         0x00006eda        0x2 00
+ .text.sqrt     0x00006edc       0xa4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
+                0x00006edc                sqrt
  .text.__ieee754_sqrt
-                0x00007530      0x15c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
-                0x00007530                __ieee754_sqrt
- .text.__ieee754_sqrtf
-                0x0000768c       0x9e c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
-                0x0000768c                __ieee754_sqrtf
- *fill*         0x0000772a        0x6 00
- .text.__kernel_cos
-                0x00007730      0x1d8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
-                0x00007730                __kernel_cos
- .text.__kernel_rem_pio2
-                0x00007908      0x6a8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
-                0x00007908                __kernel_rem_pio2
- .text.__kernel_sin
-                0x00007fb0      0x180 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
-                0x00007fb0                __kernel_sin
- .text.fabs     0x00008130        0x6 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
-                0x00008130                fabs
- *fill*         0x00008136        0x2 00
- .text.floor    0x00008138      0x108 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
-                0x00008138                floor
+                0x00006f80      0x15c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
+                0x00006f80                __ieee754_sqrt
  .text.__fpclassifyd
-                0x00008240       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
-                0x00008240                __fpclassifyd
- .text.matherr  0x000082a4        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
-                0x000082a4                matherr
- .text.scalbn   0x000082a8       0xf0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
-                0x000082a8                scalbn
- .text.__fpclassifyf
-                0x00008398       0x54 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
-                0x00008398                __fpclassifyf
- .text.copysign
-                0x000083ec       0x14 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
-                0x000083ec                copysign
- .text.__errno  0x00008400        0xc c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
-                0x00008400                __errno
+                0x000070dc       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
+                0x000070dc                __fpclassifyd
+ .text.matherr  0x00007140        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
+                0x00007140                matherr
+ .text.__errno  0x00007144        0xc c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
+                0x00007144                __errno
  *(.glue_7)
  .glue_7        0x00000000        0x0 linker stubs
  *(.glue_7t)
  .glue_7t       0x00000000        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x0000840c        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
+ .eh_frame      0x00007150        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
  *(.init)
- .init          0x0000840c        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crti.o
-                0x0000840c                _init
- .init          0x00008410        0x8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
+ .init          0x00007150        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crti.o
+                0x00007150                _init
+ .init          0x00007154        0x8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
  *(.fini)
- .fini          0x00008418        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crti.o
-                0x00008418                _fini
- .fini          0x0000841c        0x8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
-                0x00008424                . = ALIGN (0x4)
-                0x00008424                _etext = .
+ .fini          0x0000715c        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crti.o
+                0x0000715c                _fini
+ .fini          0x00007160        0x8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
+                0x00007168                . = ALIGN (0x4)
+                0x00007168                _etext = .
 
-.vfp11_veneer   0x00008424        0x0
+.vfp11_veneer   0x00007168        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x00008424        0x0
+.v4_bx          0x00007168        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x00008424        0x0
+.iplt           0x00007168        0x0
  .iplt          0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
 
-.rodata         0x00008428     0x2240
-                0x00008428                . = ALIGN (0x4)
+.rodata         0x00007168     0x30ec
+                0x00007168                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x00008428       0x44 src\main.o
- .rodata        0x0000846c        0x4 src\keyboard.o
+ .rodata        0x00007168       0x54 src\main.o
+ .rodata        0x000071bc        0x4 src\keyboard.o
  *(.rodata*)
  .rodata.font5x7
-                0x00008470      0x1e0 src\splc501c.o
+                0x000071c0      0x1e0 src\splc501c.o
  .rodata.main_menu
-                0x00008650      0x420 src\main.o
+                0x000073a0      0x420 src\main.o
  .rodata.measure
-                0x00008a70      0x420 src\main.o
+                0x000077c0      0x420 src\main.o
  .rodata.battery_alarm
-                0x00008e90      0x420 src\main.o
-                0x00008e90                battery_alarm
+                0x00007be0      0x420 src\main.o
+                0x00007be0                battery_alarm
  .rodata.battery
-                0x000092b0      0x420 src\main.o
-                0x000092b0                battery
+                0x00008000      0x420 src\main.o
+                0x00008000                battery
  .rodata.bt_state
-                0x000096d0      0x420 src\main.o
-                0x000096d0                bt_state
+                0x00008420      0x420 src\main.o
+                0x00008420                bt_state
  .rodata.settings
-                0x00009af0      0x420 src\main.o
-                0x00009af0                settings
+                0x00008840      0x420 src\main.o
+                0x00008840                settings
  .rodata.lcd_brightness
-                0x00009f10      0x420 src\main.o
-                0x00009f10                lcd_brightness
+                0x00008c60      0x420 src\main.o
+                0x00008c60                lcd_brightness
+ .rodata.callibration_start
+                0x00009080      0x420 src\main.o
+                0x00009080                callibration_start
+ .rodata.callibration
+                0x000094a0      0x420 src\main.o
+                0x000094a0                callibration
+ .rodata.succes
+                0x000098c0      0x420 src\main.o
+                0x000098c0                succes
+ .rodata.working
+                0x00009ce0      0x420 src\main.o
+                0x00009ce0                working
  .rodata.ADC_COEFFICIENT
-                0x0000a330        0x8 src\ADS7835E.o
-                0x0000a330                ADC_COEFFICIENT
+                0x0000a100        0x8 src\ADS7835E.o
+                0x0000a100                ADC_COEFFICIENT
  .rodata.str1.1
-                0x0000a338        0x2 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
+                0x0000a108        0x2 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
  .rodata.str1.1
-                0x0000a33a       0x11 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
+                0x0000a10a       0x11 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
  .rodata.str1.1
-                0x0000a34b       0x22 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
- *fill*         0x0000a36d        0x3 00
+                0x0000a11b       0x22 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
+ *fill*         0x0000a13d        0x3 00
  .rodata.__mprec_tens
-                0x0000a370       0xc8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x0000a370                __mprec_tens
+                0x0000a140       0xc8 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x0000a140                __mprec_tens
  .rodata.p05.5252
-                0x0000a438        0xc c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
- *fill*         0x0000a444        0x4 00
+                0x0000a208        0xc c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+ *fill*         0x0000a214        0x4 00
  .rodata.__mprec_bigtens
-                0x0000a448       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
-                0x0000a448                __mprec_bigtens
+                0x0000a218       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x0000a218                __mprec_bigtens
  .rodata.str1.1
-                0x0000a470        0xf c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
+                0x0000a240        0xf c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
  .rodata.str1.1
-                0x0000a47f        0x5 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
- .rodata.str1.1
-                0x0000a484        0x6 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
- *fill*         0x0000a48a        0x2 00
- .rodata.npio2_hw
-                0x0000a48c       0x80 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
- .rodata.two_over_pi
-                0x0000a50c      0x108 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
- .rodata.init_jk
-                0x0000a614       0x10 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
- *fill*         0x0000a624        0x4 00
- .rodata.PIo2   0x0000a628       0x40 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
-                0x0000a668                . = ALIGN (0x4)
+                0x0000a24f        0x5 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
+                0x0000a254                . = ALIGN (0x4)
 
-.rel.dyn        0x0000a668        0x0
+.rel.dyn        0x0000a254        0x0
  .rel.iplt      0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x0000a668        0x0
-                0x0000a668                __exidx_start = .
+.ARM            0x0000a254        0x0
+                0x0000a254                __exidx_start = .
  *(.ARM.exidx*)
-                0x0000a668                __exidx_end = .
+                0x0000a254                __exidx_end = .
 
-.preinit_array  0x0000a668        0x0
-                0x0000a668                PROVIDE (__preinit_array_start, .)
+.preinit_array  0x0000a254        0x0
+                0x0000a254                PROVIDE (__preinit_array_start, .)
  *(.preinit_array*)
-                0x0000a668                PROVIDE (__preinit_array_end, .)
+                0x0000a254                PROVIDE (__preinit_array_end, .)
 
-.init_array     0x0000a668        0x4
-                0x0000a668                PROVIDE (__init_array_start, .)
+.init_array     0x0000a254        0x4
+                0x0000a254                PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*))
  *(.init_array*)
- .init_array    0x0000a668        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
-                0x0000a66c                PROVIDE (__init_array_end, .)
+ .init_array    0x0000a254        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
+                0x0000a258                PROVIDE (__init_array_end, .)
 
-.fini_array     0x0000a66c        0x4
-                0x0000a66c                PROVIDE (__fini_array_start, .)
+.fini_array     0x0000a258        0x4
+                0x0000a258                PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0000a66c        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
-                0x0000a670                PROVIDE (__fini_array_end, .)
-                0x0000a670                _sidata = LOADADDR (.data)
+ .fini_array    0x0000a258        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
+                0x0000a25c                PROVIDE (__fini_array_end, .)
+                0x0000a25c                _sidata = LOADADDR (.data)
 
-.data           0x20000000       0x78 load address 0x0000a670
+.data           0x20000000       0x90 load address 0x0000a25c
                 0x20000000                . = ALIGN (0x4)
                 0x20000000                _sdata = .
  *(.data)
@@ -2051,89 +2094,85 @@ LOAD c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/g
  .data.SystemLFXOClock
                 0x20000004        0x4 src\system_efm32gg.o
  .data.uart1    0x20000008        0x4 src\BTM222.o
+ .data.uart1Init
+                0x2000000c       0x18 src\BTM222.o
  .data.impure_data
-                0x2000000c       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
+                0x20000024       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
  .data._impure_ptr
-                0x20000070        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
-                0x20000070                _impure_ptr
+                0x20000088        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
+                0x20000088                _impure_ptr
  .data.__fdlib_version
-                0x20000074        0x1 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_lib_ver.o)
-                0x20000074                __fdlib_version
-                0x20000078                . = ALIGN (0x4)
- *fill*         0x20000075        0x3 00
-                0x20000078                _edata = .
+                0x2000008c        0x1 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_lib_ver.o)
+                0x2000008c                __fdlib_version
+                0x20000090                . = ALIGN (0x4)
+ *fill*         0x2000008d        0x3 00
+                0x20000090                _edata = .
 
-.jcr            0x20000078        0x0 load address 0x0000a6e8
- .jcr           0x20000078        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
+.jcr            0x20000090        0x0 load address 0x0000a2ec
+ .jcr           0x20000090        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
 
-.igot.plt       0x20000078        0x0 load address 0x0000a6e8
+.igot.plt       0x20000090        0x0 load address 0x0000a2ec
  .igot.plt      0x00000000        0x0 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
-                0x20000078                . = ALIGN (0x4)
+                0x20000090                . = ALIGN (0x4)
 
-.bss            0x20000078      0x2c0 load address 0x0000a6e8
-                0x20000078                _sbss = .
-                0x20000078                __bss_start__ = _sbss
+.bss            0x20000090      0x2ac load address 0x0000a2f0
+                0x20000090                _sbss = .
+                0x20000090                __bss_start__ = _sbss
  *(.bss)
- .bss           0x20000078       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
+ .bss           0x20000090       0x1c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtbegin.o
  *(.bss*)
  .bss.endOfADCInterrupt
-                0x20000094        0x1 src\main.o
-                0x20000094                endOfADCInterrupt
- *fill*         0x20000095        0x1 00
- .bss.FRAME     0x20000096        0x2 src\main.o
-                0x20000096                FRAME
- .bss.lastNumberRow.7792
-                0x20000098        0x1 src\main.o
- .bss.lastNumberRow.7771
-                0x20000099        0x1 src\main.o
- .bss.BTMcounter.7739
-                0x2000009a        0x2 src\main.o
+                0x200000ac        0x1 src\main.o
+                0x200000ac                endOfADCInterrupt
+ *fill*         0x200000ad        0x1 00
+ .bss.FRAME     0x200000ae        0x2 src\main.o
+                0x200000ae                FRAME
+ .bss.lastNumberRow.7804
+                0x200000b0        0x1 src\main.o
+ .bss.lastNumberRow.7783
+                0x200000b1        0x1 src\main.o
+ .bss.BTMcounter.7752
+                0x200000b2        0x2 src\main.o
  .bss.cmuStatus
-                0x2000009c        0x2 Libraries\emlib\src\em_emu.o
- *fill*         0x2000009e        0x2 00
+                0x200000b4        0x2 Libraries\emlib\src\em_emu.o
+ *fill*         0x200000b6        0x2 00
  .bss.__malloc_free_list
-                0x200000a0        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
-                0x200000a0                __malloc_free_list
+                0x200000b8        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
+                0x200000b8                __malloc_free_list
  .bss.heap_end.5107
-                0x200000a4        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
+                0x200000bc        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
  *(COMMON)
- COMMON         0x200000a8        0x4 src\system_efm32gg.o
-                0x200000a8                SystemCoreClock
- *fill*         0x200000ac        0x4 00
- COMMON         0x200000b0       0x44 src\main.o
-                0x200000b0                results
-                0x200000d0                State
-                0x200000d8                receivexBuffer
-                0x200000e4                buf
-                0x200000f0                msTicks
- COMMON         0x200000f4       0x14 src\goertzel.o
-                0x200000f4                Q2
-                0x200000f8                coeff
-                0x200000fc                sine
-                0x20000100                cosine
-                0x20000104                Q1
- COMMON         0x20000108      0x220 src\BTM222.o
-                0x20000108                txBuf
-                0x20000218                rxBuf
- COMMON         0x20000328        0xc src\ADS7835E.o
-                0x20000328                RxFrame
-                0x2000032c                masterRxBufferSize
-                0x20000330                masterRxBuffer
- COMMON         0x20000334        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
-                0x20000334                errno
-                0x20000338                . = ALIGN (0x4)
-                0x20000338                _ebss = .
-                0x20000338                __bss_end__ = _ebss
+ COMMON         0x200000c0        0x4 src\system_efm32gg.o
+                0x200000c0                SystemCoreClock
+ *fill*         0x200000c4        0x4 00
+ COMMON         0x200000c8       0x44 src\main.o
+                0x200000c8                results
+                0x200000e8                State
+                0x200000f0                receivexBuffer
+                0x200000fc                buf
+                0x20000108                msTicks
+ COMMON         0x2000010c      0x220 src\BTM222.o
+                0x2000010c                txBuf
+                0x2000021c                rxBuf
+ COMMON         0x2000032c        0xc src\ADS7835E.o
+                0x2000032c                RxFrame
+                0x20000330                masterRxBufferSize
+                0x20000334                masterRxBuffer
+ COMMON         0x20000338        0x4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
+                0x20000338                errno
+                0x2000033c                . = ALIGN (0x4)
+                0x2000033c                _ebss = .
+                0x2000033c                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x20000338      0x400 load address 0x0000a6e8
-                0x20000338                . = ALIGN (0x4)
-                0x20000338                PROVIDE (end, .)
-                0x20000338                PROVIDE (_end, .)
-                0x20000338                . = (. + _Min_Heap_Size)
-                0x20000738                . = (. + _Min_Stack_Size)
- *fill*         0x20000338      0x400 00
-                0x20000738                . = ALIGN (0x4)
+                0x2000033c      0x400 load address 0x0000a2ec
+                0x2000033c                . = ALIGN (0x4)
+                0x2000033c                PROVIDE (end, .)
+                0x2000033c                PROVIDE (_end, .)
+                0x2000033c                . = (. + _Min_Heap_Size)
+                0x2000073c                . = (. + _Min_Stack_Size)
+ *fill*         0x2000033c      0x400 00
+                0x2000073c                . = ALIGN (0x4)
 
 .memory_b1_text
  *(.mb1text)
@@ -2164,192 +2203,153 @@ LOAD c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/g
  .ARM.attributes
                 0x00000104       0x33 src\keyboard.o
  .ARM.attributes
-                0x00000137       0x33 src\goertzel.o
+                0x00000137       0x33 src\Timers.o
  .ARM.attributes
-                0x0000016a       0x33 src\Timers.o
+                0x0000016a       0x33 src\BTM222.o
  .ARM.attributes
-                0x0000019d       0x33 src\BTM222.o
+                0x0000019d       0x33 src\ADS7835E.o
  .ARM.attributes
-                0x000001d0       0x33 src\ADS7835E.o
+                0x000001d0       0x33 Libraries\emlib\src\em_usart.o
  .ARM.attributes
-                0x00000203       0x33 Libraries\emlib\src\em_usart.o
+                0x00000203       0x33 Libraries\emlib\src\em_timer.o
  .ARM.attributes
-                0x00000236       0x33 Libraries\emlib\src\em_timer.o
+                0x00000236       0x33 Libraries\emlib\src\em_system.o
  .ARM.attributes
-                0x00000269       0x33 Libraries\emlib\src\em_system.o
+                0x00000269       0x33 Libraries\emlib\src\em_rtc.o
  .ARM.attributes
-                0x0000029c       0x33 Libraries\emlib\src\em_rtc.o
+                0x0000029c       0x33 Libraries\emlib\src\em_gpio.o
  .ARM.attributes
-                0x000002cf       0x33 Libraries\emlib\src\em_gpio.o
+                0x000002cf       0x33 Libraries\emlib\src\em_emu.o
  .ARM.attributes
-                0x00000302       0x33 Libraries\emlib\src\em_emu.o
+                0x00000302       0x33 Libraries\emlib\src\em_dma.o
  .ARM.attributes
-                0x00000335       0x33 Libraries\emlib\src\em_dma.o
+                0x00000335       0x33 Libraries\emlib\src\em_cmu.o
  .ARM.attributes
-                0x00000368       0x33 Libraries\emlib\src\em_cmu.o
+                0x00000368       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
  .ARM.attributes
-                0x0000039b       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
+                0x00000395       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
  .ARM.attributes
-                0x000003c8       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
+                0x000003c2       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
  .ARM.attributes
-                0x000003f5       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
+                0x000003ef       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
  .ARM.attributes
-                0x00000422       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-impure.o)
+                0x0000041c       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
  .ARM.attributes
-                0x0000044f       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
+                0x00000449       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
  .ARM.attributes
-                0x0000047c       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
+                0x00000476       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
  .ARM.attributes
-                0x000004a9       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
+                0x000004a3       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
  .ARM.attributes
-                0x000004d6       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
+                0x000004d0       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
  .ARM.attributes
-                0x00000503       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
+                0x000004fd       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
  .ARM.attributes
-                0x00000530       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
+                0x0000052a       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
  .ARM.attributes
-                0x0000055d       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
+                0x00000557       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
  .ARM.attributes
-                0x0000058a       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
+                0x00000584       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
  .ARM.attributes
-                0x000005b7       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
+                0x000005b1       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
  .ARM.attributes
-                0x000005e4       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
+                0x000005de       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
  .ARM.attributes
-                0x00000611       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
+                0x0000060b       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
  .ARM.attributes
-                0x0000063e       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
+                0x00000638       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
  .ARM.attributes
-                0x0000066b       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
+                0x00000665       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
  .ARM.attributes
-                0x00000698       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
+                0x00000692       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
  .ARM.attributes
-                0x000006c5       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+                0x000006bf       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
  .ARM.attributes
-                0x000006f2       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
+                0x000006ec       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
  .ARM.attributes
-                0x0000071f       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
+                0x00000719       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
  .ARM.attributes
-                0x0000074c       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
+                0x00000746       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
  .ARM.attributes
-                0x00000779       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
+                0x00000773       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
  .ARM.attributes
-                0x000007a6       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
+                0x000007a0       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
  .ARM.attributes
-                0x000007d3       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
+                0x000007cd       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
  .ARM.attributes
-                0x00000800       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
+                0x000007fa       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
  .ARM.attributes
-                0x0000082d       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
+                0x00000827       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_lib_ver.o)
  .ARM.attributes
-                0x0000085a       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
+                0x00000854       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
  .ARM.attributes
-                0x00000887       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
+                0x00000881       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
  .ARM.attributes
-                0x000008b4       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
+                0x000008ae       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubdf3.o)
  .ARM.attributes
-                0x000008e1       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
+                0x000008cb       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivdf3.o)
  .ARM.attributes
-                0x0000090e       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
+                0x000008e8       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpdf2.o)
  .ARM.attributes
-                0x0000093b       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+                0x00000905       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_fixdfsi.o)
  .ARM.attributes
-                0x00000968       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
- .ARM.attributes
-                0x00000995       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
- .ARM.attributes
-                0x000009c2       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
- .ARM.attributes
-                0x000009ef       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
- .ARM.attributes
-                0x00000a1c       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_lib_ver.o)
- .ARM.attributes
-                0x00000a49       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
- .ARM.attributes
-                0x00000a76       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
- .ARM.attributes
-                0x00000aa3       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
- .ARM.attributes
-                0x00000ad0       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
- .ARM.attributes
-                0x00000afd       0x2d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
- .ARM.attributes
-                0x00000b2a       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubdf3.o)
- .ARM.attributes
-                0x00000b47       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivdf3.o)
- .ARM.attributes
-                0x00000b64       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpdf2.o)
- .ARM.attributes
-                0x00000b81       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_fixdfsi.o)
- .ARM.attributes
-                0x00000b9e       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_truncdfsf2.o)
- .ARM.attributes
-                0x00000bbb       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
- .ARM.attributes
-                0x00000bd8       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivsf3.o)
- .ARM.attributes
-                0x00000bf5       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpsf2.o)
- .ARM.attributes
-                0x00000c12       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
+                0x00000922       0x1d c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m/crtn.o
 OUTPUT(FINAL_COIL_METER.elf elf32-littlearm)
 
-.debug_info     0x00000000     0xa1c1
+.debug_info     0x00000000     0xa154
  .debug_info    0x00000000      0x56c src\system_efm32gg.o
  .debug_info    0x0000056c       0x85 src\startup_efm32gg.o
  .debug_info    0x000005f1      0x954 src\splc501c.o
- .debug_info    0x00000f45     0x1389 src\main.o
- .debug_info    0x000022ce      0xc9b src\keyboard.o
- .debug_info    0x00002f69      0x334 src\goertzel.o
- .debug_info    0x0000329d      0xa86 src\Timers.o
- .debug_info    0x00003d23      0xd2d src\BTM222.o
- .debug_info    0x00004a50      0xb67 src\ADS7835E.o
- .debug_info    0x000055b7      0xe45 Libraries\emlib\src\em_usart.o
- .debug_info    0x000063fc      0x70c Libraries\emlib\src\em_timer.o
- .debug_info    0x00006b08      0x237 Libraries\emlib\src\em_system.o
- .debug_info    0x00006d3f      0x32b Libraries\emlib\src\em_rtc.o
- .debug_info    0x0000706a      0x4d4 Libraries\emlib\src\em_gpio.o
- .debug_info    0x0000753e      0xa9c Libraries\emlib\src\em_emu.o
- .debug_info    0x00007fda     0x122d Libraries\emlib\src\em_dma.o
- .debug_info    0x00009207      0xfba Libraries\emlib\src\em_cmu.o
+ .debug_info    0x00000f45     0x15c1 src\main.o
+ .debug_info    0x00002506      0xc9b src\keyboard.o
+ .debug_info    0x000031a1      0xaff src\Timers.o
+ .debug_info    0x00003ca0      0xd2d src\BTM222.o
+ .debug_info    0x000049cd      0xb7d src\ADS7835E.o
+ .debug_info    0x0000554a      0xe45 Libraries\emlib\src\em_usart.o
+ .debug_info    0x0000638f      0x70c Libraries\emlib\src\em_timer.o
+ .debug_info    0x00006a9b      0x237 Libraries\emlib\src\em_system.o
+ .debug_info    0x00006cd2      0x32b Libraries\emlib\src\em_rtc.o
+ .debug_info    0x00006ffd      0x4d4 Libraries\emlib\src\em_gpio.o
+ .debug_info    0x000074d1      0xa9c Libraries\emlib\src\em_emu.o
+ .debug_info    0x00007f6d     0x122d Libraries\emlib\src\em_dma.o
+ .debug_info    0x0000919a      0xfba Libraries\emlib\src\em_cmu.o
 
-.debug_abbrev   0x00000000     0x1e2e
+.debug_abbrev   0x00000000     0x1d99
  .debug_abbrev  0x00000000      0x1a5 src\system_efm32gg.o
  .debug_abbrev  0x000001a5       0x12 src\startup_efm32gg.o
  .debug_abbrev  0x000001b7      0x1c4 src\splc501c.o
- .debug_abbrev  0x0000037b      0x2e4 src\main.o
- .debug_abbrev  0x0000065f      0x208 src\keyboard.o
- .debug_abbrev  0x00000867       0xf7 src\goertzel.o
- .debug_abbrev  0x0000095e      0x170 src\Timers.o
- .debug_abbrev  0x00000ace      0x27a src\BTM222.o
- .debug_abbrev  0x00000d48      0x29d src\ADS7835E.o
- .debug_abbrev  0x00000fe5      0x1d6 Libraries\emlib\src\em_usart.o
- .debug_abbrev  0x000011bb      0x14d Libraries\emlib\src\em_timer.o
- .debug_abbrev  0x00001308       0xef Libraries\emlib\src\em_system.o
- .debug_abbrev  0x000013f7      0x198 Libraries\emlib\src\em_rtc.o
- .debug_abbrev  0x0000158f      0x13a Libraries\emlib\src\em_gpio.o
- .debug_abbrev  0x000016c9      0x244 Libraries\emlib\src\em_emu.o
- .debug_abbrev  0x0000190d      0x23b Libraries\emlib\src\em_dma.o
- .debug_abbrev  0x00001b48      0x2e6 Libraries\emlib\src\em_cmu.o
+ .debug_abbrev  0x0000037b      0x32e src\main.o
+ .debug_abbrev  0x000006a9      0x208 src\keyboard.o
+ .debug_abbrev  0x000008b1      0x188 src\Timers.o
+ .debug_abbrev  0x00000a39      0x27a src\BTM222.o
+ .debug_abbrev  0x00000cb3      0x29d src\ADS7835E.o
+ .debug_abbrev  0x00000f50      0x1d6 Libraries\emlib\src\em_usart.o
+ .debug_abbrev  0x00001126      0x14d Libraries\emlib\src\em_timer.o
+ .debug_abbrev  0x00001273       0xef Libraries\emlib\src\em_system.o
+ .debug_abbrev  0x00001362      0x198 Libraries\emlib\src\em_rtc.o
+ .debug_abbrev  0x000014fa      0x13a Libraries\emlib\src\em_gpio.o
+ .debug_abbrev  0x00001634      0x244 Libraries\emlib\src\em_emu.o
+ .debug_abbrev  0x00001878      0x23b Libraries\emlib\src\em_dma.o
+ .debug_abbrev  0x00001ab3      0x2e6 Libraries\emlib\src\em_cmu.o
 
-.debug_loc      0x00000000     0x2d76
+.debug_loc      0x00000000     0x2dda
  .debug_loc     0x00000000      0x1e8 src\system_efm32gg.o
  .debug_loc     0x000001e8      0x42a src\splc501c.o
- .debug_loc     0x00000612      0x3f6 src\main.o
- .debug_loc     0x00000a08      0x244 src\keyboard.o
- .debug_loc     0x00000c4c      0x146 src\goertzel.o
- .debug_loc     0x00000d92      0x118 src\Timers.o
- .debug_loc     0x00000eaa      0x404 src\BTM222.o
- .debug_loc     0x000012ae      0x3d8 src\ADS7835E.o
- .debug_loc     0x00001686      0x460 Libraries\emlib\src\em_usart.o
- .debug_loc     0x00001ae6      0x150 Libraries\emlib\src\em_timer.o
- .debug_loc     0x00001c36       0x70 Libraries\emlib\src\em_system.o
- .debug_loc     0x00001ca6      0x1a8 Libraries\emlib\src\em_rtc.o
- .debug_loc     0x00001e4e      0x118 Libraries\emlib\src\em_gpio.o
- .debug_loc     0x00001f66      0x318 Libraries\emlib\src\em_emu.o
- .debug_loc     0x0000227e      0x428 Libraries\emlib\src\em_dma.o
- .debug_loc     0x000026a6      0x6d0 Libraries\emlib\src\em_cmu.o
+ .debug_loc     0x00000612      0x4d8 src\main.o
+ .debug_loc     0x00000aea      0x244 src\keyboard.o
+ .debug_loc     0x00000d2e      0x1b4 src\Timers.o
+ .debug_loc     0x00000ee2      0x404 src\BTM222.o
+ .debug_loc     0x000012e6      0x404 src\ADS7835E.o
+ .debug_loc     0x000016ea      0x460 Libraries\emlib\src\em_usart.o
+ .debug_loc     0x00001b4a      0x150 Libraries\emlib\src\em_timer.o
+ .debug_loc     0x00001c9a       0x70 Libraries\emlib\src\em_system.o
+ .debug_loc     0x00001d0a      0x1a8 Libraries\emlib\src\em_rtc.o
+ .debug_loc     0x00001eb2      0x118 Libraries\emlib\src\em_gpio.o
+ .debug_loc     0x00001fca      0x318 Libraries\emlib\src\em_emu.o
+ .debug_loc     0x000022e2      0x428 Libraries\emlib\src\em_dma.o
+ .debug_loc     0x0000270a      0x6d0 Libraries\emlib\src\em_cmu.o
 
-.debug_aranges  0x00000000      0x860
+.debug_aranges  0x00000000      0x858
  .debug_aranges
                 0x00000000       0x68 src\system_efm32gg.o
  .debug_aranges
@@ -2357,104 +2357,98 @@ OUTPUT(FINAL_COIL_METER.elf elf32-littlearm)
  .debug_aranges
                 0x00000090       0xb0 src\splc501c.o
  .debug_aranges
-                0x00000140       0xb8 src\main.o
+                0x00000140       0xd8 src\main.o
  .debug_aranges
-                0x000001f8       0x70 src\keyboard.o
+                0x00000218       0x70 src\keyboard.o
  .debug_aranges
-                0x00000268       0x48 src\goertzel.o
+                0x00000288       0x58 src\Timers.o
  .debug_aranges
-                0x000002b0       0x40 src\Timers.o
+                0x000002e0       0xb0 src\BTM222.o
  .debug_aranges
-                0x000002f0       0xb0 src\BTM222.o
+                0x00000390       0xb0 src\ADS7835E.o
  .debug_aranges
-                0x000003a0       0xa8 src\ADS7835E.o
+                0x00000440       0xb8 Libraries\emlib\src\em_usart.o
  .debug_aranges
-                0x00000448       0xb8 Libraries\emlib\src\em_usart.o
+                0x000004f8       0x48 Libraries\emlib\src\em_timer.o
  .debug_aranges
-                0x00000500       0x48 Libraries\emlib\src\em_timer.o
+                0x00000540       0x28 Libraries\emlib\src\em_system.o
  .debug_aranges
-                0x00000548       0x28 Libraries\emlib\src\em_system.o
+                0x00000568       0x58 Libraries\emlib\src\em_rtc.o
  .debug_aranges
-                0x00000570       0x58 Libraries\emlib\src\em_rtc.o
+                0x000005c0       0x40 Libraries\emlib\src\em_gpio.o
  .debug_aranges
-                0x000005c8       0x40 Libraries\emlib\src\em_gpio.o
+                0x00000600       0x90 Libraries\emlib\src\em_emu.o
  .debug_aranges
-                0x00000608       0x90 Libraries\emlib\src\em_emu.o
+                0x00000690       0xb0 Libraries\emlib\src\em_dma.o
  .debug_aranges
-                0x00000698       0xb0 Libraries\emlib\src\em_dma.o
- .debug_aranges
-                0x00000748      0x118 Libraries\emlib\src\em_cmu.o
+                0x00000740      0x118 Libraries\emlib\src\em_cmu.o
 
-.debug_ranges   0x00000000      0x758
+.debug_ranges   0x00000000      0x760
  .debug_ranges  0x00000000       0x58 src\system_efm32gg.o
  .debug_ranges  0x00000058       0x20 src\startup_efm32gg.o
  .debug_ranges  0x00000078       0xa0 src\splc501c.o
- .debug_ranges  0x00000118       0xa8 src\main.o
- .debug_ranges  0x000001c0       0x60 src\keyboard.o
- .debug_ranges  0x00000220       0x38 src\goertzel.o
- .debug_ranges  0x00000258       0x30 src\Timers.o
+ .debug_ranges  0x00000118       0xc8 src\main.o
+ .debug_ranges  0x000001e0       0x60 src\keyboard.o
+ .debug_ranges  0x00000240       0x48 src\Timers.o
  .debug_ranges  0x00000288       0xa0 src\BTM222.o
- .debug_ranges  0x00000328       0x98 src\ADS7835E.o
- .debug_ranges  0x000003c0       0xa8 Libraries\emlib\src\em_usart.o
- .debug_ranges  0x00000468       0x38 Libraries\emlib\src\em_timer.o
- .debug_ranges  0x000004a0       0x18 Libraries\emlib\src\em_system.o
- .debug_ranges  0x000004b8       0x48 Libraries\emlib\src\em_rtc.o
- .debug_ranges  0x00000500       0x30 Libraries\emlib\src\em_gpio.o
- .debug_ranges  0x00000530       0x80 Libraries\emlib\src\em_emu.o
- .debug_ranges  0x000005b0       0xa0 Libraries\emlib\src\em_dma.o
- .debug_ranges  0x00000650      0x108 Libraries\emlib\src\em_cmu.o
+ .debug_ranges  0x00000328       0xa0 src\ADS7835E.o
+ .debug_ranges  0x000003c8       0xa8 Libraries\emlib\src\em_usart.o
+ .debug_ranges  0x00000470       0x38 Libraries\emlib\src\em_timer.o
+ .debug_ranges  0x000004a8       0x18 Libraries\emlib\src\em_system.o
+ .debug_ranges  0x000004c0       0x48 Libraries\emlib\src\em_rtc.o
+ .debug_ranges  0x00000508       0x30 Libraries\emlib\src\em_gpio.o
+ .debug_ranges  0x00000538       0x80 Libraries\emlib\src\em_emu.o
+ .debug_ranges  0x000005b8       0xa0 Libraries\emlib\src\em_dma.o
+ .debug_ranges  0x00000658      0x108 Libraries\emlib\src\em_cmu.o
 
-.debug_line     0x00000000     0x3560
+.debug_line     0x00000000     0x34fa
  .debug_line    0x00000000      0x22b src\system_efm32gg.o
  .debug_line    0x0000022b       0x75 src\startup_efm32gg.o
  .debug_line    0x000002a0      0x425 src\splc501c.o
- .debug_line    0x000006c5      0x503 src\main.o
- .debug_line    0x00000bc8      0x2e5 src\keyboard.o
- .debug_line    0x00000ead      0x1a4 src\goertzel.o
- .debug_line    0x00001051      0x1f8 src\Timers.o
- .debug_line    0x00001249      0x3a1 src\BTM222.o
- .debug_line    0x000015ea      0x3f5 src\ADS7835E.o
- .debug_line    0x000019df      0x40d Libraries\emlib\src\em_usart.o
- .debug_line    0x00001dec      0x2d2 Libraries\emlib\src\em_timer.o
- .debug_line    0x000020be      0x1bb Libraries\emlib\src\em_system.o
- .debug_line    0x00002279      0x231 Libraries\emlib\src\em_rtc.o
- .debug_line    0x000024aa      0x213 Libraries\emlib\src\em_gpio.o
- .debug_line    0x000026bd      0x380 Libraries\emlib\src\em_emu.o
- .debug_line    0x00002a3d      0x43b Libraries\emlib\src\em_dma.o
- .debug_line    0x00002e78      0x6e8 Libraries\emlib\src\em_cmu.o
+ .debug_line    0x000006c5      0x5f1 src\main.o
+ .debug_line    0x00000cb6      0x2e5 src\keyboard.o
+ .debug_line    0x00000f9b      0x233 src\Timers.o
+ .debug_line    0x000011ce      0x3a1 src\BTM222.o
+ .debug_line    0x0000156f      0x40a src\ADS7835E.o
+ .debug_line    0x00001979      0x40d Libraries\emlib\src\em_usart.o
+ .debug_line    0x00001d86      0x2d2 Libraries\emlib\src\em_timer.o
+ .debug_line    0x00002058      0x1bb Libraries\emlib\src\em_system.o
+ .debug_line    0x00002213      0x231 Libraries\emlib\src\em_rtc.o
+ .debug_line    0x00002444      0x213 Libraries\emlib\src\em_gpio.o
+ .debug_line    0x00002657      0x380 Libraries\emlib\src\em_emu.o
+ .debug_line    0x000029d7      0x43b Libraries\emlib\src\em_dma.o
+ .debug_line    0x00002e12      0x6e8 Libraries\emlib\src\em_cmu.o
 
-.debug_str      0x00000000     0x36dc
+.debug_str      0x00000000     0x371e
  .debug_str     0x00000000      0x378 src\system_efm32gg.o
                                 0x3e3 (size before relaxing)
  .debug_str     0x00000378      0x52e src\splc501c.o
                                 0x691 (size before relaxing)
- .debug_str     0x000008a6      0x8cf src\main.o
-                                0xec7 (size before relaxing)
- .debug_str     0x00001175      0x154 src\keyboard.o
+ .debug_str     0x000008a6      0x9db src\main.o
+                                0xfd9 (size before relaxing)
+ .debug_str     0x00001281      0x145 src\keyboard.o
                                 0xc6c (size before relaxing)
- .debug_str     0x000012c9       0xf0 src\goertzel.o
-                                0x25a (size before relaxing)
- .debug_str     0x000013b9      0x2e2 src\Timers.o
-                                0x9e5 (size before relaxing)
- .debug_str     0x0000169b      0x537 src\BTM222.o
+ .debug_str     0x000013c6      0x308 src\Timers.o
+                                0xa1b (size before relaxing)
+ .debug_str     0x000016ce      0x537 src\BTM222.o
                                 0xd80 (size before relaxing)
- .debug_str     0x00001bd2      0x205 src\ADS7835E.o
-                                0x73f (size before relaxing)
- .debug_str     0x00001dd7      0x5ab Libraries\emlib\src\em_usart.o
+ .debug_str     0x00001c05      0x224 src\ADS7835E.o
+                                0x754 (size before relaxing)
+ .debug_str     0x00001e29      0x5a4 Libraries\emlib\src\em_usart.o
                                 0xd25 (size before relaxing)
- .debug_str     0x00002382      0x2d4 Libraries\emlib\src\em_timer.o
+ .debug_str     0x000023cd      0x2d4 Libraries\emlib\src\em_timer.o
                                 0x6f3 (size before relaxing)
- .debug_str     0x00002656       0xc7 Libraries\emlib\src\em_system.o
+ .debug_str     0x000026a1       0xc7 Libraries\emlib\src\em_system.o
                                 0x233 (size before relaxing)
- .debug_str     0x0000271d       0xa9 Libraries\emlib\src\em_rtc.o
+ .debug_str     0x00002768       0xa9 Libraries\emlib\src\em_rtc.o
                                 0x247 (size before relaxing)
- .debug_str     0x000027c6       0xfc Libraries\emlib\src\em_gpio.o
+ .debug_str     0x00002811       0xfc Libraries\emlib\src\em_gpio.o
                                 0x4cb (size before relaxing)
- .debug_str     0x000028c2      0x397 Libraries\emlib\src\em_emu.o
+ .debug_str     0x0000290d      0x397 Libraries\emlib\src\em_emu.o
                                 0x68e (size before relaxing)
- .debug_str     0x00002c59      0x5c2 Libraries\emlib\src\em_dma.o
+ .debug_str     0x00002ca4      0x5b2 Libraries\emlib\src\em_dma.o
                                 0xc86 (size before relaxing)
- .debug_str     0x0000321b      0x4c1 Libraries\emlib\src\em_cmu.o
+ .debug_str     0x00003256      0x4c8 Libraries\emlib\src\em_cmu.o
                                 0xb32 (size before relaxing)
 
 .comment        0x00000000       0x82
@@ -2463,7 +2457,6 @@ OUTPUT(FINAL_COIL_METER.elf elf32-littlearm)
  .comment       0x00000000       0x83 src\splc501c.o
  .comment       0x00000000       0x83 src\main.o
  .comment       0x00000000       0x83 src\keyboard.o
- .comment       0x00000000       0x83 src\goertzel.o
  .comment       0x00000000       0x83 src\Timers.o
  .comment       0x00000000       0x83 src\BTM222.o
  .comment       0x00000000       0x83 src\ADS7835E.o
@@ -2476,64 +2469,50 @@ OUTPUT(FINAL_COIL_METER.elf elf32-littlearm)
  .comment       0x00000000       0x83 Libraries\emlib\src\em_dma.o
  .comment       0x00000000       0x83 Libraries\emlib\src\em_cmu.o
 
-.debug_frame    0x00000000     0x2618
+.debug_frame    0x00000000     0x23d0
  .debug_frame   0x00000000      0x120 src\system_efm32gg.o
  .debug_frame   0x00000120      0x260 src\splc501c.o
- .debug_frame   0x00000380      0x250 src\main.o
- .debug_frame   0x000005d0      0x148 src\keyboard.o
- .debug_frame   0x00000718       0xd0 src\goertzel.o
- .debug_frame   0x000007e8       0xa0 src\Timers.o
- .debug_frame   0x00000888      0x244 src\BTM222.o
- .debug_frame   0x00000acc      0x238 src\ADS7835E.o
- .debug_frame   0x00000d04      0x25c Libraries\emlib\src\em_usart.o
- .debug_frame   0x00000f60       0xb8 Libraries\emlib\src\em_timer.o
- .debug_frame   0x00001018       0x48 Libraries\emlib\src\em_system.o
- .debug_frame   0x00001060       0xf0 Libraries\emlib\src\em_rtc.o
- .debug_frame   0x00001150       0xa8 Libraries\emlib\src\em_gpio.o
- .debug_frame   0x000011f8      0x1bc Libraries\emlib\src\em_emu.o
- .debug_frame   0x000013b4      0x240 Libraries\emlib\src\em_dma.o
- .debug_frame   0x000015f4      0x3b0 Libraries\emlib\src\em_cmu.o
- .debug_frame   0x000019a4       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
- .debug_frame   0x000019c4       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
- .debug_frame   0x000019f0       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
- .debug_frame   0x00001ab4       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
- .debug_frame   0x00001ae0       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
- .debug_frame   0x00001b10       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
- .debug_frame   0x00001b3c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
- .debug_frame   0x00001b5c       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
- .debug_frame   0x00001b88       0x58 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
- .debug_frame   0x00001be0       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
- .debug_frame   0x00001c00       0x88 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
- .debug_frame   0x00001c88      0x14c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
- .debug_frame   0x00001dd4       0x58 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
- .debug_frame   0x00001e2c       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
- .debug_frame   0x00001ef0       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
- .debug_frame   0x00001f1c       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
- .debug_frame   0x00001f44       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
- .debug_frame   0x00001f6c      0x23c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
- .debug_frame   0x000021a8       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
- .debug_frame   0x000021d8       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
- .debug_frame   0x0000223c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
- .debug_frame   0x0000225c       0x68 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
- .debug_frame   0x000022c4       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
- .debug_frame   0x000022e4       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_cos.o)
- .debug_frame   0x00002310       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_sin.o)
- .debug_frame   0x0000233c       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
- .debug_frame   0x00002374       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-wf_sqrt.o)
- .debug_frame   0x000023a4       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
- .debug_frame   0x000023dc       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
- .debug_frame   0x00002410       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
- .debug_frame   0x0000243c       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_cos.o)
- .debug_frame   0x00002474       0x3c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
- .debug_frame   0x000024b0       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
- .debug_frame   0x000024e8       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fabs.o)
- .debug_frame   0x00002508       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_floor.o)
- .debug_frame   0x0000253c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
- .debug_frame   0x0000255c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
- .debug_frame   0x0000257c       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
- .debug_frame   0x000025ac       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-sf_fpclassify.o)
- .debug_frame   0x000025cc       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_copysign.o)
- .debug_frame   0x000025f8       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
+ .debug_frame   0x00000380      0x2d0 src\main.o
+ .debug_frame   0x00000650      0x148 src\keyboard.o
+ .debug_frame   0x00000798       0xf4 src\Timers.o
+ .debug_frame   0x0000088c      0x244 src\BTM222.o
+ .debug_frame   0x00000ad0      0x254 src\ADS7835E.o
+ .debug_frame   0x00000d24      0x25c Libraries\emlib\src\em_usart.o
+ .debug_frame   0x00000f80       0xb8 Libraries\emlib\src\em_timer.o
+ .debug_frame   0x00001038       0x48 Libraries\emlib\src\em_system.o
+ .debug_frame   0x00001080       0xf0 Libraries\emlib\src\em_rtc.o
+ .debug_frame   0x00001170       0xa8 Libraries\emlib\src\em_gpio.o
+ .debug_frame   0x00001218      0x1bc Libraries\emlib\src\em_emu.o
+ .debug_frame   0x000013d4      0x240 Libraries\emlib\src\em_dma.o
+ .debug_frame   0x00001614      0x3b0 Libraries\emlib\src\em_cmu.o
+ .debug_frame   0x000019c4       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
+ .debug_frame   0x000019e4       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-callocr.o)
+ .debug_frame   0x00001a10       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
+ .debug_frame   0x00001ad4       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-init.o)
+ .debug_frame   0x00001b00       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-malloc.o)
+ .debug_frame   0x00001b30       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mallocr.o)
+ .debug_frame   0x00001b5c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memset.o)
+ .debug_frame   0x00001b7c       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-sbrkr.o)
+ .debug_frame   0x00001ba8       0x58 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-snprintf.o)
+ .debug_frame   0x00001c00       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strlen.o)
+ .debug_frame   0x00001c20       0x88 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-svfprintf.o)
+ .debug_frame   0x00001ca8      0x14c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-syscalls.o)
+ .debug_frame   0x00001df4       0x58 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
+ .debug_frame   0x00001e4c       0xc4 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
+ .debug_frame   0x00001f10       0x2c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-freer.o)
+ .debug_frame   0x00001f3c       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memchr.o)
+ .debug_frame   0x00001f64       0x28 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-memcpy.o)
+ .debug_frame   0x00001f8c      0x23c c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
+ .debug_frame   0x000021c8       0x30 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reallocr.o)
+ .debug_frame   0x000021f8       0x64 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
+ .debug_frame   0x0000225c       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-strcpy.o)
+ .debug_frame   0x0000227c       0x68 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
+ .debug_frame   0x000022e4       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-msizer.o)
+ .debug_frame   0x00002304       0x38 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-w_sqrt.o)
+ .debug_frame   0x0000233c       0x34 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_sqrt.o)
+ .debug_frame   0x00002370       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_fpclassify.o)
+ .debug_frame   0x00002390       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_matherr.o)
+ .debug_frame   0x000023b0       0x20 c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-errno.o)
 
 Cross Reference Table
 
@@ -2571,6 +2550,7 @@ AES_OFB128                                        Libraries\emlib\src\em_aes.o
 AES_OFB256                                        Libraries\emlib\src\em_aes.o
 BTM222_EnterATMode                                src\BTM222.o
 BTM222_Init                                       src\BTM222.o
+                                                  src\main.o
 BTM222_ReadData                                   src\BTM222.o
 BTM222_SendData                                   src\BTM222.o
 BTM222_SetName                                    src\BTM222.o
@@ -2741,7 +2721,6 @@ I2C_Transfer                                      Libraries\emlib\src\em_i2c.o
 I2C_TransferInit                                  Libraries\emlib\src\em_i2c.o
 INT_LockCnt                                       Libraries\emlib\src\em_int.o
 InitGoertzel                                      src\goertzel.o
-                                                  src\main.o
 InterruptVector                                   src\startup_efm32gg.o
 KeyboardGpioSetup                                 src\keyboard.o
                                                   src\main.o
@@ -2840,6 +2819,8 @@ ResultADC_Buf_Init                                src\ADS7835E.o
 ResultADC_Buf_Write                               src\ADS7835E.o
                                                   src\main.o
 RxFrame                                           src\ADS7835E.o
+SPI2_disableRXInt_SW                              src\ADS7835E.o
+                                                  src\main.o
 SPI2_setupRXInt_SW                                src\ADS7835E.o
                                                   src\main.o
 SVC_Handler                                       src\startup_efm32gg.o
@@ -2871,6 +2852,8 @@ SystemULFRCOClockGet                              src\system_efm32gg.o
                                                   Libraries\emlib\src\em_cmu.o
 TIMER0_IRQHandler                                 src\ADS7835E.o
                                                   src\startup_efm32gg.o
+TIMER0forADC_Disable                              src\Timers.o
+                                                  src\ADS7835E.o
 TIMER0forADC_Setup                                src\Timers.o
                                                   src\ADS7835E.o
 TIMER1_IRQHandler                                 src\startup_efm32gg.o
@@ -2964,6 +2947,7 @@ __aeabi_dadd                                      c:/program files/atollic/trues
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
                                                   src\ADS7835E.o
                                                   src\goertzel.o
+                                                  src\main.o
 __aeabi_dcmpeq                                    c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_cmpdf2.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-e_rem_pio2.o)
@@ -2994,6 +2978,7 @@ __aeabi_ddiv                                      c:/program files/atollic/trues
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-mprec.o)
                                                   src\ADS7835E.o
                                                   src\goertzel.o
+                                                  src\main.o
 __aeabi_dmul                                      c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_muldivdf3.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_sin.o)
@@ -3020,7 +3005,6 @@ __aeabi_f2d                                       c:/program files/atollic/trues
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
                                                   src\ADS7835E.o
                                                   src\goertzel.o
-                                                  src\main.o
 __aeabi_fadd                                      c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-ef_sqrt.o)
                                                   src\goertzel.o
@@ -3046,6 +3030,7 @@ __aeabi_i2d                                       c:/program files/atollic/trues
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-dtoa.o)
                                                   src\ADS7835E.o
                                                   src\goertzel.o
+                                                  src\main.o
 __aeabi_i2f                                       c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubsf3.o)
                                                   src\goertzel.o
 __aeabi_l2d                                       c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/armv7-m\libgcc.a(_arm_addsubdf3.o)
@@ -3241,6 +3226,10 @@ battery                                           src\main.o
 battery_alarm                                     src\main.o
 bt_state                                          src\main.o
 buf                                               src\main.o
+calibrationMode                                   src\main.o
+callibration                                      src\main.o
+callibration_over                                 src\main.o
+callibration_start                                src\main.o
 calloc                                            c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-calloc.o)
                                                   src\ADS7835E.o
 cleanup_glue                                      c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-reent.o)
@@ -3252,7 +3241,6 @@ cos                                               c:/program files/atollic/trues
                                                   src\goertzel.o
 cosine                                            src\goertzel.o
 doGoertzelAlgorithm                               src\ADS7835E.o
-                                                  src\main.o
 ecvt                                              c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
 ecvtbuf                                           c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-ecvtbuf.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
@@ -3279,6 +3267,7 @@ free                                              c:/program files/atollic/trues
                                                   src\ADS7835E.o
 gcvt                                              c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
                                                   src\ADS7835E.o
+                                                  src\main.o
 gcvtf                                             c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-efgcvt.o)
 goertzel_mag                                      src\goertzel.o
                                                   src\ADS7835E.o
@@ -3321,6 +3310,7 @@ rms                                               src\ADS7835E.o
 rxBuf                                             src\BTM222.o
 scalbn                                            c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-s_scalbn.o)
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libm.a(lib_a-k_rem_pio2.o)
+setCalibrateFactor                                src\main.o
 setLCDBrightness                                  src\main.o
 settings                                          src\main.o
 showWhereIam                                      src\main.o
@@ -3347,6 +3337,7 @@ strlen                                            c:/program files/atollic/trues
                                                   c:/program files/atollic/truestudio for arm pro 4.3.1/armtools/bin/../lib/gcc/arm-atollic-eabi/4.7.3/../../../../arm-atollic-eabi/lib/armv7-m\libc_s.a(lib_a-vfprintf_i.o)
                                                   src\BTM222.o
                                                   src\tiny_printf.o
+succes                                            src\main.o
 ts_formatlength                                   src\tiny_printf.o
 ts_formatstring                                   src\tiny_printf.o
 ts_itoa                                           src\tiny_printf.o
@@ -3356,3 +3347,4 @@ uart1ReadData                                     src\BTM222.o
 uart1SendChar                                     src\BTM222.o
 uart1SendData                                     src\BTM222.o
 uart1Setup                                        src\BTM222.o
+working                                           src\main.o

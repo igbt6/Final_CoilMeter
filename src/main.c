@@ -48,28 +48,21 @@
 
 void showWhereIam(uint8_t numberMenuRow, bool onORoff);
 void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff);
-/* OPIS DO PODL ADC TAM GDZIE SWITCHE
- //	PE12	left - clk
- //	PE14	right- conv
- //	PE13	OK- data
- *
- */
+
 void setLCDBrightness(void);
+void calibrationMode(void);     // bigger functions used in main_menu
+double setCalibrateFactor(int measuredCurrent);
 /////////////////////////////////////////////////////////////////////
 //functions that allow you to TURN ON/OFF the following module
 /////////////////////////////////////////////////////////////////////
 static void GLCD_Enable(void) {
-
-	//GPIO ->P[0].MODEH |=  GPIO_P_MODEH_MODE13_PUSHPULL;
-	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
-	GPIO_PinOutClear(gpioPortA, 13);
+	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 0);
+	GPIO_PinOutSet(gpioPortA, 13);
 }
 
 static void GLCD_Disable(void) {
-
-	//GPIO ->P[0].MODEH |= GPIO_P_MODEH_MODE13_PUSHPULL;
-	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
-	GPIO_PinOutSet(gpioPortA, 13);
+	//GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
+	GPIO_PinOutClear(gpioPortA, 13);
 }
 static void BT_Enable(void) {
 	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 1);
@@ -165,14 +158,15 @@ int main(void) {
 				while (1)
 					;
 			//GLCD_Disable();
-			//GLCD_Enable();
+
 			GLCD_Init();
 			GLCD_ClearScreen();
 			GLCD_GoTo(40, 3);
 			GLCD_WriteString("LOADING...");
+			GLCD_Enable();
 			Delay(700);
 			State.MODE = MAIN_MENU;
-
+			GLCD_Enable();
 			///	Set20MHzFrequency_Init();
 			////	SPI2_setupRXInt_SW(&FRAME);        ----Pomiar
 			//////	BTM222_Init();
@@ -185,7 +179,7 @@ int main(void) {
 		}
 
 		case MAIN_MENU: {
-			//GLCD_Disable();
+
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(main_menu);
@@ -218,7 +212,7 @@ int main(void) {
 					Set20MHzFrequency_Init();
 					SPI2_setupRXInt_SW(&FRAME);
 					BT_Enable();
-					//BTM222_Init();
+					BTM222_Init();
 					State.init = true;
 				}
 				static uint16_t BTMcounter;
@@ -246,16 +240,17 @@ int main(void) {
 							GLCD_WriteString(bufoo);
 							BTMcounter = 0;
 						}
-						InitGoertzel();
-						double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
-						ConvertDOUBLEtoLCD(goertzel, bufoo);
-						GLCD_GoTo(50, 6);
-						GLCD_WriteString(bufoo);
+						/*
+						 InitGoertzel();
+						 double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
+						 ConvertDOUBLEtoLCD(goertzel, bufoo);
+						 GLCD_GoTo(50, 6);
+						 GLCD_WriteString(bufoo);
+						 */
 						results.rms = rms(&ADC_RESULT);
 						ConvertDOUBLEtoLCD(results.rms, bufoo);
 						GLCD_GoTo(50, 2);
 						GLCD_WriteString(bufoo);
-
 						//BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
 					}
 				}
@@ -282,7 +277,7 @@ int main(void) {
 						break;
 					case LCD_BRIGHTNESS:
 						setLCDBrightness();
-						State.settings_menu=false;
+						State.settings_menu = false;
 						State.init = false; //powrot re-draw again
 						break;
 					default:
@@ -321,6 +316,15 @@ int main(void) {
 				break;
 			}
 			case CALIBRATION: {
+				if (!State.init) {
+					Set20MHzFrequency_Init();
+					//ADD spi frame for ADC similar to START
+					GLCD_ClearScreen();
+					GLCD_bmp(callibration_start);
+					State.init = true;
+				}
+				calibrationMode();
+
 				break;
 			}
 			default: {
@@ -377,7 +381,8 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff) {
 	lastNumberRow = numberMenuRow;
 }
 /////////////////////////////////////////////////////////////////
-
+//   void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff)
+/////////////////////////////////////////////////////////////////
 void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff) {
 	if (numberMenuRow > NUMBER_OF_SETTINGS_OPTIONS)
 		return;
@@ -400,7 +405,9 @@ void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff) {
 	}
 	lastNumberRow = numberMenuRow;
 }
-
+/////////////////////////////////////////////////////////////////
+//      void setLCDBrightness(void)
+/////////////////////////////////////////////////////////////////
 void setLCDBrightness(void) {
 
 	GPIO_IntConfig(gpioPortE, OK, false, true, false); // turn off during setting
@@ -410,14 +417,14 @@ void setLCDBrightness(void) {
 	GLCD_ClearScreen();
 	GLCD_bmp(lcd_brightness);
 	uint8_t brightness = 20;
-	uint8_t percentValue=(brightness*100)/(64);
+	uint8_t percentValue = (brightness * 100) / (64);
 	char str[5];
 	Delay(300);
 	while (GPIO_PinInGet(gpioPortE, OK)) {
 		GLCD_WriteCommand(SPLC501C_VOLUME_MODE);
 		GLCD_WriteCommand(brightness);
 		snprintf(str, 4, " %d ", percentValue);
-		str[4]='%';
+		str[4] = '%';
 		GLCD_GoTo(60, 5);
 		GLCD_WriteString(str);
 
@@ -431,10 +438,141 @@ void setLCDBrightness(void) {
 			brightness %= 64;
 			Delay(500);
 		}
-		percentValue=(brightness*100)/(64);
+		percentValue = (brightness * 100) / (64);
 	}
 	GPIO_IntConfig(gpioPortE, OK, false, true, true); // turn on back after setting
 	GPIO_IntConfig(gpioPortE, UP, false, true, true);
 	GPIO_IntConfig(gpioPortE, DOWN, false, true, true);
 	Delay(300);
 }
+/////////////////////////////////////////////////////////////////
+//      void calibrationMode(void)
+/////////////////////////////////////////////////////////////////
+void calibrationMode(void) {
+	NVIC_DisableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
+	NVIC_DisableIRQ(GPIO_ODD_IRQn);
+	uint8_t numberOfCalibration = 2;
+	uint8_t i = 0;
+	double scallingFactors[2]; // tu trzymane przed obliczeniem ostatecznego
+	double newFactor=0; // tu trzymane przed obliczeniem ostatecznego
+	int currentValue = 0;
+	char StringOutput[5];
+	Delay(500);
+	while (GPIO_PinInGet(gpioPortE, OK) && GPIO_PinInGet(gpioPortE, RIGHT)) {
+
+		if (!GPIO_PinInGet(gpioPortE, LEFT)) {
+			goto RETURN;
+		}
+	}
+
+
+	while (i < (numberOfCalibration)) {
+		GLCD_ClearScreen();
+			GLCD_bmp(callibration);
+			currentValue=0;
+		i++;
+		GLCD_GoTo(12, 5);
+		if (i == 1) {
+
+			GLCD_WriteString("1");
+		}
+
+		else
+			GLCD_WriteString("2");
+
+		Delay(400);
+		while (GPIO_PinInGet(gpioPortE, RIGHT) && GPIO_PinInGet(gpioPortE, OK)) {
+			snprintf(StringOutput, 5, " %3d", currentValue);
+			GLCD_GoTo(65, 5);
+			GLCD_WriteString(StringOutput);
+
+			if (!GPIO_PinInGet(gpioPortE, UP)) {
+
+				Delay(60);
+				if (!GPIO_PinInGet(gpioPortE, UP)) {
+
+					currentValue++;
+					if (currentValue >= 500) {
+						currentValue = 500;
+					}
+
+				}
+
+			}
+
+			if (!GPIO_PinInGet(gpioPortE, DOWN)) {
+
+				Delay(60);
+				if (!GPIO_PinInGet(gpioPortE, DOWN)) {
+
+					currentValue--;
+					if (currentValue <= 0) {
+						currentValue = 0;
+					}
+				}
+			}
+		}
+
+		GLCD_ClearScreen();
+		GLCD_bmp(working);
+		scallingFactors[i-1]=setCalibrateFactor(currentValue);
+		Delay(5000);
+		GLCD_ClearScreen();
+		GLCD_bmp(succes);
+		Delay(3000);
+
+	}
+
+	for (uint8_t i = 0; i < 2; i++) {
+		newFactor += scallingFactors[i];
+		}
+
+        newFactor= newFactor/2;             //TODO
+
+	RETURN: GLCD_ClearScreen();
+
+	gcvt(newFactor, 3, StringOutput);   //debug
+				GLCD_GoTo(65, 5);//debug
+				GLCD_WriteString(StringOutput);//debug
+
+				Delay(8000);//debug
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
+	NVIC_EnableIRQ(GPIO_ODD_IRQn);
+	return;
+
+}
+/////////////////////////////////////////////////////////////////
+//      double setCalibrateFactor(void)
+/////////////////////////////////////////////////////////////////
+double setCalibrateFactor(int measuredCurrent) {
+	uint16_t measured_data; //posluzy do odbierania ramek od niej
+	CircularBufferADC_Result ADC_RESULT;
+	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 100 samples /sampling freuency is 100Hz
+	SPI2_setupRXInt_SW(&measured_data); // setup
+	const uint8_t numberOfSamples = 100;
+	double tempBuf[numberOfSamples];
+	double avgRms=0;
+	double factor=0;
+
+	uint8_t i = 0;
+	while (i < numberOfSamples) {
+
+		if (endOfADCInterrupt) {
+			endOfADCInterrupt = false;
+			ResultADC_Buf_Write(&ADC_RESULT, measured_data);
+			if (ADC_RESULT.Buf_isFull) {
+				tempBuf[i] = rms(&ADC_RESULT);
+				i++;
+			}
+		}
+	}
+	SPI2_disableRXInt_SW();
+	for (uint8_t i = 0; i < numberOfSamples; i++) {
+		avgRms += tempBuf[i];
+	}
+	avgRms = avgRms / numberOfSamples;
+	factor= measuredCurrent/avgRms;
+
+	return factor;
+}
+
