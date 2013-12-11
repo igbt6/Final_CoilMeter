@@ -50,6 +50,7 @@ void showWhereIam(uint8_t numberMenuRow, bool onORoff);
 void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff);
 
 void setLCDBrightness(void);
+void setSleepTime(void);
 void calibrationMode(void);     // bigger functions used in main_menu
 double setCalibrateFactor(int measuredCurrent);
 /////////////////////////////////////////////////////////////////////
@@ -61,7 +62,7 @@ static void GLCD_Enable(void) {
 }
 
 static void GLCD_Disable(void) {
-	//GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 1);
+	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 0);
 	GPIO_PinOutClear(gpioPortA, 13);
 }
 static void BT_Enable(void) {
@@ -98,25 +99,18 @@ static void Set20MHzFrequency_Init(void) {
 
 }
 ////////////////////////////////////////////////////////////////////////////////
-//volatile METER_STATE STATE = WAITFORENABLE; // extern global enym type
 
+const states init_States = STATES_INIT_DEFAULT; //default settings
 volatile states State;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 void Delay(uint32_t dlyTicks);
-
 volatile uint32_t msTicks; /* counts 1ms timeTicks */
 
 ///////////////////GLOBAL VARIABLES////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 char receivexBuffer[10];
 Results results;
-
-/* Clearing the receive buffers */
-
-//extern volatile struct circularBuffer;
 bool endOfADCInterrupt;
-//int i = 12; // liczba bitow
 uint16_t FRAME = 0;
 bool endOfADCInterrupt = false;
 int licznik_kwiecinskigo = 0;
@@ -127,38 +121,19 @@ int main(void) {
 	CHIP_Init();
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 100 samples /sampling freuency is 100Hz
-	/*
-	 #define SPLC501C_PAGE_BLINKING_MODE	0xD5
-	 #define SPLC501C_PAGE_BLINKING_0	0x01
-	 #define SPLC501C_PAGE_BLINKING_1	0x02
-	 #define SPLC501C_PAGE_BLINKING_2	0x04
-	 #define SPLC501C_PAGE_BLINKING_3	0x08
-	 #define SPLC501C_PAGE_BLINKING_4	0x10
-	 #define SPLC501C_PAGE_BLINKING_5	0x20
-	 #define SPLC501C_PAGE_BLINKING_6	0x40
-	 #define SPLC501C_PAGE_BLINKING_7	0x80
-
-	 */
-	KeyboardGpioSetup(/*showWhereIam*/); // init keyboard , external events
-	State.MODE = WAITFORENABLE; // start
-	State.settings_menu = false;
+	KeyboardGpioSetup(); // init keyboard , external events
+	State = init_States;
 	while (1) {
 		switch (State.MODE) {
-
 		case WAITFORENABLE: {
-
 			EMU_EnterEM2(true);   // deep sleep mode
-
 			break;
 		}
-
 		case ENABLING: {
 			/* Setup SysTick Timer for 1 msec interrupts  */
 			if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
 				while (1)
 					;
-			//GLCD_Disable();
-
 			GLCD_Init();
 			GLCD_ClearScreen();
 			GLCD_GoTo(40, 3);
@@ -167,19 +142,15 @@ int main(void) {
 			Delay(700);
 			State.MODE = MAIN_MENU;
 			GLCD_Enable();
-			///	Set20MHzFrequency_Init();
-			////	SPI2_setupRXInt_SW(&FRAME);        ----Pomiar
-			//////	BTM222_Init();
-			//		GLCD_WriteCommand(SPLC501C_PAGE_BLINKING_MODE);
-//GLCD_WriteCommand(SPLC501C_PAGE_BLINKING_2);
-
 			char respBuf1[10];
 
 			break;
 		}
 
 		case MAIN_MENU: {
-
+			if (!State.init && State.LAST_MODE == SLEEP_MODE) {
+				GLCD_Enable();
+			}  //wake up
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(main_menu);
@@ -203,6 +174,9 @@ int main(void) {
 			 GLCD_WriteString(buf);
 			 */
 
+			if (!State.init && State.LAST_MODE == SLEEP_MODE) {
+				GLCD_Enable();
+			}  //wake up
 			switch (State.MAIN_MENU_CURRENT_OPTION) {
 
 			case START: {
@@ -214,10 +188,10 @@ int main(void) {
 					BT_Enable();
 					BTM222_Init();
 					State.init = true;
+					State.activeFunction.isMeasurementOn=true;
 				}
 				static uint16_t BTMcounter;
 				char bufoo[7]; // receive buffer
-
 				//BTM222_ReadData(respBuf1);
 				if (endOfADCInterrupt) {
 					endOfADCInterrupt = false;
@@ -264,7 +238,7 @@ int main(void) {
 					State.init = true;
 				}
 
-				if (State.settings_menu) {
+				if (State.activeFunction.settings_menu) {
 					switch (State.SETTINGS_CURRENT_OPTION) {
 					case SLAVE_MODE:
 						GLCD_ClearScreen();
@@ -274,10 +248,13 @@ int main(void) {
 					case SET_TIME:
 						break;
 					case SLEEP_TIME:
+						setSleepTime();
+						State.activeFunction.settings_menu = false;
+						State.init = false; //powrot re-draw again
 						break;
 					case LCD_BRIGHTNESS:
 						setLCDBrightness();
-						State.settings_menu = false;
+						State.activeFunction.settings_menu = false;
 						State.init = false; //powrot re-draw again
 						break;
 					default:
@@ -324,6 +301,8 @@ int main(void) {
 					State.init = true;
 				}
 				calibrationMode();
+				State.init = false;   // return to main menu
+				State.MODE = MAIN_MENU;
 
 				break;
 			}
@@ -342,6 +321,17 @@ int main(void) {
 				break;
 			}
 		}
+		case SLEEP_MODE: {
+			if (!State.init) {
+				GLCD_ClearScreen();
+				GLCD_Disable();
+				BT_Disable();
+				State.init = true;
+			}
+			EMU_EnterEM2(true);
+			break;
+		}
+
 		}
 	}
 }
@@ -424,10 +414,10 @@ void setLCDBrightness(void) {
 		GLCD_WriteCommand(SPLC501C_VOLUME_MODE);
 		GLCD_WriteCommand(brightness);
 		snprintf(str, 4, " %d ", percentValue);
-		str[4] = '%';
+		//str[4] = '%';
 		GLCD_GoTo(60, 5);
 		GLCD_WriteString(str);
-
+		GLCD_WriteString(" %");
 		if (!GPIO_PinInGet(gpioPortE, DOWN)) {
 			brightness -= 4;
 			brightness %= 64;
@@ -445,6 +435,59 @@ void setLCDBrightness(void) {
 	GPIO_IntConfig(gpioPortE, DOWN, false, true, true);
 	Delay(300);
 }
+
+/////////////////////////////////////////////////////////////////
+//       void setSleepTime(void)
+/////////////////////////////////////////////////////////////////
+void setSleepTime(void) {
+
+	NVIC_DisableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
+	NVIC_DisableIRQ(GPIO_ODD_IRQn);
+
+	GLCD_ClearScreen();
+	GLCD_bmp(sleepTime);
+	uint16_t sleepTime = State.deepSleepTime;
+
+	char StringOutput[5];
+	Delay(300);
+	while (GPIO_PinInGet(gpioPortE, OK)) {
+		snprintf(StringOutput, 5, " %1d", sleepTime);
+		GLCD_GoTo(58, 5);
+		GLCD_WriteString(StringOutput);
+		GLCD_GoTo(100, 5);
+		GLCD_WriteString("[s]");
+
+		if (!GPIO_PinInGet(gpioPortE, UP)) {
+
+			Delay(60);
+			if (!GPIO_PinInGet(gpioPortE, UP)) {
+
+				sleepTime++;
+				if (sleepTime >= 3600) {
+					sleepTime = 3600;
+				}
+			}
+		}
+		if (!GPIO_PinInGet(gpioPortE, DOWN)) {
+			Delay(60);
+			if (!GPIO_PinInGet(gpioPortE, DOWN)) {
+				sleepTime--;
+				if (sleepTime <= 0) {
+					sleepTime = 0;
+				}
+			}
+		}
+		if (!GPIO_PinInGet(gpioPortE, LEFT)) {
+			goto RETURN;
+		}
+
+	}
+	State.deepSleepTime = sleepTime;
+	RETURN: NVIC_EnableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
+	NVIC_EnableIRQ(GPIO_ODD_IRQn);
+	Delay(300);
+}
+
 /////////////////////////////////////////////////////////////////
 //      void calibrationMode(void)
 /////////////////////////////////////////////////////////////////
@@ -454,7 +497,7 @@ void calibrationMode(void) {
 	uint8_t numberOfCalibration = 2;
 	uint8_t i = 0;
 	double scallingFactors[2]; // tu trzymane przed obliczeniem ostatecznego
-	double newFactor=0; // tu trzymane przed obliczeniem ostatecznego
+	double newFactor = 0; // tu trzymane przed obliczeniem ostatecznego
 	int currentValue = 0;
 	char StringOutput[5];
 	Delay(500);
@@ -465,11 +508,10 @@ void calibrationMode(void) {
 		}
 	}
 
-
 	while (i < (numberOfCalibration)) {
 		GLCD_ClearScreen();
-			GLCD_bmp(callibration);
-			currentValue=0;
+		GLCD_bmp(callibration);
+		currentValue = 0;
 		i++;
 		GLCD_GoTo(12, 5);
 		if (i == 1) {
@@ -495,16 +537,11 @@ void calibrationMode(void) {
 					if (currentValue >= 500) {
 						currentValue = 500;
 					}
-
 				}
-
 			}
-
 			if (!GPIO_PinInGet(gpioPortE, DOWN)) {
-
 				Delay(60);
 				if (!GPIO_PinInGet(gpioPortE, DOWN)) {
-
 					currentValue--;
 					if (currentValue <= 0) {
 						currentValue = 0;
@@ -512,30 +549,26 @@ void calibrationMode(void) {
 				}
 			}
 		}
-
 		GLCD_ClearScreen();
 		GLCD_bmp(working);
-		scallingFactors[i-1]=setCalibrateFactor(currentValue);
+		scallingFactors[i - 1] = setCalibrateFactor(currentValue);
 		Delay(5000);
 		GLCD_ClearScreen();
 		GLCD_bmp(succes);
 		Delay(3000);
+	}
+	for (uint8_t i = 0; i < 2; i++) {
+		newFactor += scallingFactors[i];
 
 	}
 
-	for (uint8_t i = 0; i < 2; i++) {
-		newFactor += scallingFactors[i];
-		}
-
-        newFactor= newFactor/2;             //TODO
-
+	newFactor = newFactor / 2;             //TODO
 	RETURN: GLCD_ClearScreen();
-
+	GLCD_bmp(callibration_over);
 	gcvt(newFactor, 3, StringOutput);   //debug
-				GLCD_GoTo(65, 5);//debug
-				GLCD_WriteString(StringOutput);//debug
-
-				Delay(8000);//debug
+	GLCD_GoTo(65, 5);   //debug
+	GLCD_WriteString(StringOutput);   //debug
+	Delay(8000);   //debug
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
 	NVIC_EnableIRQ(GPIO_ODD_IRQn);
 	return;
@@ -546,13 +579,14 @@ void calibrationMode(void) {
 /////////////////////////////////////////////////////////////////
 double setCalibrateFactor(int measuredCurrent) {
 	uint16_t measured_data; //posluzy do odbierania ramek od niej
+	static int previousMeasuredCurrent;
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 100 samples /sampling freuency is 100Hz
 	SPI2_setupRXInt_SW(&measured_data); // setup
 	const uint8_t numberOfSamples = 100;
 	double tempBuf[numberOfSamples];
-	double avgRms=0;
-	double factor=0;
+	double avgRms = 0;
+	double factor = 0;
 
 	uint8_t i = 0;
 	while (i < numberOfSamples) {
@@ -571,8 +605,10 @@ double setCalibrateFactor(int measuredCurrent) {
 		avgRms += tempBuf[i];
 	}
 	avgRms = avgRms / numberOfSamples;
-	factor= measuredCurrent/avgRms;
-
+	if (avgRms == 0 || measuredCurrent == 0)
+		measuredCurrent = previousMeasuredCurrent;
+	factor = measuredCurrent / avgRms;
+	previousMeasuredCurrent = measuredCurrent;
 	return factor;
 }
 
