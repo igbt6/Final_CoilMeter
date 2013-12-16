@@ -15,7 +15,7 @@
 
 
 #define SIZE_BUF_ADC  100 //ilosc probek
-
+#define NUMBER_OF_VALUES_FOR_AVG 50 //ilosc probek
 
 
 /* Circular buffer object */
@@ -34,6 +34,7 @@ typedef struct {
 	double min;
 	double max;
 	double avg;
+	double rmsAVG[NUMBER_OF_VALUES_FOR_AVG];
 }Results;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

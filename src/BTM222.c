@@ -18,19 +18,18 @@ txBuf; // externowe
 
 void uart1Setup(void) {
 	cmuSetup();
-	CMU_ClockEnable(cmuClock_GPIO, true);
-
 	GPIO_PinModeSet(gpioPortB, 9, gpioModePushPull, 1); // out , Pushpull
 	GPIO_PinModeSet(gpioPortB, 10, gpioModeInput, 0);
 	uart1Init.enable = usartDisable;
-	uart1Init.refFreq = 0;
-	uart1Init.baudrate = 115200;      // Baud Rate - default value  for my BTM222
-	uart1Init.oversampling = usartOVS16;
+	uart1Init.refFreq = 20000000;
+	uart1Init.baudrate = 115200;     // Baud Rate - default value  for my BTM222
+	uart1Init.oversampling = usartOVS8;
 	uart1Init.parity = usartNoParity;  // Parity mode
 	uart1Init.stopbits = usartStopbits1; //  Number of stop bits. Range is 0 to 2
 	uart1Init.mvdis = false;          //  Disable majority voting
 	uart1Init.prsRxEnable = false; //  Enable USART Rx via Peripheral Reflex System
-	uart1Init.prsRxCh = usartPrsRxCh0;  //  Select PRS channel if enabled
+	//uart1Init.prsRxCh = usartPrsRxCh0;  //  Select PRS channel if enable
+
 	USART_InitAsync(uart1, &uart1Init);
 
 	USART_IntClear(uart1, _UART_IF_MASK);
@@ -122,19 +121,18 @@ void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
 	// Fill dataPtr[0:dataLen-1] into txBuffer
 //TODO i<dataLen
 
-	while (i<dataLen) {
+	while (i < dataLen) {
 		txBuf.data[i] = *(dataPtr + i);
 		/////////txBuf.wrI = (txBuf.wrI + 1) % BUFFERSIZE;
 		i++;
 	}
 
 	// Increment pending byte counter
-  ///////txBuf.pendingBytes /*+*/= dataLen;
- ///TESTTSSSSSS
+	///////txBuf.pendingBytes /*+*/= dataLen;
+	///TESTTSSSSSS
 	// Enable interrupt on USART TX Buffer
 
-
- USART_IntEnable(uart1, UART_IF_TXBL);
+	USART_IntEnable(uart1, UART_IF_TXBL);
 }
 
 /******************************************************************************
@@ -171,18 +169,15 @@ uint32_t uart1ReadData(uint8_t * dataPtr, uint32_t dataLen) {
  ******************************************************************************/
 void cmuSetup(void) {
 	/* Start HFXO and wait until it is stable */
-	/* CMU_OscillatorEnable( cmuOsc_HFXO, true, true); */
-
+	// CMU_OscillatorEnable( cmuOsc_HFXO, true, true);
 	/* Select HFXO as clock source for HFCLK */
-	/* CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO ); */
-
+// CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO );
 	/* Disable HFRCO */
-	/* CMU_OscillatorEnable( cmuOsc_HFRCO, false, false ); */
-
+	// CMU_OscillatorEnable( cmuOsc_HFRCO, false, false );
 	/* Enable clock for HF peripherals */
-	CMU_ClockEnable(cmuClock_HFPER, true);
-
+	//CMU_ClockEnable(cmuClock_HFPER, true);
 	/* Enable clock for USART module */
+	CMU_ClockEnable(cmuClock_GPIO, true);
 	CMU_ClockEnable(cmuClock_UART1, true);
 }
 
@@ -220,36 +215,34 @@ void UART1_TX_IRQHandler(void) {
 
 	/* Check TX buffer level status */
 	if (uart1->STATUS & UART_STATUS_TXBL) {
-/*
-		if (txBuf.pendingBytes < 0) {
-			// Transmit pending character
-			USART_Tx(uart1, txBuf.data[txBuf.rdI]);
-			//txBuf.rdI = (txBuf.rdI + 1) % BUFFERSIZE;
-			txBuf.pendingBytes--;
-		}
-*/
-int i=0;
+		/*
+		 if (txBuf.pendingBytes < 0) {
+		 // Transmit pending character
+		 USART_Tx(uart1, txBuf.data[txBuf.rdI]);
+		 //txBuf.rdI = (txBuf.rdI + 1) % BUFFERSIZE;
+		 txBuf.pendingBytes--;
+		 }
+		 */
+
+		/// to odkomentowac
+		int i = 0;
 		while (i < 8) {
 
-				USART_Tx(uart1, txBuf.data[i]);
-				i++;
-			}
-/*
-		USART_Tx(uart1, 'r');
-		USART_Tx(uart1, 'm');
-		USART_Tx(uart1, 's');
-		USART_Tx(uart1, '0');
+			USART_Tx(uart1, txBuf.data[i]);
+			i++;
+		}
 
-		USART_Tx(uart1, '.');
-				USART_Tx(uart1, '3');
-				USART_Tx(uart1, '3');
-				USART_Tx(uart1, '9');
-				USART_Tx(uart1, '9');
-				USART_Tx(uart1, 'r');
-*/
-		 //Disable Tx interrupt if no more bytes in queue
+		/*
+		 USART_Tx(uart1, 'r');
+		 USART_Tx(uart1, 'm');
+		 USART_Tx(uart1, 's');
+		 USART_Tx(uart1, '0');
+
+		 USART_Tx(uart1, '.');
+		 */
+		//Disable Tx interrupt if no more bytes in queue
 		//if (txBuf.pendingBytes == 0) {  ///ttests
-			USART_IntDisable(uart1, UART_IF_TXBL);
+		USART_IntDisable(uart1, UART_IF_TXBL);
 		//} ///ttests
 	}
 }
@@ -258,22 +251,18 @@ int i=0;
 //BLUETOOTH
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void BTM222_Init(){
-	 uart1Setup();
+void BTM222_Init() {
+	uart1Setup();
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t BTM222_EnterATMode()
-{
-	char buf[32]={0};
-char  ATmodeEnab[]={"+++\r"};
-char ATDisabEcho[]={"ATE0\r"};
+uint8_t BTM222_EnterATMode() {
+	char buf[32] = { 0 };
+	char ATmodeEnab[] = { "+++\r" };
+	char ATDisabEcho[] = { "ATE0\r" };
 	// Send +++ for AT mode enabling
 	BTM222_SendData(ATmodeEnab);
 	//uart1SendData(ATmodeEnab, strlen((char*)ATmodeEnab));
@@ -283,36 +272,34 @@ char ATDisabEcho[]={"ATE0\r"};
 	BTM222_ReadData(buf);
 
 	//return (char*)buf;
-if (strcmp(buf, "OK")==0) return BTM222_OK; else return BTM222_ERR;
+	if (strcmp(buf, "OK") == 0)
+		return BTM222_OK;
+	else
+		return BTM222_ERR;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-uint8_t  BTM222_SetName(char * Name)
-{
+uint8_t BTM222_SetName(char * Name) {
 	char buf[32];
 
 	sprintf(buf, "ATN=%s\r", Name);
 	BTM222_SendData(buf);
 	BTM222_ReadData(buf);
-	if (strcmp(buf, "OK")==0) return BTM222_OK; else return BTM222_ERR;
+	if (strcmp(buf, "OK") == 0)
+		return BTM222_OK;
+	else
+		return BTM222_ERR;
 //	return (char*)buf;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void BTM222_SendData(char * buffer)
-{
-	uart1SendData((uint8_t*)buffer, (uint32_t)strlen(buffer));
+void BTM222_SendData(char * buffer) {
+	uart1SendData((uint8_t*) buffer, (uint32_t) strlen(buffer));
 }
 
+void BTM222_ReadData(char* buffer) {
 
-void BTM222_ReadData(char* buffer){
-
-	uart1ReadData((uint8_t*)buffer, (uint32_t)strlen(buffer));
+	uart1ReadData((uint8_t*) buffer, (uint32_t) strlen(buffer));
 
 }
-
-
-
-
 

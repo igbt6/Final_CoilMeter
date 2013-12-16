@@ -8,10 +8,9 @@
  **  Functions   : main
  **
  **  Environment : Atollic TrueSTUDIO
- **                Energy Micro peripheral module library for
- **                "EFM32" microcontrollers
  **
- **          Author : andrzej  z  Texas!
+ **
+ **          Author : uszko, kwiecinski
  **
  *****************************************************************************
  */
@@ -66,12 +65,12 @@ static void GLCD_Disable(void) {
 	GPIO_PinOutClear(gpioPortA, 13);
 }
 static void BT_Enable(void) {
-	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 1);
+	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 0);
 	GPIO_PinOutClear(gpioPortF, 6);
 }
 
 static void BT_Disable(void) {
-	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 1);
+	GPIO_PinModeSet(gpioPortF, 6, gpioModePushPull, 0);
 	GPIO_PinOutSet(gpioPortF, 6);
 }
 
@@ -96,6 +95,7 @@ static void Set20MHzFrequency_Init(void) {
 
 	/* Enable HFXO as high frequency clock, HFCLK */
 	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+	CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
 
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,9 @@ bool endOfADCInterrupt;
 uint16_t FRAME = 0;
 bool endOfADCInterrupt = false;
 int licznik_kwiecinskigo = 0;
-char buf[10];
+uint8_t avgCounter = 0;
+
+//char buf[10];
 /////////////////////////13//////////////////////////////////////////////////////////////////////////////
 // value of rms
 int main(void) {
@@ -183,36 +185,63 @@ int main(void) {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(measure);
+
 					Set20MHzFrequency_Init();
+					//cmuSetup();
 					SPI2_setupRXInt_SW(&FRAME);
+					Delay(10);
 					BT_Enable();
 					BTM222_Init();
 					State.init = true;
-					State.activeFunction.isMeasurementOn=true;
+					State.activeFunction.isMeasurementOn = true;
 				}
 				static uint16_t BTMcounter;
 				char bufoo[7]; // receive buffer
 				//BTM222_ReadData(respBuf1);
+				//while(1){
 				if (endOfADCInterrupt) {
 					endOfADCInterrupt = false;
 
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
 					if (ADC_RESULT.Buf_isFull) {
 						BTMcounter++;
-						if (BTMcounter == 1000) {
+					//	if (BTMcounter == 200) {
 							results.avg = avg(&ADC_RESULT);
 							results.max = max(&ADC_RESULT);
 							results.min = min(&ADC_RESULT);
 							ConvertDOUBLEtoLCD(results.max, bufoo);
 							GLCD_GoTo(50, 4);
 							GLCD_WriteString(bufoo);
+							BTM222_SendData(
+									ParseDataToSendThroughBTM(bufoo, 'm'));
 							ConvertDOUBLEtoLCD(results.min, bufoo);
 							GLCD_GoTo(50, 3);
 							GLCD_WriteString(bufoo);
+							BTM222_SendData(
+									ParseDataToSendThroughBTM(bufoo, 'n'));
 							ConvertDOUBLEtoLCD(results.avg, bufoo);
 							GLCD_GoTo(50, 5);
 							GLCD_WriteString(bufoo);
+							BTM222_SendData(
+									ParseDataToSendThroughBTM(bufoo, 'a'));
 							BTMcounter = 0;
+							//results.rms = rms(&ADC_RESULT);
+							 ConvertDOUBLEtoLCD(results.rms, bufoo);
+																					 GLCD_GoTo(50, 2);
+																					 GLCD_WriteString(bufoo);
+																					 BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
+					//		 }
+
+						results.rmsAVG[avgCounter] = rms(&ADC_RESULT);
+						avgCounter++;
+						if (avgCounter >= NUMBER_OF_VALUES_FOR_AVG) {
+							avgCounter = 0;
+							results.rms=0;
+							for (int i = 0; i < NUMBER_OF_VALUES_FOR_AVG; i++) {
+								results.rms+=results.rmsAVG[i];
+							}
+							results.rms/=NUMBER_OF_VALUES_FOR_AVG;
+
 						}
 						/*
 						 InitGoertzel();
@@ -221,12 +250,8 @@ int main(void) {
 						 GLCD_GoTo(50, 6);
 						 GLCD_WriteString(bufoo);
 						 */
-						results.rms = rms(&ADC_RESULT);
-						ConvertDOUBLEtoLCD(results.rms, bufoo);
-						GLCD_GoTo(50, 2);
-						GLCD_WriteString(bufoo);
-						//BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
-					}
+
+						ADC_RESULT.Buf_isFull=false;}
 				}
 
 				break;
@@ -317,7 +342,7 @@ int main(void) {
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(battery_alarm);
-				State.init = true;
+				State.init = true;//// nie wracaaaaaaaaaaaaaaaaaaaaaaaaa
 				break;
 			}
 		}
@@ -583,7 +608,7 @@ double setCalibrateFactor(int measuredCurrent) {
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 100 samples /sampling freuency is 100Hz
 	SPI2_setupRXInt_SW(&measured_data); // setup
-	const uint8_t numberOfSamples = 100;
+	const uint8_t numberOfSamples = SIZE_BUF_ADC;
 	double tempBuf[numberOfSamples];
 	double avgRms = 0;
 	double factor = 0;

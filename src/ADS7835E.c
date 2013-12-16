@@ -214,7 +214,7 @@ static bool checkData(double *data) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
-	const double SCALLING_FACTOR = 184.345;
+	const double SCALLING_FACTOR = 184;
 	//digit *=ADC_COEFFICIENT;
 	if (checkData(&digit)) {
 		digit *= SCALLING_FACTOR;
@@ -244,9 +244,9 @@ int ConvertU16_from_ADCToINT(uint16_t digit) {
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
-	for (uint8_t i = 0; i < 6; i++) {
+	for (uint8_t i = 0; i < 5; i++) {
 
-		data[i + 1] = data[i];
+		data[5 - i] = data[4-i];
 	}
 	data[6] = 'x'; // end delimiter
 	switch (typeOfMessage) {
@@ -266,6 +266,7 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 
 /* Write an element, overwriting oldest element if buffer is full. App can
  choose to avoid the overwrite by checking cbIsFull(). */
+/*
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 	switch (cb->Buf_isFull) {
 	case false: {
@@ -274,8 +275,9 @@ void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 
 		if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
 			cb->Buf_isFull = true;
+
 		}
-//	cb->start = (cb->start + 1) % cb->size; /* full, overwrite */
+//	cb->start = (cb->start + 1) % cb->size; // full, overwrite
 		break;
 	}
 	case true: {
@@ -293,6 +295,19 @@ void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 	}
 	}
 }
+*/
+void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
+
+		cb->Values[cb->end] = x;
+		cb->end = (cb->end + 1); // % cb->size;
+
+		if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
+			cb->Buf_isFull = true;
+			cb->end=0;
+			}
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Read oldest element. App must ensure !cbIsEmpty() first. */
 /*    void ResultADC_Buf_Read(CircularBufferADC_Result *cb) {
