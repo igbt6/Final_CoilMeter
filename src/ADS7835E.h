@@ -14,8 +14,8 @@
 /* Defines */
 
 
-#define SIZE_BUF_ADC  100 //ilosc probek
-#define NUMBER_OF_VALUES_FOR_AVG 50 //ilosc probek
+#define SIZE_BUF_ADC  64 //ilosc probek
+#define NUMBER_OF_VALUES_FOR_AVG 5 //ilosc do obliczenia sredniej
 
 
 /* Circular buffer object */
@@ -28,6 +28,8 @@ typedef struct {
     bool Buf_isFull;
 } CircularBufferADC_Result;
 
+/////extern CircularBufferADC_Result ADC_RESULT;   // note , you MUST init this struct first by { ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); }  function  in main.c file
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct {
 	double rms;
@@ -35,6 +37,9 @@ typedef struct {
 	double max;
 	double avg;
 	double rmsAVG[NUMBER_OF_VALUES_FOR_AVG];
+	double avgAVG[NUMBER_OF_VALUES_FOR_AVG];
+	double minAVG[NUMBER_OF_VALUES_FOR_AVG];
+	double maxAVG[NUMBER_OF_VALUES_FOR_AVG];
 }Results;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,13 +54,13 @@ inline int ResultADC_Buf_IsEmpty(CircularBufferADC_Result *cb) {
 void SPI_setup(void); // hardware SPI
 void SPI2_Init(void);
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive);
-void SPI2_setupRXInt_SW(uint16_t* receiveBuffer); // software SPI
+void SPI2_setupRXInt_SW(uint16_t* receiveBuffer ); // software SPI
 void SPI2_disableRXInt_SW(void);
 void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 
 
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
-void ConvertDOUBLEtoLCD(double digit, char* StringOutput);
+void ConvertDOUBLEtoLCD(double digit, char* StringOutput,bool factorEnable);
 int ConvertU16_from_ADCToINT(uint16_t digit);
 char* ParseDataToSendThroughBTM(char* data, char typeOfMessage);
 //void ResultADC_Buf_Read(CircularBufferADC_Result *cb);

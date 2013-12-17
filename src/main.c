@@ -39,6 +39,8 @@
 #include "goertzel.h"
 #include "keyboard.h"
 #include "bitmaps.h"
+#include "arm_math.h"
+
 ///////////////////////////////////////////// DEFINE'y KOMPILACJI WARUNKOWEJ//////////////////////////////////////////////
 #define DEBUG 1           // dla debugerra- for testing
 #define COMPILATION 1   // 1 sprzetowa obsl USART, 0 programowa
@@ -108,6 +110,129 @@ volatile uint32_t msTicks; /* counts 1ms timeTicks */
 
 ///////////////////GLOBAL VARIABLES////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+
+/** Buffer of float samples ready for FFT. */
+#define BUFFER_SAMPLES                  512
+
+/** (Approximate) sample rate used for sampling data. */
+#define SAMPLE_RATE                     (1024)
+static float32_t floatBuf[BUFFER_SAMPLES];
+
+/** Complex (interleaved) output from FFT. */
+static float32_t fftOutputComplex[BUFFER_SAMPLES * 2];
+
+/** Magnitude of complex numbers in FFT output. */
+static float32_t fftOutputMag[BUFFER_SAMPLES];
+
+/** Flag used to indicate whether data is ready for processing */
+static volatile bool dataReadyForFFT;
+/** Indicate whether we are currently processing data through FFT */
+static volatile bool processingFFT;
+
+/** Instance structures for float32_t RFFT */
+static arm_rfft_instance_f32 rfft_instance;
+/** Instance structure for float32_t CFFT used by the RFFT */
+static arm_cfft_radix4_instance_f32 cfft_instance;
+
+/***************************************************************************//**
+ * @brief
+ *   Process the sampled data through FFT.
+ *******************************************************************************/bool ProcessFFT(
+		uint16_t x) {
+	static int i;
+
+	/*
+	 * Convert to float values.
+	 */
+
+	floatBuf[i] = ((float32_t) ConvertU16_from_ADCToINT(x)) * 0.00122;
+	i++;
+
+	/* Process the data through the RFFT module, resulting complex output is
+	 * stored in fftOutputComplex
+	 */
+	if (i == BUFFER_SAMPLES) {
+		arm_rfft_f32(&rfft_instance, floatBuf, fftOutputComplex);
+
+		/* Compute the magnitude of all the resulting complex numbers */
+		arm_cmplx_mag_f32(fftOutputComplex, fftOutputMag, BUFFER_SAMPLES);
+		i = 0;
+		return true;
+	}
+	return false;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Find the maximal bin and estimate the frequency using sinc interpolation.
+ * @return
+ *   Frequency of maximal peak
+ *******************************************************************************/
+float32_t GetFreq(void) {
+	float32_t maxVal;
+	uint32_t maxIndex;
+
+	/* Real and imag components of maximal bin and bins on each side */
+	float32_t rz_p, iz_p, rz_n, iz_n, rz_0, iz_0;
+	/* Small correction to the "index" of the maximal bin */
+	float32_t deltaIndex;
+	/* Real and imag components of the intermediate result */
+	float32_t a, b, c, d;
+
+#define START_INDEX 4
+	/* Find the biggest bin, disregarding the first bins because of DC offset and
+	 * low frequency noise.
+	 */
+	arm_max_f32(&fftOutputMag[START_INDEX], BUFFER_SAMPLES / 2 - START_INDEX,
+			&maxVal, &maxIndex);
+
+	maxIndex += START_INDEX;
+
+	/* Perform sinc() interpolation using the two bins on each side of the
+	 * maximal bin. For more information see page 113 of
+	 * http://tmo.jpl.nasa.gov/progress_report/42-118/118I.pdf
+	 */
+
+	/* z_{peak} */
+	rz_0 = fftOutputComplex[maxIndex * 2];
+	iz_0 = fftOutputComplex[maxIndex * 2 + 1];
+
+	/* z_{peak+1} */
+	rz_p = fftOutputComplex[maxIndex * 2 + 2];
+	iz_p = fftOutputComplex[maxIndex * 2 + 2 + 1];
+
+	/* z_{peak-1} */
+	rz_n = fftOutputComplex[maxIndex * 2 - 2];
+	iz_n = fftOutputComplex[maxIndex * 2 - 2 + 1];
+
+	/* z_{peak+1} - z_{peak-1} */
+	a = rz_p - rz_n;
+	b = iz_p - iz_n;
+	/* z_{peak+1} + z_{peak-1} - 2*z_{peak} */
+	c = rz_p + rz_n - (float32_t) 2.0 * rz_0;
+	d = iz_p + iz_n - (float32_t) 2.0 * iz_0;
+
+	/* Re (z_{peak+1} - z_{peak-1}) / (z_{peak+1} + z_{peak-1} - 2*z_{peak}) */
+	deltaIndex = (a * c + b * d) / (c * c + d * d);
+
+	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
+			/ (float32_t) BUFFER_SAMPLES;
+
+	//return  maxVal;
+}
+
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
 char receivexBuffer[10];
 Results results;
 bool endOfADCInterrupt;
@@ -120,9 +245,13 @@ uint8_t avgCounter = 0;
 /////////////////////////13//////////////////////////////////////////////////////////////////////////////
 // value of rms
 int main(void) {
+
+	uint32_t time;
+	arm_status status; //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+
 	CHIP_Init();
 	CircularBufferADC_Result ADC_RESULT;
-	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 100 samples /sampling freuency is 100Hz
+	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 64 samples /sampling freuency is 1000Hz
 	KeyboardGpioSetup(); // init keyboard , external events
 	State = init_States;
 	while (1) {
@@ -185,7 +314,14 @@ int main(void) {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(measure);
-
+					/* Initialize the CFFT/CIFFT module */
+					status = arm_rfft_init_f32(&rfft_instance, &cfft_instance,
+							BUFFER_SAMPLES, 0, /* forward transform */1); /* normal, not bitreversed, order */
+					if (status != ARM_MATH_SUCCESS) {
+						/* Error initializing RFFT module. */
+						while (1)
+							;
+					}
 					Set20MHzFrequency_Init();
 					//cmuSetup();
 					SPI2_setupRXInt_SW(&FRAME);
@@ -200,49 +336,91 @@ int main(void) {
 				//BTM222_ReadData(respBuf1);
 				//while(1){
 				if (endOfADCInterrupt) {
+					/* Do FFT, measure number of cpu cycles used. */
+					/*
+					 if (ProcessFFT(FRAME)) {
+					 ConvertDOUBLEtoLCD(GetFreq(), bufoo, false);
+					 GLCD_GoTo(50, 2);
+					 GLCD_WriteString(bufoo);
+					 }
+
+
+					 */
+					/*
+					 ConvertDOUBLEtoLCD((double) time, bufoo);
+					 GLCD_GoTo(50, 3);
+					 GLCD_WriteString(bufoo);
+					 */
 					endOfADCInterrupt = false;
 
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
 					if (ADC_RESULT.Buf_isFull) {
 						BTMcounter++;
-					//	if (BTMcounter == 200) {
-							results.avg = avg(&ADC_RESULT);
-							results.max = max(&ADC_RESULT);
-							results.min = min(&ADC_RESULT);
-							ConvertDOUBLEtoLCD(results.max, bufoo);
-							GLCD_GoTo(50, 4);
-							GLCD_WriteString(bufoo);
-							BTM222_SendData(
-									ParseDataToSendThroughBTM(bufoo, 'm'));
-							ConvertDOUBLEtoLCD(results.min, bufoo);
-							GLCD_GoTo(50, 3);
-							GLCD_WriteString(bufoo);
-							BTM222_SendData(
-									ParseDataToSendThroughBTM(bufoo, 'n'));
-							ConvertDOUBLEtoLCD(results.avg, bufoo);
-							GLCD_GoTo(50, 5);
-							GLCD_WriteString(bufoo);
-							BTM222_SendData(
-									ParseDataToSendThroughBTM(bufoo, 'a'));
-							BTMcounter = 0;
-							//results.rms = rms(&ADC_RESULT);
-							 ConvertDOUBLEtoLCD(results.rms, bufoo);
-																					 GLCD_GoTo(50, 2);
-																					 GLCD_WriteString(bufoo);
-																					 BTM222_SendData(ParseDataToSendThroughBTM(bufoo,'r'));
-					//		 }
+						//	if (BTMcounter == 200) {
+						/*
+						 results.avg = avg(&ADC_RESULT);
+						 results.max = max(&ADC_RESULT);
+						 results.min = min(&ADC_RESULT);
+						 ConvertDOUBLEtoLCD(results.max, bufoo, true);
+						 GLCD_GoTo(50, 4);
+						 GLCD_WriteString(bufoo);
+						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
+						 ConvertDOUBLEtoLCD(results.min, bufoo, true);
+						 GLCD_GoTo(50, 3);
+						 GLCD_WriteString(bufoo);
+						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
+						 ConvertDOUBLEtoLCD(results.avg, bufoo, true);
+						 GLCD_GoTo(50, 5);
+						 GLCD_WriteString(bufoo);
+						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
+						 BTMcounter = 0;
 
-						results.rmsAVG[avgCounter] = rms(&ADC_RESULT);
-						avgCounter++;
-						if (avgCounter >= NUMBER_OF_VALUES_FOR_AVG) {
-							avgCounter = 0;
-							results.rms=0;
-							for (int i = 0; i < NUMBER_OF_VALUES_FOR_AVG; i++) {
-								results.rms+=results.rmsAVG[i];
-							}
-							results.rms/=NUMBER_OF_VALUES_FOR_AVG;
+						 */
+						/*
+						 results.rms = rms(&ADC_RESULT);
+						 ConvertDOUBLEtoLCD(results.rms, bufoo);
+						 GLCD_GoTo(50, 2);
+						 GLCD_WriteString(bufoo);
+						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
 
-						}
+						 */
+						//		 }
+						/*
+						 results.rmsAVG[avgCounter] = rms(&ADC_RESULT);
+						 results.maxAVG[avgCounter] = max(&ADC_RESULT);
+						 results.minAVG[avgCounter] = min(&ADC_RESULT);
+						 results.avgAVG[avgCounter] = avg(&ADC_RESULT);
+						 avgCounter++;
+						 if (avgCounter >= NUMBER_OF_VALUES_FOR_AVG) {
+						 avgCounter = 0;
+						 results.rms = 0;
+						 results.min = 0;
+						 results.max = 0;
+						 results.avg = 0;
+						 for (int i = 0; i < NUMBER_OF_VALUES_FOR_AVG; i++) {
+						 results.rms += results.rmsAVG[i];
+						 results.min += results.minAVG[i];
+						 results.max += results.maxAVG[i];
+						 results.avg += results.avgAVG[i];
+						 }
+						 results.rms /= NUMBER_OF_VALUES_FOR_AVG;
+						 results.min /= NUMBER_OF_VALUES_FOR_AVG;
+						 results.max /= NUMBER_OF_VALUES_FOR_AVG;
+						 results.avg /= NUMBER_OF_VALUES_FOR_AVG;
+						 //ConvertDOUBLEtoLCD(results.rms, bufoo, true);
+						 //GLCD_GoTo(50, 2);
+						 //GLCD_WriteString(bufoo);
+						 ConvertDOUBLEtoLCD(results.max, bufoo, true);
+						 GLCD_GoTo(50, 4);
+						 GLCD_WriteString(bufoo);
+						 ConvertDOUBLEtoLCD(results.min, bufoo, true);
+						 GLCD_GoTo(50, 3);
+						 GLCD_WriteString(bufoo);
+						 ConvertDOUBLEtoLCD(results.avg, bufoo, true);
+						 GLCD_GoTo(50, 5);
+						 GLCD_WriteString(bufoo);
+						 }
+						 */
 						/*
 						 InitGoertzel();
 						 double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
@@ -250,8 +428,17 @@ int main(void) {
 						 GLCD_GoTo(50, 6);
 						 GLCD_WriteString(bufoo);
 						 */
+						if (BTMcounter == 8) {
+							double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
+							ConvertDOUBLEtoLCD(goertzel, bufoo, true);
+							GLCD_GoTo(50, 6);
+							GLCD_WriteString(bufoo);
+							BTMcounter = 0;
+						}
 
-						ADC_RESULT.Buf_isFull=false;}
+							ADC_RESULT.Buf_isFull = false;
+					}
+
 				}
 
 				break;
@@ -342,7 +529,7 @@ int main(void) {
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(battery_alarm);
-				State.init = true;//// nie wracaaaaaaaaaaaaaaaaaaaaaaaaa
+				State.init = true;   //// nie wracaaaaaaaaaaaaaaaaaaaaaaaaa
 				break;
 			}
 		}

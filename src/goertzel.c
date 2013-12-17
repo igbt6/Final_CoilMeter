@@ -10,15 +10,14 @@
 
 
 #include <stdio.h>
-#include <math.h>
 #include "goertzel.h"
 #include "ADS7835E.h"
+#include "arm_math.h"
 
 #define SAMPLING_RATE	1000.0	//8kHz
 #define TARGET_FREQUENCY	50.0	//941 Hz
 #define N	100	//Block size
-#define M_PI 3.1416//9265358979323846
-#define PI M_PI
+
 
 
 FLOATING coeff;
@@ -95,7 +94,7 @@ float goertzel_mag(int numSamples,int _FREQUENCY,int _RATE, uint16_t* data)
 
     floatnumSamples = (float) numSamples;
     k = (int) (0.5 + ((floatnumSamples * _FREQUENCY) / _RATE));
-    omega = (2.0 * M_PI * k) / floatnumSamples;
+    omega = (2.0 * PI * k) / floatnumSamples;
     sine = sin(omega);
     cosine = cos(omega);
     coeff = 2.0 * cosine;

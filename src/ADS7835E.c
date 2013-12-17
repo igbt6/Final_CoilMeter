@@ -28,6 +28,7 @@ uint16_t* masterRxBuffer;
 int masterRxBufferSize;
 
 uint16_t* RxFrame; // for software SPI
+CircularBufferADC_Result ADC_Result;
 extern bool endOfADCInterrupt;
 #if !SOFTWARE_SPI
 void SPI2_Init(void) {
@@ -166,9 +167,12 @@ static uint16_t ReadFrameFromSPI_SW(void) {
 // Interrupt Service Routine TIMER0 Interrupt Line for sampling of ADC converter
 void TIMER0_IRQHandler(void) {
 	/* Clear flag for TIMER0 overflow interrupt */
+
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
-	*RxFrame = ReadFrameFromSPI_SW();
-	endOfADCInterrupt = true;
+	////if (!endOfADCInterrupt) {
+		*RxFrame = ReadFrameFromSPI_SW();
+		endOfADCInterrupt = true;
+	///}
 	/*
 	 static int i ,x;
 	 i++;
@@ -213,11 +217,13 @@ static bool checkData(double *data) {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ConvertDOUBLEtoLCD(double digit, char* StringOutput) {
+void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable) {
+
 	const double SCALLING_FACTOR = 184;
-	//digit *=ADC_COEFFICIENT;
+
 	if (checkData(&digit)) {
-		digit *= SCALLING_FACTOR;
+		if (factorEnable)
+			digit *= SCALLING_FACTOR;
 		gcvt(digit, 4, StringOutput);
 	} else {
 		StringOutput[0] = '0';
@@ -246,7 +252,7 @@ int ConvertU16_from_ADCToINT(uint16_t digit) {
 char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 	for (uint8_t i = 0; i < 5; i++) {
 
-		data[5 - i] = data[4-i];
+		data[5 - i] = data[4 - i];
 	}
 	data[6] = 'x'; // end delimiter
 	switch (typeOfMessage) {
@@ -267,46 +273,46 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 /* Write an element, overwriting oldest element if buffer is full. App can
  choose to avoid the overwrite by checking cbIsFull(). */
 /*
-void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
-	switch (cb->Buf_isFull) {
-	case false: {
-		cb->Values[cb->end] = x;
-		cb->end = (cb->end + 1); // % cb->size;
+ void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
+ switch (cb->Buf_isFull) {
+ case false: {
+ cb->Values[cb->end] = x;
+ cb->end = (cb->end + 1); // % cb->size;
 
-		if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
-			cb->Buf_isFull = true;
+ if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
+ cb->Buf_isFull = true;
 
-		}
-//	cb->start = (cb->start + 1) % cb->size; // full, overwrite
-		break;
-	}
-	case true: {
-		//uint16_t tab[cb->size];
-		for (uint8_t i = 0; i < cb->size; i++) {
+ }
+ //	cb->start = (cb->start + 1) % cb->size; // full, overwrite
+ break;
+ }
+ case true: {
+ //uint16_t tab[cb->size];
+ for (uint8_t i = 0; i < cb->size; i++) {
 
-			if (i == (cb->size - 1)) {
+ if (i == (cb->size - 1)) {
 
-				cb->Values[i] = cb->Values[i - 1];
-			} else
-				cb->Values[cb->size - i - 1] = cb->Values[cb->size - i - 2];
-		}
-		cb->Values[0] = x;   // load a new Value from ADC
-		break;
-	}
-	}
-}
+ cb->Values[i] = cb->Values[i - 1];
+ } else
+ cb->Values[cb->size - i - 1] = cb->Values[cb->size - i - 2];
+ }
+ cb->Values[0] = x;   // load a new Value from ADC
+ break;
+ }
+ }
+ }
+
 */
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 
-		cb->Values[cb->end] = x;
-		cb->end = (cb->end + 1); // % cb->size;
+	cb->Values[cb->end] = x;
+	cb->end = (cb->end + 1); // % cb->size;
 
-		if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
-			cb->Buf_isFull = true;
-			cb->end=0;
-			}
+	if ((cb->end % cb->size) == (cb->start)) { // if the whole buf is full
+		cb->Buf_isFull = true;
+		cb->end = 0;
+	}
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Read oldest element. App must ensure !cbIsEmpty() first. */
@@ -403,7 +409,7 @@ float doGoertzelAlgorithm(CircularBufferADC_Result *v) {
 	return ADC_COEFFICIENT*sqrt(magnitudeSquared); //relative magntude
 #endif
 
-	return ADC_COEFFICIENT * goertzel_mag(100, 50, 1000, v->Values);
+	return ADC_COEFFICIENT * goertzel_mag(SIZE_BUF_ADC, 50, 1024, v->Values);
 
 }
 
