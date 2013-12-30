@@ -265,7 +265,6 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 	default:
 		break;
 	}
-	data[0] = 'r';
 	return data;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +408,7 @@ float doGoertzelAlgorithm(CircularBufferADC_Result *v) {
 	return ADC_COEFFICIENT*sqrt(magnitudeSquared); //relative magntude
 #endif
 
-	return ADC_COEFFICIENT * goertzel_mag(SIZE_BUF_ADC, 50, 1024, v->Values);
+	return ADC_COEFFICIENT * goertzel(SIZE_BUF_ADC, 50, 1024, v->Values);
 
 }
 

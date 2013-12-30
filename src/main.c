@@ -14,7 +14,7 @@
  **
  *****************************************************************************
  */
-
+//pront -- z cewki 0.90 [A]*
 /* Includes */
 #include <stdint.h>
 #include <stdbool.h>
@@ -108,74 +108,49 @@ volatile states State;
 void Delay(uint32_t dlyTicks);
 volatile uint32_t msTicks; /* counts 1ms timeTicks */
 
-///////////////////GLOBAL VARIABLES////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+#define BUFFER_SAMPLES  512  // number of samples for FFT
+#define SAMPLE_RATE     1024   // sample rate used for sampling data.
+float32_t floatBuf[BUFFER_SAMPLES];
+float32_t fftOutputComplex[BUFFER_SAMPLES * 2]; // Complex output from FFT
+float32_t fftOutputMag[BUFFER_SAMPLES]; //Magnitude of complex numbers in FFT output
+volatile bool isFFTComputed = false; // Flag used to indicate whether fft is calculated
+arm_rfft_instance_f32 rfft_instance; // Instance structures for float32_t real time fourier transform
+arm_cfft_radix4_instance_f32 cfft_instance; // Instance structure for float32_t CFFT used by the RFFT
 
-/** Buffer of float samples ready for FFT. */
-#define BUFFER_SAMPLES                  512
-
-/** (Approximate) sample rate used for sampling data. */
-#define SAMPLE_RATE                     (1024)
-static float32_t floatBuf[BUFFER_SAMPLES];
-
-/** Complex (interleaved) output from FFT. */
-static float32_t fftOutputComplex[BUFFER_SAMPLES * 2];
-
-/** Magnitude of complex numbers in FFT output. */
-static float32_t fftOutputMag[BUFFER_SAMPLES];
-
-/** Flag used to indicate whether data is ready for processing */
-static volatile bool dataReadyForFFT;
-/** Indicate whether we are currently processing data through FFT */
-static volatile bool processingFFT;
-
-/** Instance structures for float32_t RFFT */
-static arm_rfft_instance_f32 rfft_instance;
-/** Instance structure for float32_t CFFT used by the RFFT */
-static arm_cfft_radix4_instance_f32 cfft_instance;
-
-/***************************************************************************//**
- * @brief
- *   Process the sampled data through FFT.
- *******************************************************************************/bool ProcessFFT(
-		uint16_t x) {
+///////////////////////////////////////////////////////////////////////////
+//                  bool doFFT(uint16_t x)                               //
+//																		 //
+//			  Process the sampled data through FFT.                      //
+///////////////////////////////////////////////////////////////////////////
+static bool doFFT(uint16_t x) {
 	static int i;
-
-	/*
-	 * Convert to float values.
-	 */
-
 	floatBuf[i] = ((float32_t) ConvertU16_from_ADCToINT(x)) * 0.00122;
 	i++;
-
-	/* Process the data through the RFFT module, resulting complex output is
-	 * stored in fftOutputComplex
-	 */
 	if (i == BUFFER_SAMPLES) {
 		arm_rfft_f32(&rfft_instance, floatBuf, fftOutputComplex);
-
-		/* Compute the magnitude of all the resulting complex numbers */
-		arm_cmplx_mag_f32(fftOutputComplex, fftOutputMag, BUFFER_SAMPLES);
+		arm_cmplx_mag_f32(fftOutputComplex, fftOutputMag, BUFFER_SAMPLES); // compute the magnitude of all complex results
 		i = 0;
 		return true;
 	}
 	return false;
 }
 
-/***************************************************************************//**
- * @brief
- *   Find the maximal bin and estimate the frequency using sinc interpolation.
- * @return
- *   Frequency of maximal peak
- *******************************************************************************/
-float32_t GetFreq(void) {
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//               float32_t GetMaxFreqFromFFT(void)                                                                   //
+// 																													 //
+//         																							                 //
+// find a maximal peak in fft and returns its value its estimated with sinc interpolation'                           //
+//  more details about this interpolation here:                                                                      //
+//
+/* Perform sinc() interpolation using the two bins on each side of the                                               //
+ * maximal bin. For more information see page 113 of                                                                 //
+ * http://tmo.jpl.nasa.gov/progress_report/42-118/118I.pdf                                                           //
+ *///
+// implementation of the algorithm from  :   http://cdn.energymicro.com/dl/an/pdf/an0051_efm32_dsp.pdf               //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static float32_t GetMaxFreqFromFFT(void) {
 	float32_t maxVal;
 	uint32_t maxIndex;
 
@@ -194,11 +169,6 @@ float32_t GetFreq(void) {
 			&maxVal, &maxIndex);
 
 	maxIndex += START_INDEX;
-
-	/* Perform sinc() interpolation using the two bins on each side of the
-	 * maximal bin. For more information see page 113 of
-	 * http://tmo.jpl.nasa.gov/progress_report/42-118/118I.pdf
-	 */
 
 	/* z_{peak} */
 	rz_0 = fftOutputComplex[maxIndex * 2];
@@ -224,15 +194,12 @@ float32_t GetFreq(void) {
 
 	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
 			/ (float32_t) BUFFER_SAMPLES;
-
-	//return  maxVal;
+	///return maxVal;
 }
 
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
+
 char receivexBuffer[10];
 Results results;
 bool endOfADCInterrupt;
@@ -240,15 +207,11 @@ uint16_t FRAME = 0;
 bool endOfADCInterrupt = false;
 int licznik_kwiecinskigo = 0;
 uint8_t avgCounter = 0;
+CircularBufferADC_Result Copy_ADC_RESULT;
 
-//char buf[10];
-/////////////////////////13//////////////////////////////////////////////////////////////////////////////
-// value of rms
 int main(void) {
 
-	uint32_t time;
-	arm_status status; //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
-
+	arm_status status; // status of fft
 	CHIP_Init();
 	CircularBufferADC_Result ADC_RESULT;
 	ResultADC_Buf_Init(&ADC_RESULT, SIZE_BUF_ADC); // 64 samples /sampling freuency is 1000Hz
@@ -274,7 +237,6 @@ int main(void) {
 			State.MODE = MAIN_MENU;
 			GLCD_Enable();
 			char respBuf1[10];
-
 			break;
 		}
 
@@ -314,135 +276,40 @@ int main(void) {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(measure);
-					/* Initialize the CFFT/CIFFT module */
-					status = arm_rfft_init_f32(&rfft_instance, &cfft_instance,
-							BUFFER_SAMPLES, 0, /* forward transform */1); /* normal, not bitreversed, order */
-					if (status != ARM_MATH_SUCCESS) {
-						/* Error initializing RFFT module. */
+
+					status = arm_rfft_init_f32(&rfft_instance, &cfft_instance, // init fft functions
+							BUFFER_SAMPLES, 0, 1);
+					if (status != ARM_MATH_SUCCESS) { // Error initializing RFFT module.
+
 						while (1)
 							;
+						isFFTComputed = false;
 					}
 					Set20MHzFrequency_Init();
-					//cmuSetup();
 					SPI2_setupRXInt_SW(&FRAME);
 					Delay(10);
 					BT_Enable();
 					BTM222_Init();
+					Timer1forDisplayResults_Setup();
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
 				}
-				static uint16_t BTMcounter;
-				char bufoo[7]; // receive buffer
 				//BTM222_ReadData(respBuf1);
-				//while(1){
 				if (endOfADCInterrupt) {
-					/* Do FFT, measure number of cpu cycles used. */
-					/*
-					 if (ProcessFFT(FRAME)) {
-					 ConvertDOUBLEtoLCD(GetFreq(), bufoo, false);
-					 GLCD_GoTo(50, 2);
-					 GLCD_WriteString(bufoo);
-					 }
-
-
-					 */
-					/*
-					 ConvertDOUBLEtoLCD((double) time, bufoo);
-					 GLCD_GoTo(50, 3);
-					 GLCD_WriteString(bufoo);
-					 */
 					endOfADCInterrupt = false;
-
+					if (!isFFTComputed) {
+						isFFTComputed = doFFT(FRAME);
+					}
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
 					if (ADC_RESULT.Buf_isFull) {
-						BTMcounter++;
-						//	if (BTMcounter == 200) {
-						/*
-						 results.avg = avg(&ADC_RESULT);
-						 results.max = max(&ADC_RESULT);
-						 results.min = min(&ADC_RESULT);
-						 ConvertDOUBLEtoLCD(results.max, bufoo, true);
-						 GLCD_GoTo(50, 4);
-						 GLCD_WriteString(bufoo);
-						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
-						 ConvertDOUBLEtoLCD(results.min, bufoo, true);
-						 GLCD_GoTo(50, 3);
-						 GLCD_WriteString(bufoo);
-						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
-						 ConvertDOUBLEtoLCD(results.avg, bufoo, true);
-						 GLCD_GoTo(50, 5);
-						 GLCD_WriteString(bufoo);
-						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
-						 BTMcounter = 0;
-
-						 */
-						/*
-						 results.rms = rms(&ADC_RESULT);
-						 ConvertDOUBLEtoLCD(results.rms, bufoo);
-						 GLCD_GoTo(50, 2);
-						 GLCD_WriteString(bufoo);
-						 BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
-
-						 */
-						//		 }
-						/*
-						 results.rmsAVG[avgCounter] = rms(&ADC_RESULT);
-						 results.maxAVG[avgCounter] = max(&ADC_RESULT);
-						 results.minAVG[avgCounter] = min(&ADC_RESULT);
-						 results.avgAVG[avgCounter] = avg(&ADC_RESULT);
-						 avgCounter++;
-						 if (avgCounter >= NUMBER_OF_VALUES_FOR_AVG) {
-						 avgCounter = 0;
-						 results.rms = 0;
-						 results.min = 0;
-						 results.max = 0;
-						 results.avg = 0;
-						 for (int i = 0; i < NUMBER_OF_VALUES_FOR_AVG; i++) {
-						 results.rms += results.rmsAVG[i];
-						 results.min += results.minAVG[i];
-						 results.max += results.maxAVG[i];
-						 results.avg += results.avgAVG[i];
-						 }
-						 results.rms /= NUMBER_OF_VALUES_FOR_AVG;
-						 results.min /= NUMBER_OF_VALUES_FOR_AVG;
-						 results.max /= NUMBER_OF_VALUES_FOR_AVG;
-						 results.avg /= NUMBER_OF_VALUES_FOR_AVG;
-						 //ConvertDOUBLEtoLCD(results.rms, bufoo, true);
-						 //GLCD_GoTo(50, 2);
-						 //GLCD_WriteString(bufoo);
-						 ConvertDOUBLEtoLCD(results.max, bufoo, true);
-						 GLCD_GoTo(50, 4);
-						 GLCD_WriteString(bufoo);
-						 ConvertDOUBLEtoLCD(results.min, bufoo, true);
-						 GLCD_GoTo(50, 3);
-						 GLCD_WriteString(bufoo);
-						 ConvertDOUBLEtoLCD(results.avg, bufoo, true);
-						 GLCD_GoTo(50, 5);
-						 GLCD_WriteString(bufoo);
-						 }
-						 */
-						/*
-						 InitGoertzel();
-						 double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
-						 ConvertDOUBLEtoLCD(goertzel, bufoo);
-						 GLCD_GoTo(50, 6);
-						 GLCD_WriteString(bufoo);
-						 */
-						if (BTMcounter == 8) {
-							double goertzel = doGoertzelAlgorithm(&ADC_RESULT); // for tests
-							ConvertDOUBLEtoLCD(goertzel, bufoo, true);
-							GLCD_GoTo(50, 6);
-							GLCD_WriteString(bufoo);
-							BTMcounter = 0;
-						}
-
-							ADC_RESULT.Buf_isFull = false;
+						memcpy(&Copy_ADC_RESULT, &ADC_RESULT,
+								sizeof(ADC_RESULT));
+						ADC_RESULT.Buf_isFull = false;
 					}
-
 				}
-
 				break;
 			}
+
 			case SETTINGS: {
 				if (!State.init) {
 					GLCD_ClearScreen();
@@ -529,9 +396,9 @@ int main(void) {
 			if (!State.init) {
 				GLCD_ClearScreen();
 				GLCD_bmp(battery_alarm);
-				State.init = true;   //// nie wracaaaaaaaaaaaaaaaaaaaaaaaaa
-				break;
+				State.init = true;   // nie wraca
 			}
+			break;
 		}
 		case SLEEP_MODE: {
 			if (!State.init) {
@@ -548,6 +415,7 @@ int main(void) {
 	}
 }
 
+/////////////////////////////////////////////////////////
 void SysTick_Handler(void) {
 	msTicks++; /* increment counter necessary in Delay()*/
 }
@@ -608,7 +476,7 @@ void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff) {
 	lastNumberRow = numberMenuRow;
 }
 /////////////////////////////////////////////////////////////////
-//      void setLCDBrightness(void)
+//      void setLCDBrightness(void)                            //
 /////////////////////////////////////////////////////////////////
 void setLCDBrightness(void) {
 
@@ -649,17 +517,14 @@ void setLCDBrightness(void) {
 }
 
 /////////////////////////////////////////////////////////////////
-//       void setSleepTime(void)
+//       void setSleepTime(void)                               //
 /////////////////////////////////////////////////////////////////
 void setSleepTime(void) {
-
 	NVIC_DisableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
 	NVIC_DisableIRQ(GPIO_ODD_IRQn);
-
 	GLCD_ClearScreen();
 	GLCD_bmp(sleepTime);
 	uint16_t sleepTime = State.deepSleepTime;
-
 	char StringOutput[5];
 	Delay(300);
 	while (GPIO_PinInGet(gpioPortE, OK)) {
@@ -668,9 +533,7 @@ void setSleepTime(void) {
 		GLCD_WriteString(StringOutput);
 		GLCD_GoTo(100, 5);
 		GLCD_WriteString("[s]");
-
 		if (!GPIO_PinInGet(gpioPortE, UP)) {
-
 			Delay(60);
 			if (!GPIO_PinInGet(gpioPortE, UP)) {
 
@@ -692,7 +555,6 @@ void setSleepTime(void) {
 		if (!GPIO_PinInGet(gpioPortE, LEFT)) {
 			goto RETURN;
 		}
-
 	}
 	State.deepSleepTime = sleepTime;
 	RETURN: NVIC_EnableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
@@ -701,7 +563,7 @@ void setSleepTime(void) {
 }
 
 /////////////////////////////////////////////////////////////////
-//      void calibrationMode(void)
+//      void calibrationMode(void)                             //
 /////////////////////////////////////////////////////////////////
 void calibrationMode(void) {
 	NVIC_DisableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
@@ -787,7 +649,7 @@ void calibrationMode(void) {
 
 }
 /////////////////////////////////////////////////////////////////
-//      double setCalibrateFactor(void)
+//      double setCalibrateFactor(void)                        //
 /////////////////////////////////////////////////////////////////
 double setCalibrateFactor(int measuredCurrent) {
 	uint16_t measured_data; //posluzy do odbierania ramek od niej
@@ -799,7 +661,6 @@ double setCalibrateFactor(int measuredCurrent) {
 	double tempBuf[numberOfSamples];
 	double avgRms = 0;
 	double factor = 0;
-
 	uint8_t i = 0;
 	while (i < numberOfSamples) {
 
@@ -822,5 +683,74 @@ double setCalibrateFactor(int measuredCurrent) {
 	factor = measuredCurrent / avgRms;
 	previousMeasuredCurrent = measuredCurrent;
 	return factor;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Interrupt Service Routine TIMER1 Interrupt - displaying results       //
+///////////////////////////////////////////////////////////////////////////
+void TIMER1_IRQHandler(void) {
+	char bufoo[7]; // receive buffer
+	static uint8_t avgCount, dispCounter;
+	TIMER_IntClear(TIMER1, TIMER_IF_OF);
+	results.rmsAVG[avgCount] = rms(&Copy_ADC_RESULT);
+	results.maxAVG[avgCount] = max(&Copy_ADC_RESULT);
+	results.minAVG[avgCount] = min(&Copy_ADC_RESULT);
+	results.avgAVG[avgCount] = avg(&Copy_ADC_RESULT);
+	avgCount++;
+	dispCounter++;
+	if (avgCount >= NUMBER_OF_VALUES_FOR_AVG) {
+		avgCount = 0;
+		results.rms = 0;
+		results.min = 0;
+		results.max = 0;
+		results.avg = 0;
+		for (int i = 0; i < NUMBER_OF_VALUES_FOR_AVG; i++) {
+			results.rms += results.rmsAVG[i];
+			results.min += results.minAVG[i];
+			results.max += results.maxAVG[i];
+			results.avg += results.avgAVG[i];
+		}
+		results.rms /= NUMBER_OF_VALUES_FOR_AVG;
+		results.min /= NUMBER_OF_VALUES_FOR_AVG;
+		results.max /= NUMBER_OF_VALUES_FOR_AVG;
+		results.avg /= NUMBER_OF_VALUES_FOR_AVG;
+	}
+
+	if (!(dispCounter % NUMBER_OF_VALUES_FOR_AVG)) {
+		ConvertDOUBLEtoLCD(results.rms, bufoo, true);
+		GLCD_GoTo(50, 2);
+		GLCD_WriteString(bufoo);
+		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
+	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 1))) {
+		ConvertDOUBLEtoLCD(results.max, bufoo, true);
+		GLCD_GoTo(50, 4);
+		GLCD_WriteString(bufoo);
+		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
+	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 2))) {
+		ConvertDOUBLEtoLCD(results.min, bufoo, true);
+		GLCD_GoTo(50, 3);
+		GLCD_WriteString(bufoo);
+		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
+	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 3))) {
+		ConvertDOUBLEtoLCD(results.avg, bufoo, true);
+		GLCD_GoTo(50, 5);
+		GLCD_WriteString(bufoo);
+		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
+	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 4))) {
+		double goertzel = doGoertzelAlgorithm(&Copy_ADC_RESULT); // for tests
+		ConvertDOUBLEtoLCD(goertzel, bufoo, true);
+		GLCD_GoTo(50, 6);
+		GLCD_WriteString(bufoo);
+
+	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 5))
+	/*&& isFFTComputed*/) {
+
+		ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
+		GLCD_GoTo(50, 7);
+		GLCD_WriteString(bufoo);
+		isFFTComputed = false;
+		dispCounter = 0;
+	}
+
 }
 

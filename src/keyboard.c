@@ -9,6 +9,8 @@
 #include "keyboard.h"
 #include "em_rtc.h"
 #include "stdbool.h"
+#include "ADS7835E.h"
+#include "Timers.h"
 
 // defines for RTC module
 #define LFRCO_FREQUENCY              32768
@@ -182,6 +184,8 @@ void GPIO_EVEN_IRQHandler(void) {
 			} else if (State.activeFunction.isMeasurementOn == true) { // podmenu start
 				State.activeFunction.isMeasurementOn = false;
 				State.init = false;
+				Timer1forDisplayResults_Disable(); // turns off all timers bluetooth and others
+				SPI2_disableRXInt_SW(); //
 				State.MODE = MAIN_MENU;
 			}
 
