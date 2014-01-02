@@ -24,14 +24,14 @@
     .SETTINGS_CURRENT_OPTION=SLAVE_MODE,         /*	SETTINGS_OPTIONS  */    \
     .rtcFlag=false,              /* rtc flag */                             \
     .init=false,              /* state init flag*/                          \
-    .deepSleepTime=600,                 /* time to disable */           		\
+    .deepSleepTime=600,             /* time to disable */           		\
     .LAST_MODE=WAITFORENABLE,       /* LAST_MODE */                         \
     .activeFunction = CHOSEN_FUNCTIONS_INIT_DEFAULT                         \
   }
 
-#define CHOSEN_FUNCTIONS_INIT_DEFAULT      \
-  { .settings_menu =false,  /* LAST_MODE */\
-    .isMeasurementOn =false  /* LAST_MODE */ \
+#define CHOSEN_FUNCTIONS_INIT_DEFAULT                                       \
+  { .settings_menu =false,  /* settings_menu_on */                          \
+    .isMeasurementOn =false  /* measurement is taking place */              \
   }
 
 
@@ -51,7 +51,8 @@ typedef enum {
 } SETTINGS_OPTIONS;
 
 struct chosenFunctions{uint8_t settings_menu:1; // flaga used to indicate that we chose any settings menu
-					   uint8_t isMeasurementOn:1;};
+					   uint8_t isMeasurementOn:1;
+					   uint8_t isBatteryLevelVerificated:1;};
 
 typedef struct{
 

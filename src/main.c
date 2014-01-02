@@ -58,6 +58,7 @@ void setSleepTime(void);
 void calibrationMode(void);     // bigger functions used in main_menu
 double setCalibrateFactor(int measuredCurrent);
 void InternalADCSetup(void);
+void drawBattery(uint32_t batVoltage);
 /////////////////////////////////////////////////////////////////////
 //functions that allow you to TURN ON/OFF the following module
 /////////////////////////////////////////////////////////////////////
@@ -289,26 +290,26 @@ int main(void) {
 					Timer1forDisplayResults_Setup();
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
-					sendViaBTM222 = true;   ////////////////////////////////////////
+					sendViaBTM222 = true; ////////////////////////////////////////
 				}
 				/*
-				if(messageFromBTMAvailable){
-				BTM222_ReadData(messageFromBTM222);
-					switch (messageFromBTM222[0]) {
+				 if(messageFromBTMAvailable){
+				 BTM222_ReadData(messageFromBTM222);
+				 switch (messageFromBTM222[0]) {
 
-					case 'A':
-						sendViaBTM222 = true;
-						break; // start measure --> turn on sending data through bluetooth
-					case 'B':sendViaBTM222 = false;
-						break;
-					case 'C':
-						break;
-					case 'D':
-						break;
-					}
-					messageFromBTMAvailable=false;
-				}
-				*/
+				 case 'A':
+				 sendViaBTM222 = true;
+				 break; // start measure --> turn on sending data through bluetooth
+				 case 'B':sendViaBTM222 = false;
+				 break;
+				 case 'C':
+				 break;
+				 case 'D':
+				 break;
+				 }
+				 messageFromBTMAvailable=false;
+				 }
+				 */
 				if (endOfADCInterrupt) {
 					endOfADCInterrupt = false;
 					if (!isFFTComputed) {
@@ -376,15 +377,22 @@ int main(void) {
 					GLCD_bmp(battery);
 					InternalADCSetup();
 					State.init = true;
+					State.activeFunction.isBatteryLevelVerificated= true;
 				}
-				GLCD_GoTo(50, 3);
-				GLCD_WriteString("YES");
-				char batVolatge[5];
-				snprintf(batVolatge, 4, " %d ", results.batLevel);   // TODO
-				GLCD_GoTo(50, 5);
-				GLCD_WriteString(batVolatge);
-				GLCD_GoTo(70, 5);
-				GLCD_WriteString("%");
+				GLCD_GoTo(40, 3);
+				GLCD_WriteString(" NO");
+				BatVoltage batVoltage;
+				batVoltage.batVoltageConstant = (results.batLevel+800) / 1000;
+				batVoltage.batVoltageFraction = (results.batLevel+800) % 1000
+						/ 10;
+				snprintf(batVoltage.batVolatgeString, 5, "%d.%d",
+						(int) batVoltage.batVoltageConstant,
+						(int) batVoltage.batVoltageFraction);   // TODO
+				GLCD_GoTo(40, 5);
+				GLCD_WriteString(batVoltage.batVolatgeString);
+				GLCD_GoTo(65, 5);
+				GLCD_WriteString(" V");
+				drawBattery(results.batLevel+800);
 				break;
 			}
 			case SD_CARD: {
@@ -401,7 +409,6 @@ int main(void) {
 				calibrationMode();
 				State.init = false;   // return to main menu
 				State.MODE = MAIN_MENU;
-
 				break;
 			}
 			default: {
@@ -768,53 +775,77 @@ void TIMER1_IRQHandler(void) {
 ///////////////////////////////////////////////////////////////////////////
 //           ADC0 Configuration for battery level                        //
 ///////////////////////////////////////////////////////////////////////////
-void InternalADCSetup(void)
-{
-  CMU_ClockEnable(cmuClock_ADC0, true);
-  CMU_ClockEnable(cmuClock_PRS, true);
-  CMU_ClockEnable(cmuClock_TIMER0, true);
-  ADC_Init_TypeDef       init       = ADC_INIT_DEFAULT;
-  ADC_InitSingle_TypeDef singleInit = ADC_INITSINGLE_DEFAULT;
-  init.timebase = ADC_TimebaseCalc(0);
-  init.prescale = ADC_PrescaleCalc(7000000, 0);
-  ADC_Init(ADC0, &init);
+void InternalADCSetup(void) {
+	CMU_ClockEnable(cmuClock_ADC0, true);
+	CMU_ClockEnable(cmuClock_PRS, true);
+	ADC_Init_TypeDef init = ADC_INIT_DEFAULT;
+	ADC_InitSingle_TypeDef singleInit = ADC_INITSINGLE_DEFAULT;
+	init.timebase = ADC_TimebaseCalc(0);
+	init.prescale = ADC_PrescaleCalc(4000000, 0);
+	init.ovsRateSel= ADC_CTRL_OVSRSEL_X8;
+	ADC_Init(ADC0, &init);
 
-  /* Init for single conversion use. */
-  singleInit.reference  = adcRef1V25;
-  singleInit.input      = adcSingleInpCh5;
-  singleInit.resolution = adcRes12Bit;
-  singleInit.prsEnable  = true; // Enable PRS for ADC
-  singleInit.prsSel= 0; // signal PRS from channel 0
+	/* Init for single conversion use. */
+	singleInit.reference = adcRefVDD;    //3.3V
+	singleInit.input = adcSingleInpCh5;
+	singleInit.resolution = adcRes12Bit;
+	singleInit.prsEnable = true; // Enable PRS for ADC
+	singleInit.prsSel = 0; // signal PRS from channel 0
 
-  Timer2forInternalADCSampling_Setup();
-  PRS_SourceSignalSet(0, PRS_CH_CTRL_SOURCESEL_TIMER2, PRS_CH_CTRL_SIGSEL_TIMER2OF, prsEdgePos); // Timer2 as source, TIMER2OF as signal (rising edge)//
+	Timer2forInternalADCSampling_Setup();
+	PRS_SourceSignalSet(0, PRS_CH_CTRL_SOURCESEL_TIMER2,
+			PRS_CH_CTRL_SIGSEL_TIMER2OF, prsEdgePos); // Timer2 as source, TIMER2OF as signal (rising edge)//
 
-  ADC_InitSingle(ADC0, &singleInit);
-  ADC0->IEN = ADC_IEN_SINGLE;  // Enable ADC Interrupt when Single Conversion Complete
-  NVIC_SetPriority(ADC0_IRQn,12);
-  NVIC_EnableIRQ(ADC0_IRQn);
+	ADC_InitSingle(ADC0, &singleInit);
+	ADC0 ->IEN = ADC_IEN_SINGLE; // Enable ADC Interrupt when Single Conversion Complete
+	NVIC_SetPriority(ADC0_IRQn, 12);
+	NVIC_EnableIRQ(ADC0_IRQn);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 //           ADC0_IRQHandler                          					 //
 //           Interrupt Service Routine for ADC                           //
 ///////////////////////////////////////////////////////////////////////////
-void ADC0_IRQHandler(void)
-{
-  ADC0->IFC = 1; // clear ADC0 flag
-  results.batLevel= ADC_DataSingleGet(ADC0);
-  results.batLevel= (results.batLevel*1250) / 4096;
+void ADC0_IRQHandler(void) {
+	ADC0 ->IFC = 1; // clear ADC0 flag
+	/*   divider is made of 2 resistors that are connected in following way:   Vcc(3.3V)--->|3.3k|--|ucChannel5ADC|--|6.8k|---GND
+	 *   then a coefficient of the divider is 0.67
+	 *   reference Voltage : 3.3V -> resolution 0.0008V
+	 *    Thus max measured voltage will be 2.747 [V]  , this situation may take place when the battery voltage is 4.1V
+	 *    For 2.747 V (input) -> binary value from ADC : -> 3435
+	 *
+	 *    */
+	results.batLevel = ADC_DataSingleGet(ADC0 );
+	results.batLevel = ((((results.batLevel * 3300) / 4096)) / 0.67);
+
 }
 
-
-
-
-
-
-
-
-
-
-
-
+///////////////////////////////////////////////////////////////////////////
+// function that draws the battery graphic                                 //
+///////////////////////////////////////////////////////////////////////////
+void drawBattery(uint32_t batVoltage) {
+	///////////////////// 26- 43 pixels ///////////////////////
+	///////////////////// 87- 126 pixels //////////////////////
+	// 40 bat levels levels
+	uint8_t batLevel = 0; // if the value is higher , batVoltage is smaller;
+	if (batVoltage > 4100)
+		batLevel = 0;
+	else if (batVoltage < 4100 && batVoltage >= 3900)
+		batLevel = 2;
+	else if (batVoltage < 3900 && batVoltage >= 3700)
+		batLevel = 8;
+	else if (batVoltage < 3700 && batVoltage >= 3500)
+		batLevel = 16;
+	else if (batVoltage < 3500 && batVoltage >= 3300)
+		batLevel = 24;
+	else if (batVoltage < 3300 && batVoltage >= 3100)
+		batLevel = 32;
+	else
+		batLevel = 40;
+	for (uint8_t x = 87 + batLevel; x < 127; x++) {
+		for (uint8_t y = 26; y < 44; y++) {
+			GLCD_SetPixel(x, y, true);
+		}
+	}
+}
 

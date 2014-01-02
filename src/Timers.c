@@ -73,8 +73,9 @@ void Timer1forDisplayResults_Disable(void) {
 void Timer2forInternalADCSampling_Setup(void)
 {
   TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
-  timerInit.prescale = timerPrescale64;  //14 Mhz / 64 // topValue is 0xFFFF so a measurement is invoked roughly every 3s
-  TIMER_Init(TIMER0, &timerInit);
+  timerInit.prescale = timerPrescale128;  //14 Mhz/128/topValue is 0xFFFF so a measurement is invoked roughly every 1.2s
+  CMU_ClockEnable(cmuClock_TIMER2, true);
+  TIMER_Init(TIMER2, &timerInit);
 }
 
 

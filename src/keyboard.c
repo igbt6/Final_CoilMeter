@@ -96,11 +96,11 @@ void GPIO_ODD_IRQHandler(void) {
 	GPIO ->IFC = 0xFFFFFFFF;
 	if (State.MODE == SLEEP_MODE) {
 		State.MODE = State.LAST_MODE;
-		State.LAST_MODE=SLEEP_MODE;
+		State.LAST_MODE = SLEEP_MODE;
 		flags = 0;
 		State.init = false;
 	}  // wake up
-	timerCounter=0;
+	timerCounter = 0;
 	if (flags & (1 << OK)) {                                 	//// OK _ KEY
 
 		if (State.MODE == WAITFORENABLE) {
@@ -109,15 +109,14 @@ void GPIO_ODD_IRQHandler(void) {
 		} else if (State.MODE == MAIN_MENU) {
 			State.init = false;
 
-
-/*
-		// very ugly way of doing that, but here it's enough
-		//Delay(1000);
-							if (!GPIO_PinInGet(gpioPortE, OK)) {
-								State.MODE =WAITFORENABLE; // goes to sleep
-							}
-							else State.MODE = MAIN_MENU_OPTION;
-*/
+			/*
+			 // very ugly way of doing that, but here it's enough
+			 //Delay(1000);
+			 if (!GPIO_PinInGet(gpioPortE, OK)) {
+			 State.MODE =WAITFORENABLE; // goes to sleep
+			 }
+			 else State.MODE = MAIN_MENU_OPTION;
+			 */
 			State.MODE = MAIN_MENU_OPTION;
 		} else if (State.MODE == MAIN_MENU_OPTION) {
 
@@ -165,11 +164,11 @@ void GPIO_EVEN_IRQHandler(void) {
 
 	if (State.MODE == SLEEP_MODE) {
 		State.MODE = State.LAST_MODE;
-		State.LAST_MODE=SLEEP_MODE;
+		State.LAST_MODE = SLEEP_MODE;
 		flags = 0;
 		State.init = false;
 	}
-	timerCounter=0;  // kasuje sleep mode
+	timerCounter = 0;  // kasuje sleep mode
 	if (flags & (1 << DOWN)) {             					//// DOWN _ KEY
 
 		if (State.MODE == MAIN_MENU) {
@@ -197,9 +196,12 @@ void GPIO_EVEN_IRQHandler(void) {
 				Timer1forDisplayResults_Disable(); // turns off all timers bluetooth and others
 				SPI2_disableRXInt_SW(); //
 				State.MODE = MAIN_MENU;
-			}
-
-			else {
+			} else if (State.activeFunction.isBatteryLevelVerificated == true) {
+				Timer2forInternalADCSampling_Disable();
+				State.activeFunction.isBatteryLevelVerificated = false;
+				State.init = false;
+				State.MODE = MAIN_MENU;
+			} else {
 				State.init = false;   // flaga init cancel
 				State.MODE = MAIN_MENU;
 			}
@@ -214,7 +216,6 @@ void GPIO_EVEN_IRQHandler(void) {
 //RTC INTERRUPTS -> very useful for keyboard delays and other stuff
 void RTC_IRQHandler(void) {
 
-
 	if (State.MODE != SLEEP_MODE) {
 		timerCounter++;
 	}
@@ -224,10 +225,10 @@ void RTC_IRQHandler(void) {
 	} // menu state indicator blinks every 300ms
 
 	if ((timerCounter / 10) == State.deepSleepTime) {
-		if(!(State.activeFunction.isMeasurementOn)){ // if the mesauement is lasting
-		State.LAST_MODE = State.MODE;
-		State.init=false;
-		State.MODE = SLEEP_MODE;
+		if (!(State.activeFunction.isMeasurementOn)) { // if the mesauement is lasting
+			State.LAST_MODE = State.MODE;
+			State.init = false;
+			State.MODE = SLEEP_MODE;
 		}
 		timerCounter = 0;
 	}
