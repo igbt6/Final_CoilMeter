@@ -47,13 +47,17 @@
 #define SAMPLING_TIMER0 1 // jesli probkuje w przerwaniu od timera to 1
 #define	SIGN_TEST 0
 
+/////////////////////////////////////////////////////////////////////
+// declarations of functions
+/////////////////////////////////////////////////////////////////////
+
 void showWhereIam(uint8_t numberMenuRow, bool onORoff);
 void showWhereIamSettings(uint8_t numberMenuRow, bool onORoff);
-
 void setLCDBrightness(void);
 void setSleepTime(void);
 void calibrationMode(void);     // bigger functions used in main_menu
 double setCalibrateFactor(int measuredCurrent);
+void InternalADCSetup(void);
 /////////////////////////////////////////////////////////////////////
 //functions that allow you to TURN ON/OFF the following module
 /////////////////////////////////////////////////////////////////////
@@ -105,8 +109,6 @@ static void Set20MHzFrequency_Init(void) {
 const states init_States = STATES_INIT_DEFAULT; //default settings
 volatile states State;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void Delay(uint32_t dlyTicks);
-volatile uint32_t msTicks; /* counts 1ms timeTicks */
 
 //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////FFT FFT/////////////////////////////////////////////////////////////////////////////////////
@@ -200,15 +202,13 @@ static float32_t GetMaxFreqFromFFT(void) {
 //////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
 
-char receivexBuffer[10];
 Results results;
-bool endOfADCInterrupt;
 uint16_t FRAME = 0;
 bool endOfADCInterrupt = false;
-int licznik_kwiecinskigo = 0;
-uint8_t avgCounter = 0;
 CircularBufferADC_Result Copy_ADC_RESULT;
-
+char messageFromBTM222[3];
+bool sendViaBTM222 = false;
+volatile bool messageFromBTMAvailable;
 int main(void) {
 
 	arm_status status; // status of fft
@@ -224,10 +224,7 @@ int main(void) {
 			break;
 		}
 		case ENABLING: {
-			/* Setup SysTick Timer for 1 msec interrupts  */
-			if (SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000))
-				while (1)
-					;
+			init1msSystick();
 			GLCD_Init();
 			GLCD_ClearScreen();
 			GLCD_GoTo(40, 3);
@@ -236,7 +233,6 @@ int main(void) {
 			Delay(700);
 			State.MODE = MAIN_MENU;
 			GLCD_Enable();
-			char respBuf1[10];
 			break;
 		}
 
@@ -293,8 +289,26 @@ int main(void) {
 					Timer1forDisplayResults_Setup();
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
+					sendViaBTM222 = true;   ////////////////////////////////////////
 				}
-				//BTM222_ReadData(respBuf1);
+				/*
+				if(messageFromBTMAvailable){
+				BTM222_ReadData(messageFromBTM222);
+					switch (messageFromBTM222[0]) {
+
+					case 'A':
+						sendViaBTM222 = true;
+						break; // start measure --> turn on sending data through bluetooth
+					case 'B':sendViaBTM222 = false;
+						break;
+					case 'C':
+						break;
+					case 'D':
+						break;
+					}
+					messageFromBTMAvailable=false;
+				}
+				*/
 				if (endOfADCInterrupt) {
 					endOfADCInterrupt = false;
 					if (!isFFTComputed) {
@@ -360,12 +374,17 @@ int main(void) {
 				if (!State.init) {
 					GLCD_ClearScreen();
 					GLCD_bmp(battery);
+					InternalADCSetup();
 					State.init = true;
 				}
 				GLCD_GoTo(50, 3);
 				GLCD_WriteString("YES");
+				char batVolatge[5];
+				snprintf(batVolatge, 4, " %d ", results.batLevel);   // TODO
 				GLCD_GoTo(50, 5);
-				GLCD_WriteString("91 %");
+				GLCD_WriteString(batVolatge);
+				GLCD_GoTo(70, 5);
+				GLCD_WriteString("%");
 				break;
 			}
 			case SD_CARD: {
@@ -415,18 +434,6 @@ int main(void) {
 	}
 }
 
-/////////////////////////////////////////////////////////
-void SysTick_Handler(void) {
-	msTicks++; /* increment counter necessary in Delay()*/
-}
-
-/////////////////////////////////////////////////////////
-void Delay(uint32_t dlyTicks) {
-	uint32_t currentTicks;
-	currentTicks = msTicks;
-	while ((msTicks - currentTicks) < dlyTicks)
-		;
-}
 /////////////////////////////////////////////////////////
 void showWhereIam(uint8_t numberMenuRow, bool onORoff) {
 	if (numberMenuRow > NUMBER_OF_OPTIONS)
@@ -720,22 +727,26 @@ void TIMER1_IRQHandler(void) {
 		ConvertDOUBLEtoLCD(results.rms, bufoo, true);
 		GLCD_GoTo(50, 2);
 		GLCD_WriteString(bufoo);
-		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
+		if (sendViaBTM222)
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 1))) {
 		ConvertDOUBLEtoLCD(results.max, bufoo, true);
 		GLCD_GoTo(50, 4);
 		GLCD_WriteString(bufoo);
-		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
+		if (sendViaBTM222)
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 2))) {
 		ConvertDOUBLEtoLCD(results.min, bufoo, true);
 		GLCD_GoTo(50, 3);
 		GLCD_WriteString(bufoo);
-		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
+		if (sendViaBTM222)
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 3))) {
 		ConvertDOUBLEtoLCD(results.avg, bufoo, true);
 		GLCD_GoTo(50, 5);
 		GLCD_WriteString(bufoo);
-		BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
+		if (sendViaBTM222)
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 4))) {
 		double goertzel = doGoertzelAlgorithm(&Copy_ADC_RESULT); // for tests
 		ConvertDOUBLEtoLCD(goertzel, bufoo, true);
@@ -743,7 +754,7 @@ void TIMER1_IRQHandler(void) {
 		GLCD_WriteString(bufoo);
 
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 5))
-	/*&& isFFTComputed*/) {
+			&& isFFTComputed) {
 
 		ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
 		GLCD_GoTo(50, 7);
@@ -753,4 +764,57 @@ void TIMER1_IRQHandler(void) {
 	}
 
 }
+
+///////////////////////////////////////////////////////////////////////////
+//           ADC0 Configuration for battery level                        //
+///////////////////////////////////////////////////////////////////////////
+void InternalADCSetup(void)
+{
+  CMU_ClockEnable(cmuClock_ADC0, true);
+  CMU_ClockEnable(cmuClock_PRS, true);
+  CMU_ClockEnable(cmuClock_TIMER0, true);
+  ADC_Init_TypeDef       init       = ADC_INIT_DEFAULT;
+  ADC_InitSingle_TypeDef singleInit = ADC_INITSINGLE_DEFAULT;
+  init.timebase = ADC_TimebaseCalc(0);
+  init.prescale = ADC_PrescaleCalc(7000000, 0);
+  ADC_Init(ADC0, &init);
+
+  /* Init for single conversion use. */
+  singleInit.reference  = adcRef1V25;
+  singleInit.input      = adcSingleInpCh5;
+  singleInit.resolution = adcRes12Bit;
+  singleInit.prsEnable  = true; // Enable PRS for ADC
+  singleInit.prsSel= 0; // signal PRS from channel 0
+
+  Timer2forInternalADCSampling_Setup();
+  PRS_SourceSignalSet(0, PRS_CH_CTRL_SOURCESEL_TIMER2, PRS_CH_CTRL_SIGSEL_TIMER2OF, prsEdgePos); // Timer2 as source, TIMER2OF as signal (rising edge)//
+
+  ADC_InitSingle(ADC0, &singleInit);
+  ADC0->IEN = ADC_IEN_SINGLE;  // Enable ADC Interrupt when Single Conversion Complete
+  NVIC_SetPriority(ADC0_IRQn,12);
+  NVIC_EnableIRQ(ADC0_IRQn);
+}
+
+///////////////////////////////////////////////////////////////////////////
+//           ADC0_IRQHandler                          					 //
+//           Interrupt Service Routine for ADC                           //
+///////////////////////////////////////////////////////////////////////////
+void ADC0_IRQHandler(void)
+{
+  ADC0->IFC = 1; // clear ADC0 flag
+  results.batLevel= ADC_DataSingleGet(ADC0);
+  results.batLevel= (results.batLevel*1250) / 4096;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 

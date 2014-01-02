@@ -108,6 +108,16 @@ void GPIO_ODD_IRQHandler(void) {
 			State.MODE = ENABLING;
 		} else if (State.MODE == MAIN_MENU) {
 			State.init = false;
+
+
+/*
+		// very ugly way of doing that, but here it's enough
+		//Delay(1000);
+							if (!GPIO_PinInGet(gpioPortE, OK)) {
+								State.MODE =WAITFORENABLE; // goes to sleep
+							}
+							else State.MODE = MAIN_MENU_OPTION;
+*/
 			State.MODE = MAIN_MENU_OPTION;
 		} else if (State.MODE == MAIN_MENU_OPTION) {
 
@@ -178,7 +188,7 @@ void GPIO_EVEN_IRQHandler(void) {
 
 		if (State.MODE == MAIN_MENU_OPTION) {
 
-			if (State.activeFunction.settings_menu == true) { // podmenu settings , dodac 2 strukture z polami bitowymi moze
+			if (State.activeFunction.settings_menu == true) { // podmenu settings
 				State.activeFunction.settings_menu = false;
 				State.init = false;
 			} else if (State.activeFunction.isMeasurementOn == true) { // podmenu start

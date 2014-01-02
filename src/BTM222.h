@@ -63,5 +63,5 @@ uint8_t BTM222_EnterATMode();
 void BTM222_GetName(char * Name);
 void BTM222_GetPin(char * Name);
 void BTM222_SendData(char * buffer);
-void BTM222_ReadData(char * buffer);
+uint32_t BTM222_ReadData(char * buffer);
 #endif /* BTM222_H_ */

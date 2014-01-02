@@ -36,6 +36,7 @@ typedef struct {
 	double min;
 	double max;
 	double avg;
+	uint32_t batLevel;
 	double rmsAVG[NUMBER_OF_VALUES_FOR_AVG];
 	double avgAVG[NUMBER_OF_VALUES_FOR_AVG];
 	double minAVG[NUMBER_OF_VALUES_FOR_AVG];

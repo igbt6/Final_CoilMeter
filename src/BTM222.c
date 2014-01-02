@@ -15,6 +15,7 @@ static USART_InitAsync_TypeDef uart1Init = USART_INITASYNC_DEFAULT;
 
 circularBuffer rxBuf,
 txBuf; // externowe
+extern volatile bool messageFromBTMAvailable;
 
 void uart1Setup(void) {
 	cmuSetup();
@@ -99,7 +100,7 @@ void uart1SendChar(uint8_t ch) {
 }
 
 /******************************************************************************
- * @brief  uartPutData function
+ *   uartPutData function
  *
  *****************************************************************************/
 void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
@@ -130,9 +131,7 @@ void uart1SendData(uint8_t * dataPtr, uint32_t dataLen) {
 	// Increment pending byte counter
 	///////txBuf.pendingBytes /*+*/= dataLen;
 	///TESTTSSSSSS
-	// Enable interrupt on USART TX Buffer
-
-	USART_IntEnable(uart1, UART_IF_TXBL);
+	USART_IntEnable(uart1, UART_IF_TXBL); // Enable interrupt on USART TX Buffer
 }
 
 /******************************************************************************
@@ -159,32 +158,22 @@ uint32_t uart1ReadData(uint8_t * dataPtr, uint32_t dataLen) {
 	}
 
 	/* Decrement pending byte counter */
-	rxBuf.pendingBytes -= dataLen;
+	rxBuf.pendingBytes =0; //-= dataLen;
 
 	return i;
 }
 
 /***************************************************************************//**
- * @brief Set up Clock Management Unit
+ * Set up Clock Management Unit
  ******************************************************************************/
 void cmuSetup(void) {
-	/* Start HFXO and wait until it is stable */
-	// CMU_OscillatorEnable( cmuOsc_HFXO, true, true);
-	/* Select HFXO as clock source for HFCLK */
-// CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO );
-	/* Disable HFRCO */
-	// CMU_OscillatorEnable( cmuOsc_HFRCO, false, false );
-	/* Enable clock for HF peripherals */
-	//CMU_ClockEnable(cmuClock_HFPER, true);
-	/* Enable clock for USART module */
+
 	CMU_ClockEnable(cmuClock_GPIO, true);
 	CMU_ClockEnable(cmuClock_UART1, true);
 }
 
 /**************************************************************************//**
- @brief UART1 RX IRQ Handler
- Set up the interrupt prior to use
- Note that this function handles overflows in a very simple way.
+ * UART1 RX IRQ Handler
  *****************************************************************************/
 void UART1_RX_IRQHandler(void) {
 	/* Check for RX data valid interrupt */
@@ -194,6 +183,7 @@ void UART1_RX_IRQHandler(void) {
 		rxBuf.data[rxBuf.wrI] = rxData;
 		rxBuf.wrI = (rxBuf.wrI + 1) % BUFFERSIZE;
 		rxBuf.pendingBytes++;
+		if(rxBuf.pendingBytes>=3){messageFromBTMAvailable=true;} // message has been received
 		/* Flag Rx overflow */
 		if (rxBuf.pendingBytes > BUFFERSIZE) {
 			rxBuf.overflow = true;
@@ -231,15 +221,6 @@ void UART1_TX_IRQHandler(void) {
 			USART_Tx(uart1, txBuf.data[i]);
 			i++;
 		}
-
-		/*
-		 USART_Tx(uart1, 'r');
-		 USART_Tx(uart1, 'm');
-		 USART_Tx(uart1, 's');
-		 USART_Tx(uart1, '0');
-
-		 USART_Tx(uart1, '.');
-		 */
 		//Disable Tx interrupt if no more bytes in queue
 		//if (txBuf.pendingBytes == 0) {  ///ttests
 		USART_IntDisable(uart1, UART_IF_TXBL);
@@ -297,9 +278,9 @@ void BTM222_SendData(char * buffer) {
 	uart1SendData((uint8_t*) buffer, (uint32_t) strlen(buffer));
 }
 
-void BTM222_ReadData(char* buffer) {
+uint32_t BTM222_ReadData(char* buffer) {
 
-	uart1ReadData((uint8_t*) buffer, (uint32_t) strlen(buffer));
+	return uart1ReadData((uint8_t*) buffer, (uint32_t) strlen(buffer));
 
 }
 
