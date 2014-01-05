@@ -249,7 +249,7 @@ int ConvertU16_from_ADCToINT(uint16_t digit) {
 	return signedDigit;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
+char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarmFFT) {
 	for (uint8_t i = 0; i < 5; i++) {
 
 		data[5 - i] = data[4 - i];
@@ -262,6 +262,7 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage) {
 	case 'n':
 		data[0] = typeOfMessage;
 		break;
+	case 'f':data[0] = typeOfMessage; data[5]=numOfHarmFFT;
 	default:
 		break;
 	}

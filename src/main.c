@@ -195,9 +195,9 @@ static float32_t GetMaxFreqFromFFT(void) {
 	/* Re (z_{peak+1} - z_{peak-1}) / (z_{peak+1} + z_{peak-1} - 2*z_{peak}) */
 	deltaIndex = (a * c + b * d) / (c * c + d * d);
 
-	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
-			/ (float32_t) BUFFER_SAMPLES;
-	///return maxVal;
+	//return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
+	//		/ (float32_t) BUFFER_SAMPLES;
+	return maxVal;
 }
 
 //////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
@@ -207,8 +207,9 @@ Results results;
 uint16_t FRAME = 0;
 bool endOfADCInterrupt = false;
 CircularBufferADC_Result Copy_ADC_RESULT;
-char messageFromBTM222[3];
+char messageFromBTM222[4];
 bool sendViaBTM222 = false;
+bool isFFTEnable = false;
 volatile bool messageFromBTMAvailable;
 int main(void) {
 
@@ -245,10 +246,6 @@ int main(void) {
 				GLCD_ClearScreen();
 				GLCD_bmp(main_menu);
 				GLCD_GoTo(1, 1);
-				/*    licznik_kwiecinskigo++;
-				 snprintf(buf, 10, "NR: %d", licznik_kwiecinskigo);
-				 GLCD_WriteString(buf);
-				 */
 				State.init = true;
 			}
 			showWhereIam(State.MAIN_MENU_CURRENT_OPTION, State.rtcFlag);
@@ -257,13 +254,6 @@ int main(void) {
 		}
 
 		case MAIN_MENU_OPTION: {
-
-			//GLCD_GoTo(1, 1);
-			/*    licznik_kwiecinskigo++;
-			 snprintf(buf, 10, "NR: %d", licznik_kwiecinskigo);
-			 GLCD_WriteString(buf);
-			 */
-
 			if (!State.init && State.LAST_MODE == SLEEP_MODE) {
 				GLCD_Enable();
 			}  //wake up
@@ -290,32 +280,36 @@ int main(void) {
 					Timer1forDisplayResults_Setup();
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
-					sendViaBTM222 = true; ////////////////////////////////////////
+					///////sendViaBTM222 = true; ////////////////////////////////////////
 				}
-				/*
-				 if(messageFromBTMAvailable){
-				 BTM222_ReadData(messageFromBTM222);
-				 switch (messageFromBTM222[0]) {
 
-				 case 'A':
-				 sendViaBTM222 = true;
-				 break; // start measure --> turn on sending data through bluetooth
-				 case 'B':sendViaBTM222 = false;
-				 break;
-				 case 'C':
-				 break;
-				 case 'D':
-				 break;
-				 }
-				 messageFromBTMAvailable=false;
-				 }
-				 */
+				if (messageFromBTMAvailable) {
+					BTM222_ReadData(messageFromBTM222);
+					switch (messageFromBTM222[0]) {
+
+					case 'A':
+						sendViaBTM222 = true;
+						break; // start measure --> turn on sending data through bluetooth
+					case 'B':
+						sendViaBTM222 = false;
+						break;
+					case 'F':
+						isFFTEnable = true;
+						sendViaBTM222 = false; // stop sending other results
+						break;
+					case 'D':
+						break;
+					}
+					messageFromBTMAvailable = false;
+				}
+
 				if (endOfADCInterrupt) {
 					endOfADCInterrupt = false;
-					if (!isFFTComputed) {
-						isFFTComputed = doFFT(FRAME);
-					}
+
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
+					if (isFFTEnable) {
+									 isFFTComputed = doFFT(FRAME); // fft
+					}
 					if (ADC_RESULT.Buf_isFull) {
 						memcpy(&Copy_ADC_RESULT, &ADC_RESULT,
 								sizeof(ADC_RESULT));
@@ -377,13 +371,13 @@ int main(void) {
 					GLCD_bmp(battery);
 					InternalADCSetup();
 					State.init = true;
-					State.activeFunction.isBatteryLevelVerificated= true;
+					State.activeFunction.isBatteryLevelVerificated = true;
 				}
 				GLCD_GoTo(40, 3);
 				GLCD_WriteString(" NO");
 				BatVoltage batVoltage;
-				batVoltage.batVoltageConstant = (results.batLevel+800) / 1000;
-				batVoltage.batVoltageFraction = (results.batLevel+800) % 1000
+				batVoltage.batVoltageConstant = (results.batLevel + 800) / 1000;
+				batVoltage.batVoltageFraction = (results.batLevel + 800) % 1000
 						/ 10;
 				snprintf(batVoltage.batVolatgeString, 5, "%d.%d",
 						(int) batVoltage.batVoltageConstant,
@@ -392,7 +386,7 @@ int main(void) {
 				GLCD_WriteString(batVoltage.batVolatgeString);
 				GLCD_GoTo(65, 5);
 				GLCD_WriteString(" V");
-				drawBattery(results.batLevel+800);
+				drawBattery(results.batLevel + 800);
 				break;
 			}
 			case SD_CARD: {
@@ -735,41 +729,40 @@ void TIMER1_IRQHandler(void) {
 		GLCD_GoTo(50, 2);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
-			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r'));
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 1))) {
 		ConvertDOUBLEtoLCD(results.max, bufoo, true);
 		GLCD_GoTo(50, 4);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
-			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm'));
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 2))) {
 		ConvertDOUBLEtoLCD(results.min, bufoo, true);
 		GLCD_GoTo(50, 3);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
-			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n'));
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 3))) {
 		ConvertDOUBLEtoLCD(results.avg, bufoo, true);
 		GLCD_GoTo(50, 5);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
-			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a'));
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 4))) {
+		if (isFFTEnable && isFFTComputed) {
+			ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
+			GLCD_GoTo(50, 7);
+			GLCD_WriteString(bufoo);
+			isFFTComputed = false;
+
+
+		}
 		double goertzel = doGoertzelAlgorithm(&Copy_ADC_RESULT); // for tests
 		ConvertDOUBLEtoLCD(goertzel, bufoo, true);
 		GLCD_GoTo(50, 6);
 		GLCD_WriteString(bufoo);
-
-	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 5))
-			&& isFFTComputed) {
-
-		ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
-		GLCD_GoTo(50, 7);
-		GLCD_WriteString(bufoo);
-		isFFTComputed = false;
 		dispCounter = 0;
 	}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -782,7 +775,7 @@ void InternalADCSetup(void) {
 	ADC_InitSingle_TypeDef singleInit = ADC_INITSINGLE_DEFAULT;
 	init.timebase = ADC_TimebaseCalc(0);
 	init.prescale = ADC_PrescaleCalc(4000000, 0);
-	init.ovsRateSel= ADC_CTRL_OVSRSEL_X8;
+	//init.ovsRateSel = ADC_CTRL_OVSRSEL_X4;
 	ADC_Init(ADC0, &init);
 
 	/* Init for single conversion use. */
@@ -829,9 +822,9 @@ void drawBattery(uint32_t batVoltage) {
 	// 40 bat levels levels
 	uint8_t batLevel = 0; // if the value is higher , batVoltage is smaller;
 	if (batVoltage > 4100)
-		batLevel = 0;
-	else if (batVoltage < 4100 && batVoltage >= 3900)
 		batLevel = 2;
+	else if (batVoltage < 4100 && batVoltage >= 3900)
+		batLevel = 4;
 	else if (batVoltage < 3900 && batVoltage >= 3700)
 		batLevel = 8;
 	else if (batVoltage < 3700 && batVoltage >= 3500)

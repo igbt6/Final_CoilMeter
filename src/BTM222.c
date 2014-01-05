@@ -216,7 +216,7 @@ void UART1_TX_IRQHandler(void) {
 
 		/// to odkomentowac
 		int i = 0;
-		while (i < 8) {
+		while (i < 7) {
 
 			USART_Tx(uart1, txBuf.data[i]);
 			i++;

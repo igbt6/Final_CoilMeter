@@ -66,7 +66,7 @@ void USART2_sendBuffer(uint16_t* txBuffer, int bytesToSend);
 void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable);
 int ConvertU16_from_ADCToINT(uint16_t digit);
-char* ParseDataToSendThroughBTM(char* data, char typeOfMessage);
+char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarmFFT);
 //void ResultADC_Buf_Read(CircularBufferADC_Result *cb);
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x);
 void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size);
