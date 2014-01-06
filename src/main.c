@@ -195,9 +195,9 @@ static float32_t GetMaxFreqFromFFT(void) {
 	/* Re (z_{peak+1} - z_{peak-1}) / (z_{peak+1} + z_{peak-1} - 2*z_{peak}) */
 	deltaIndex = (a * c + b * d) / (c * c + d * d);
 
-	//return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
-	//		/ (float32_t) BUFFER_SAMPLES;
-	return maxVal;
+	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
+		/ (float32_t) BUFFER_SAMPLES;
+	//return maxVal;
 }
 
 //////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
@@ -697,7 +697,7 @@ double setCalibrateFactor(int measuredCurrent) {
 // Interrupt Service Routine TIMER1 Interrupt - displaying results       //
 ///////////////////////////////////////////////////////////////////////////
 void TIMER1_IRQHandler(void) {
-	char bufoo[7]; // receive buffer
+	char bufoo[8]; // receive buffer
 	static uint8_t avgCount, dispCounter;
 	TIMER_IntClear(TIMER1, TIMER_IF_OF);
 	results.rmsAVG[avgCount] = rms(&Copy_ADC_RESULT);
@@ -763,6 +763,7 @@ void TIMER1_IRQHandler(void) {
 		GLCD_WriteString(bufoo);
 		dispCounter = 0;
 	}
+//	for(volatile uint8_t i;i<8;i++){bufoo[i]=' ';}
 }
 
 ///////////////////////////////////////////////////////////////////////////

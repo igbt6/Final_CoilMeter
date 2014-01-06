@@ -170,8 +170,8 @@ void TIMER0_IRQHandler(void) {
 
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
 	////if (!endOfADCInterrupt) {
-		*RxFrame = ReadFrameFromSPI_SW();
-		endOfADCInterrupt = true;
+	*RxFrame = ReadFrameFromSPI_SW();
+	endOfADCInterrupt = true;
 	///}
 	/*
 	 static int i ,x;
@@ -220,20 +220,58 @@ static bool checkData(double *data) {
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable) {
 
 	const double SCALLING_FACTOR = 184;
-
+	bool valueBelowZero = false;
 	if (checkData(&digit)) {
 		if (factorEnable)
 			digit *= SCALLING_FACTOR;
-		gcvt(digit, 4, StringOutput);
+		if (digit < 0) {
+			digit -= (2 * digit);
+			valueBelowZero = true;
+		}
+
+		gcvt(digit, 7, StringOutput);
+		if (StringOutput[1] == '.') {
+
+			StringOutput[3] = StringOutput[0];
+			StringOutput[5] = StringOutput[2];
+			StringOutput[0] = ' ';
+			StringOutput[1] = ' ';
+			if (valueBelowZero)
+				StringOutput[2] = '-';
+			else
+				StringOutput[2] = ' ';
+		} else if (StringOutput[2] == '.') {
+			StringOutput[2] = StringOutput[0];
+			StringOutput[5] = StringOutput[3];
+			StringOutput[3] = StringOutput[1];
+			StringOutput[0] = ' ';
+			if (valueBelowZero)
+				StringOutput[1] = '-';
+			else
+				StringOutput[1] = ' ';
+		} else if (StringOutput[3] == '.') {
+			for (uint8_t i = 0; i < 3; i++) {
+				StringOutput[3 - i] = StringOutput[2 - i];
+			}
+			StringOutput[5] = StringOutput[4];
+			if (valueBelowZero)
+				StringOutput[0] = '-';
+			else
+				StringOutput[0] = ' ';
+		}
+		StringOutput[4] = '.';
+
 	} else {
-		StringOutput[0] = '0';
-		StringOutput[1] = '.';
-		StringOutput[2] = '0';
+		StringOutput[0] = ' ';
+		StringOutput[1] = ' ';
+		StringOutput[2] = ' ';
 		StringOutput[3] = '0';
-		StringOutput[4] = '0';
-		StringOutput[5] = NULL;
+		StringOutput[4] = '.';
+		StringOutput[5] = '0';
 
 	}
+	StringOutput[6] = ' ';
+	StringOutput[7] = ' ';
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
@@ -249,12 +287,13 @@ int ConvertU16_from_ADCToINT(uint16_t digit) {
 	return signedDigit;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarmFFT) {
-	for (uint8_t i = 0; i < 5; i++) {
+char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,
+		uint8_t numOfHarmFFT) {
+	for (uint8_t i = 0; i < 6; i++) {
 
-		data[5 - i] = data[4 - i];
+		data[6 - i] = data[5 - i];
 	}
-	data[6] = 'x'; // end delimiter
+	data[7] = 'x'; // end delimiter
 	switch (typeOfMessage) {
 	case 'r':
 	case 'a':
@@ -262,7 +301,9 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarm
 	case 'n':
 		data[0] = typeOfMessage;
 		break;
-	case 'f':data[0] = typeOfMessage; data[5]=numOfHarmFFT;
+	case 'f':
+		data[0] = typeOfMessage;
+		data[6] = numOfHarmFFT;
 	default:
 		break;
 	}
@@ -302,7 +343,7 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarm
  }
  }
 
-*/
+ */
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 
 	cb->Values[cb->end] = x;
