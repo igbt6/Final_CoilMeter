@@ -14,7 +14,7 @@
 /* Defines */
 
 #define SIZE_BUF_ADC  64 //ilosc probek
-#define NUMBER_OF_VALUES_FOR_AVG 5 //ilosc do obliczenia sredniej
+#define NUMBER_OF_VALUES_FOR_AVG 8 //ilosc do obliczenia sredniej
 
 /* Circular buffer object */
 typedef struct {

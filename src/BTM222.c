@@ -17,6 +17,10 @@ circularBuffer rxBuf,
 txBuf; // externowe
 extern volatile bool messageFromBTMAvailable;
 
+
+
+char* Commands[]={"AAAA", "BBBB","CCCC", "CONN", "DISC", "FFFF"};
+
 void uart1Setup(void) {
 	cmuSetup();
 	GPIO_PinModeSet(gpioPortB, 9, gpioModePushPull, 1); // out , Pushpull
@@ -58,19 +62,14 @@ void uart1Setup(void) {
  *****************************************************************************/
 uint8_t uart1ReadChar(void) {
 	uint8_t ch;
-
 	/* Check if there is a byte that is ready to be fetched. If no byte is ready, wait for incoming data */
-
 	if (rxBuf.pendingBytes < 1) {
 		while (rxBuf.pendingBytes < 1)
 			;
 	}
-
 	/* Copy data from buffer */
 	ch = rxBuf.data[rxBuf.rdI];
 	rxBuf.rdI = (rxBuf.rdI + 1) % BUFFERSIZE;
-
-	/* Decrement pending byte counter */
 	rxBuf.pendingBytes--;
 
 	return ch;
@@ -142,14 +141,16 @@ uint32_t uart1ReadData(uint8_t * dataPtr, uint32_t dataLen) {
 	uint32_t i = 0;
 
 	/* Wait until the requested number of bytes are available */
-	if (rxBuf.pendingBytes < dataLen) {
+/*	if (rxBuf.pendingBytes < dataLen) {
 		while (rxBuf.pendingBytes < dataLen)
 			;
 	}
-
+*/
 	if (dataLen == 0) {
 		dataLen = rxBuf.pendingBytes;
 	}
+
+	dataLen=4; // always for my case
 	/* Copy data from Rx buffer to dataPtr */
 	while (i < dataLen) {
 		*(dataPtr + i) = rxBuf.data[rxBuf.rdI];
@@ -158,7 +159,9 @@ uint32_t uart1ReadData(uint8_t * dataPtr, uint32_t dataLen) {
 	}
 
 	/* Decrement pending byte counter */
-	rxBuf.pendingBytes =0; //-= dataLen;
+	rxBuf.pendingBytes = 0; //-= dataLen;
+	rxBuf.wrI=0;
+	rxBuf.rdI=0;   // bad way but in my case it's enough
 
 	return i;
 }
@@ -183,12 +186,13 @@ void UART1_RX_IRQHandler(void) {
 		rxBuf.data[rxBuf.wrI] = rxData;
 		rxBuf.wrI = (rxBuf.wrI + 1) % BUFFERSIZE;
 		rxBuf.pendingBytes++;
-		if(rxBuf.pendingBytes>=3){messageFromBTMAvailable=true;} // message has been received
+		if (rxBuf.pendingBytes>=4) {
+			messageFromBTMAvailable = true;
+		} // message has been received
 		/* Flag Rx overflow */
 		if (rxBuf.pendingBytes > BUFFERSIZE) {
 			rxBuf.overflow = true;
-		}
-		/* Clear RXDATAV interrupt */
+		}/* Clear RXDATAV interrupt */
 		USART_IntClear(UART1, UART_IF_RXDATAV);
 	}
 }

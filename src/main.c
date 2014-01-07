@@ -170,33 +170,20 @@ static float32_t GetMaxFreqFromFFT(void) {
 	 */
 	arm_max_f32(&fftOutputMag[START_INDEX], BUFFER_SAMPLES / 2 - START_INDEX,
 			&maxVal, &maxIndex);
-
 	maxIndex += START_INDEX;
-
-	/* z_{peak} */
 	rz_0 = fftOutputComplex[maxIndex * 2];
 	iz_0 = fftOutputComplex[maxIndex * 2 + 1];
-
-	/* z_{peak+1} */
 	rz_p = fftOutputComplex[maxIndex * 2 + 2];
 	iz_p = fftOutputComplex[maxIndex * 2 + 2 + 1];
-
-	/* z_{peak-1} */
 	rz_n = fftOutputComplex[maxIndex * 2 - 2];
 	iz_n = fftOutputComplex[maxIndex * 2 - 2 + 1];
-
-	/* z_{peak+1} - z_{peak-1} */
 	a = rz_p - rz_n;
 	b = iz_p - iz_n;
-	/* z_{peak+1} + z_{peak-1} - 2*z_{peak} */
 	c = rz_p + rz_n - (float32_t) 2.0 * rz_0;
 	d = iz_p + iz_n - (float32_t) 2.0 * iz_0;
-
-	/* Re (z_{peak+1} - z_{peak-1}) / (z_{peak+1} + z_{peak-1} - 2*z_{peak}) */
 	deltaIndex = (a * c + b * d) / (c * c + d * d);
-
 	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
-		/ (float32_t) BUFFER_SAMPLES;
+			/ (float32_t) BUFFER_SAMPLES;
 	//return maxVal;
 }
 
@@ -280,25 +267,29 @@ int main(void) {
 					Timer1forDisplayResults_Setup();
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
-					///////sendViaBTM222 = true; ////////////////////////////////////////
+					sendViaBTM222 = true; ////////////////////////////////////////
 				}
 
 				if (messageFromBTMAvailable) {
 					BTM222_ReadData(messageFromBTM222);
-					switch (messageFromBTM222[0]) {
-
-					case 'A':
-						sendViaBTM222 = true;
-						break; // start measure --> turn on sending data through bluetooth
-					case 'B':
-						sendViaBTM222 = false;
-						break;
-					case 'F':
-						isFFTEnable = true;
-						sendViaBTM222 = false; // stop sending other results
-						break;
-					case 'D':
-						break;
+					if (messageFromBTM222[3] == 'x') {
+						switch (messageFromBTM222[0]) {
+						case 'A':
+							sendViaBTM222 = true;
+							break; // start measure --> turn on sending data through bluetooth
+						case 'B':
+							sendViaBTM222 = false;
+							break;
+						case 'F':
+							isFFTEnable = true;
+							sendViaBTM222 = false;
+							// stop sending other results
+							break;
+						case 'D':
+							break;
+						default:
+							break;
+						}
 					}
 					messageFromBTMAvailable = false;
 				}
@@ -308,7 +299,7 @@ int main(void) {
 
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
 					if (isFFTEnable) {
-									 isFFTComputed = doFFT(FRAME); // fft
+						isFFTComputed = doFFT(FRAME); // fft
 					}
 					if (ADC_RESULT.Buf_isFull) {
 						memcpy(&Copy_ADC_RESULT, &ADC_RESULT,
@@ -331,7 +322,10 @@ int main(void) {
 					case SLAVE_MODE:
 						GLCD_ClearScreen();
 						GLCD_GoTo(40, 3);
-						GLCD_WriteString("SLAVE MODE.");
+						GLCD_WriteString("SLAVE MODE");
+						GLCD_GoTo(15, 5);
+						GLCD_WriteString("HAS BEEN ENABLED");
+						Delay(1000);
 						break;
 					case SET_TIME:
 						break;
@@ -362,7 +356,7 @@ int main(void) {
 				GLCD_GoTo(2, 3);
 				GLCD_WriteString("CONNECTED");
 				GLCD_GoTo(2, 5);
-				GLCD_WriteString(" MAC ...");
+				GLCD_WriteString("00:12:6F:32:B4:F2");
 				break;
 			}
 			case BAT_LEVEL: {
@@ -390,6 +384,13 @@ int main(void) {
 				break;
 			}
 			case SD_CARD: {
+				//not available yet
+				GLCD_ClearScreen();
+				GLCD_GoTo(40, 3);
+				GLCD_WriteString("NO SD-CARD");
+				GLCD_GoTo(20, 5);
+				GLCD_WriteString("IN THE SOCKET !");
+				Delay(1000);
 				break;
 			}
 			case CALIBRATION: {
@@ -502,7 +503,6 @@ void setLCDBrightness(void) {
 		GLCD_WriteCommand(SPLC501C_VOLUME_MODE);
 		GLCD_WriteCommand(brightness);
 		snprintf(str, 4, " %d ", percentValue);
-		//str[4] = '%';
 		GLCD_GoTo(60, 5);
 		GLCD_WriteString(str);
 		GLCD_WriteString(" %");
@@ -610,6 +610,10 @@ void calibrationMode(void) {
 			GLCD_GoTo(65, 5);
 			GLCD_WriteString(StringOutput);
 
+			if (!GPIO_PinInGet(gpioPortE, LEFT)) {
+						goto RETURN;
+					}
+
 			if (!GPIO_PinInGet(gpioPortE, UP)) {
 
 				Delay(60);
@@ -645,14 +649,18 @@ void calibrationMode(void) {
 	}
 
 	newFactor = newFactor / 2;             //TODO
-	RETURN: GLCD_ClearScreen();
+	GLCD_ClearScreen();
 	GLCD_bmp(callibration_over);
 	gcvt(newFactor, 3, StringOutput);   //debug
-	GLCD_GoTo(65, 5);   //debug
-	GLCD_WriteString(StringOutput);   //debug
-	Delay(8000);   //debug
+		GLCD_GoTo(65, 5);   //debug
+		GLCD_WriteString(StringOutput);   //debug
+		Delay(8000);   //debug
+	Delay(2000);
+	RETURN:
+
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn); //turn off all external events interrupts
 	NVIC_EnableIRQ(GPIO_ODD_IRQn);
+	GLCD_ClearScreen();
 	return;
 
 }
@@ -699,7 +707,7 @@ double setCalibrateFactor(int measuredCurrent) {
 void TIMER1_IRQHandler(void) {
 	char bufoo[8]; // receive buffer
 	static uint8_t avgCount, dispCounter;
-	TIMER_IntClear(TIMER1, TIMER_IF_OF);
+
 	results.rmsAVG[avgCount] = rms(&Copy_ADC_RESULT);
 	results.maxAVG[avgCount] = max(&Copy_ADC_RESULT);
 	results.minAVG[avgCount] = min(&Copy_ADC_RESULT);
@@ -726,35 +734,34 @@ void TIMER1_IRQHandler(void) {
 
 	if (!(dispCounter % NUMBER_OF_VALUES_FOR_AVG)) {
 		ConvertDOUBLEtoLCD(results.rms, bufoo, true);
-		GLCD_GoTo(50, 2);
+		GLCD_GoTo(40, 2);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 1))) {
 		ConvertDOUBLEtoLCD(results.max, bufoo, true);
-		GLCD_GoTo(50, 4);
+		GLCD_GoTo(40, 4);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 2))) {
 		ConvertDOUBLEtoLCD(results.min, bufoo, true);
-		GLCD_GoTo(50, 3);
+		GLCD_GoTo(40, 3);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 3))) {
 		ConvertDOUBLEtoLCD(results.avg, bufoo, true);
-		GLCD_GoTo(50, 5);
+		GLCD_GoTo(40, 5);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 4))) {
 		if (isFFTEnable && isFFTComputed) {
 			ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
-			GLCD_GoTo(50, 7);
+			GLCD_GoTo(40, 7);
 			GLCD_WriteString(bufoo);
 			isFFTComputed = false;
-
 
 		}
 		double goertzel = doGoertzelAlgorithm(&Copy_ADC_RESULT); // for tests
@@ -763,7 +770,10 @@ void TIMER1_IRQHandler(void) {
 		GLCD_WriteString(bufoo);
 		dispCounter = 0;
 	}
-//	for(volatile uint8_t i;i<8;i++){bufoo[i]=' ';}
+	TIMER_IntClear(TIMER1, TIMER_IF_OF);
+	for (volatile uint8_t i=0; i < 8; i++) {
+		bufoo[i] = ' ';
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
