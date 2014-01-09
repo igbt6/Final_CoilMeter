@@ -1,7 +1,7 @@
 /*
  * BTM222.h
  *
- *  Created on: Oct 2, 2013
+ *  Created on: May 29, 2013
  *      Author: lukasz
  */
 

@@ -1,7 +1,7 @@
 /*
  * ADS7835E.h
  *
- *  Created on: May 11, 2013
+ *  Created on: May 23, 2013
  *      Author: lukasz
  */
 
@@ -15,14 +15,14 @@
 
 #define SIZE_BUF_ADC  64 //ilosc probek
 #define NUMBER_OF_VALUES_FOR_AVG 8 //ilosc do obliczenia sredniej
-
+static const double ADC_COEFFICIENT = 0.00122;
 /* Circular buffer object */
 typedef struct {
 #define TYPE_OF_ADC_RESULT  uint16_t
-	int size; /* maximum number of elements           */
-	int start; /* index of oldest element              */
-	int end; /* index at which to write new element  */
-	TYPE_OF_ADC_RESULT *Values; /* vector of elements     */
+	int size; // maximum number of elements
+	int start; // index of oldest element
+	int end; // index at which to write new element
+	TYPE_OF_ADC_RESULT *Values; // vector of elements
 	bool Buf_isFull;
 } CircularBufferADC_Result;
 
@@ -67,7 +67,7 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput);
 void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable);
 int ConvertU16_from_ADCToINT(uint16_t digit);
 char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,uint8_t numOfHarmFFT);
-//void ResultADC_Buf_Read(CircularBufferADC_Result *cb);
+void ResultADC_Buf_Read(CircularBufferADC_Result *cb,TYPE_OF_ADC_RESULT*elem);
 void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x);
 void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size);
 void ResultADC_Buf_Free(CircularBufferADC_Result *cb);

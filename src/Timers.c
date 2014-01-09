@@ -55,7 +55,7 @@ void Timer1forDisplayResults_Setup(void) {
 	NVIC_EnableIRQ(TIMER1_IRQn); // Enable TIMER1 interrupt vector in NVIC
 	TIMER_TopSet(TIMER1, TOP_ValueForDisplayResults);  //Set TIMER Top value
 	TIMER_Init(TIMER1, &timerInit);	// Configure TIMER
-	//INFO!!! - An Interrupt Handler is declared in main.c
+	//INFO!!! - The Interrupt Handler is declared in main.c
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

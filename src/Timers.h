@@ -9,8 +9,6 @@
 #define TIMERS_H_
 
 
-#include "em_timer.h"
-
 
 void TIMER0forADC_Setup(void);
 void TIMER0forADC_Disable(void);
@@ -23,7 +21,7 @@ void Timer2forInternalADCSampling_Setup(void);
 void Timer2forInternalADCSampling_Disable(void);
 
 
-void Delay(uint32_t dlyTicks);
+void Delay(unsigned long dlyTicks);
 void init1msSystick(void) ;
 
 #endif /* TIMERS_H_ */

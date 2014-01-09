@@ -1,7 +1,7 @@
 /*
  * BTM222.c
  *
- *  Created on: Oct 2, 2013
+ *  Created on: May 23, 2013
  *      Author: lukasz
  */
 #include "BTM222.h"

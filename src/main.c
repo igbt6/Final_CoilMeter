@@ -127,17 +127,17 @@ arm_cfft_radix4_instance_f32 cfft_instance; // Instance structure for float32_t 
 //																		 //
 //			  Process the sampled data through FFT.                      //
 ///////////////////////////////////////////////////////////////////////////
-static bool doFFT(uint16_t x) {
+static void doFFT(uint16_t x) {
 	static int i;
-	floatBuf[i] = ((float32_t) ConvertU16_from_ADCToINT(x)) * 0.00122;
+	floatBuf[i] = ((float32_t) ConvertU16_from_ADCToINT(x)) *  ADC_COEFFICIENT;
 	i++;
 	if (i == BUFFER_SAMPLES) {
 		arm_rfft_f32(&rfft_instance, floatBuf, fftOutputComplex);
 		arm_cmplx_mag_f32(fftOutputComplex, fftOutputMag, BUFFER_SAMPLES); // compute the magnitude of all complex results
 		i = 0;
-		return true;
+	   isFFTComputed=true;
 	}
-	return false;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,8 @@ static float32_t GetMaxFreqFromFFT(void) {
 	float32_t a, b, c, d;
 
 #define START_INDEX 4
-	/* Find the biggest bin, disregarding the first bins because of DC offset and
+	/*
+	 * Find the biggest bin, disregarding the first bins because of DC offset and
 	 * low frequency noise.
 	 */
 	arm_max_f32(&fftOutputMag[START_INDEX], BUFFER_SAMPLES / 2 - START_INDEX,
@@ -185,6 +186,19 @@ static float32_t GetMaxFreqFromFFT(void) {
 	return ((float32_t) maxIndex + deltaIndex) * (float32_t) SAMPLE_RATE
 			/ (float32_t) BUFFER_SAMPLES;
 	//return maxVal;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//           float32_t GetMagForGivenFrequncy(uint16_t binFrequency)           //
+//																		       //
+//			  returns value of magnitude for the given bin.                    //
+/////////////////////////////////////////////////////////////////////////////////
+static float32_t GetMagForGivenFrequncy(uint16_t binFrequency){
+
+	uint16_t usefulFrequencies= BUFFER_SAMPLES/2;
+	uint16_t resolution = SAMPLE_RATE/BUFFER_SAMPLES;
+	if((binFrequency/resolution)>usefulFrequencies) return 0;
+	return fftOutputMag[binFrequency/resolution+1];
 }
 
 //////////////////////////////////////////////////////////////////FFT FFT -- END/////////////////////////////////////////////////////////////////////////////////////
@@ -268,6 +282,7 @@ int main(void) {
 					State.init = true;
 					State.activeFunction.isMeasurementOn = true;
 					sendViaBTM222 = true; ////////////////////////////////////////
+					isFFTEnable=true;/////////////////////////////////////////////////////////////////////////////TODO
 				}
 
 				if (messageFromBTMAvailable) {
@@ -298,9 +313,9 @@ int main(void) {
 					endOfADCInterrupt = false;
 
 					ResultADC_Buf_Write(&ADC_RESULT, FRAME);
-					if (isFFTEnable) {
-						isFFTComputed = doFFT(FRAME); // fft
-					}
+			if (/*isFFTEnable&&*/(!isFFTComputed)) {
+					     doFFT(FRAME); // fft
+				}
 					if (ADC_RESULT.Buf_isFull) {
 						memcpy(&Copy_ADC_RESULT, &ADC_RESULT,
 								sizeof(ADC_RESULT));
@@ -705,7 +720,7 @@ double setCalibrateFactor(int measuredCurrent) {
 // Interrupt Service Routine TIMER1 Interrupt - displaying results       //
 ///////////////////////////////////////////////////////////////////////////
 void TIMER1_IRQHandler(void) {
-	char bufoo[8]; // receive buffer
+	char bufoo[8]; // sending buffer
 	static uint8_t avgCount, dispCounter;
 
 	results.rmsAVG[avgCount] = rms(&Copy_ADC_RESULT);
@@ -734,39 +749,42 @@ void TIMER1_IRQHandler(void) {
 
 	if (!(dispCounter % NUMBER_OF_VALUES_FOR_AVG)) {
 		ConvertDOUBLEtoLCD(results.rms, bufoo, true);
-		GLCD_GoTo(40, 2);
+		GLCD_GoTo(43, 2);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'r', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 1))) {
 		ConvertDOUBLEtoLCD(results.max, bufoo, true);
-		GLCD_GoTo(40, 4);
+		GLCD_GoTo(43, 4);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'm', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 2))) {
 		ConvertDOUBLEtoLCD(results.min, bufoo, true);
-		GLCD_GoTo(40, 3);
+		GLCD_GoTo(43, 3);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'n', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 3))) {
 		ConvertDOUBLEtoLCD(results.avg, bufoo, true);
-		GLCD_GoTo(40, 5);
+		GLCD_GoTo(43, 5);
 		GLCD_WriteString(bufoo);
 		if (sendViaBTM222)
 			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'a', -1));
 	} else if (!(dispCounter % (NUMBER_OF_VALUES_FOR_AVG + 4))) {
 		if (isFFTEnable && isFFTComputed) {
-			ConvertDOUBLEtoLCD(GetMaxFreqFromFFT(), bufoo, false);
-			GLCD_GoTo(40, 7);
+			static uint8_t binNumber;
+			ConvertDOUBLEtoLCD(/*GetMaxFreqFromFFT()*/GetMagForGivenFrequncy(50*(binNumber+1)), bufoo, false);
+			GLCD_GoTo(43, 7);
 			GLCD_WriteString(bufoo);
+			BTM222_SendData(ParseDataToSendThroughBTM(bufoo, 'f',binNumber));
+			binNumber++;
+			if(binNumber>9)binNumber=0;
 			isFFTComputed = false;
-
 		}
 		double goertzel = doGoertzelAlgorithm(&Copy_ADC_RESULT); // for tests
 		ConvertDOUBLEtoLCD(goertzel, bufoo, true);
-		GLCD_GoTo(50, 6);
+		GLCD_GoTo(43, 6);
 		GLCD_WriteString(bufoo);
 		dispCounter = 0;
 	}

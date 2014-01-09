@@ -1,7 +1,7 @@
 /*
  * ADS7835E.c
  *
- *  Created on: May 11, 2013
+ *  Created on: May 23, 2013
  *      Author: lukasz
  */
 
@@ -21,8 +21,6 @@
 
 #define SOFTWARE_SPI 1
 
-const double ADC_COEFFICIENT = 0.00122;
-
 uint16_t* masterRxBuffer;
 uint16_t* masterRxBuffer;
 int masterRxBufferSize;
@@ -32,27 +30,20 @@ CircularBufferADC_Result ADC_Result;
 extern bool endOfADCInterrupt;
 #if !SOFTWARE_SPI
 void SPI2_Init(void) {
-	/* No low frequency clock source selected */
-
-	/* Enable GPIO clock */
 	CMU_ClockEnable(cmuClock_GPIO, true);
-
 	GPIO ->P[2].DOUT |= (1 << 2);
-	/*  PC2  Push-pull */GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
+	GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
 			& ~_GPIO_P_MODEL_MODE2_MASK) | GPIO_P_MODEL_MODE2_PUSHPULL;
-	/* PC3 is configured to Input */GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
+	GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
 			& ~_GPIO_P_MODEL_MODE3_MASK) | GPIO_P_MODEL_MODE3_INPUT;
-	/*  PC4 Push-pull */GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
+	GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
 			& ~_GPIO_P_MODEL_MODE4_MASK) | GPIO_P_MODEL_MODE4_PUSHPULL;
-	/* PC5 */GPIO ->P[2].DOUT |= (1 << 5);
-	/* PC5  Push-pull */GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
+	GPIO ->P[2].DOUT |= (1 << 5);
+	GPIO ->P[2].MODEL = (GPIO ->P[2].MODEL
 			& ~_GPIO_P_MODEL_MODE5_MASK) | GPIO_P_MODEL_MODE5_PUSHPULL;
 
-	/* Enable clock for USART2 */
 	CMU_ClockEnable(cmuClock_USART2, true);
-	/* Custom initialization for USART2 */
 	USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
-
 	init.baudrate = 1000000;
 	init.databits = usartDatabits12;
 	init.msbf = 1;
@@ -78,7 +69,6 @@ void SPI2_Init(void) {
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive) {
 	USART_TypeDef *spi = USART2;
 
-	//Setting up pointer and indexes
 	masterRxBuffer = receiveBuffer;
 	masterRxBufferSize = bytesToReceive;
 	masterRxBufferIndex = 0;
@@ -147,7 +137,6 @@ void SPI2_disableRXInt_SW(void) {
 static uint16_t ReadFrameFromSPI_SW(void) {
 	uint16_t AdcFrame = 0;
 	int i = 12;
-
 	GPIO ->P[2].DOUTCLR = 1 << 5;
 	GPIO ->P[2].DOUTSET = 1 << 4;
 	GPIO ->P[2].DOUTCLR = 1 << 4;
@@ -160,30 +149,14 @@ static uint16_t ReadFrameFromSPI_SW(void) {
 		GPIO ->P[2].DOUTCLR = 1 << 4;
 	}
 	GPIO ->P[2].DOUTSET |= 1 << 5;
-
 	return AdcFrame;
 }
 
 // Interrupt Service Routine TIMER0 Interrupt Line for sampling of ADC converter
 void TIMER0_IRQHandler(void) {
-	/* Clear flag for TIMER0 overflow interrupt */
-
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
-	////if (!endOfADCInterrupt) {
 	*RxFrame = ReadFrameFromSPI_SW();
 	endOfADCInterrupt = true;
-	///}
-	/*
-	 static int i ,x;
-	 i++;
-	 if (i >= 1000) {
-	 x++;
-	 GLCD_GoTo(1, 0);
-	 GLCD_WriteChar((char)x);
-
-	 i = 0;
-	 }
-	 */
 }
 
 #endif
@@ -199,10 +172,8 @@ void ConvertU16ToINTtoLCD(uint16_t digit, char* StringOutput) {
 		snprintf(StringOutput, 5, "-%.3f", signedDigit);
 	} else {
 		signedDigit = digit * ADC_COEFFICIENT;
-
-		// snprintf(StringOutput, 5, "%2f,%1f", (signedDigit / 10), (signedDigit / 10));
 		snprintf(StringOutput, 5, " %.3f", signedDigit);
-		//  return StringOutput;
+
 	}
 }
 
@@ -230,6 +201,7 @@ void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable) {
 		}
 
 		gcvt(digit, 7, StringOutput);
+
 		if (StringOutput[1] == '.') {
 
 			StringOutput[3] = StringOutput[0];
@@ -271,7 +243,7 @@ void ConvertDOUBLEtoLCD(double digit, char* StringOutput, bool factorEnable) {
 
 	}
 	StringOutput[6] = ' ';
-	StringOutput[7] = ' ';
+	StringOutput[7] = NULL;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int ConvertU16_from_ADCToINT(uint16_t digit) {
@@ -303,7 +275,7 @@ char* ParseDataToSendThroughBTM(char* data, char typeOfMessage,
 		break;
 	case 'f':
 		data[0] = typeOfMessage;
-		data[6] = numOfHarmFFT;
+		data[1] = (char)(((int)'0')+numOfHarmFFT);
 	default:
 		break;
 	}
@@ -356,14 +328,15 @@ void ResultADC_Buf_Write(CircularBufferADC_Result *cb, TYPE_OF_ADC_RESULT x) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Read oldest element. App must ensure !cbIsEmpty() first. */
-/*    void ResultADC_Buf_Read(CircularBufferADC_Result *cb) {
- *elem = cb->elems[cb->start];
- cb->start = (cb->start + 1) % cb->size;
- }
- */
+
+void ResultADC_Buf_Read(CircularBufferADC_Result *cb,
+		TYPE_OF_ADC_RESULT*oldestValue) {
+	*oldestValue = cb->Values[cb->start];
+	cb->start = (cb->start + 1) % cb->size;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size) {
-	cb->size = size; /* include empty elem */
+	cb->size = size;
 	cb->start = 0;
 	cb->end = 0;
 	cb->Buf_isFull = false;
@@ -373,7 +346,7 @@ void ResultADC_Buf_Init(CircularBufferADC_Result *cb, int size) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ResultADC_Buf_Free(CircularBufferADC_Result *cb) {
-	free(cb->Values); /* OK if null */
+	free(cb->Values);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double rms(CircularBufferADC_Result *v) {
@@ -386,7 +359,6 @@ double rms(CircularBufferADC_Result *v) {
 	return ADC_COEFFICIENT * sqrt(sum / v->size);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double min(CircularBufferADC_Result *v) {
 	double minValue = 0.0;
@@ -395,7 +367,7 @@ double min(CircularBufferADC_Result *v) {
 	if (!checkData(&rmsValue)) {
 		minValue = 0;
 		return minValue;
-	} // to avoid if rms is around 0 and max or min could be then bigger value
+	}
 	for (int i = 0; i < v->size; i++) {
 		minTempValue = ConvertU16_from_ADCToINT(v->Values[i]);
 		if (minTempValue < minValue) {
@@ -412,7 +384,7 @@ double max(CircularBufferADC_Result *v) {
 	if (!checkData(&rmsValue)) {
 		maxValue = 0;
 		return maxValue;
-	} // to avoid if rms is around 0 and max or min could be then bigger value
+	}
 	for (int i = 0; i < v->size; i++) {
 		maxTempValue = ConvertU16_from_ADCToINT(v->Values[i]);
 		if (maxTempValue > maxValue) {
@@ -433,22 +405,6 @@ double avg(CircularBufferADC_Result *v) {
 //goertzel
 
 float doGoertzelAlgorithm(CircularBufferADC_Result *v) {
-	float magnitudeSquared = 0;
-	float real, imag;
-#if 0
-	for (int i = 0; i < v->size; i++) {
-		ProcessSample(ConvertU16_from_ADCToINT(v->Values[i]));
-	}
-	/* optimized algorithm
-
-	 magnitudeSquared = GetMagnitudeSquared(); // magnitude squared
-
-	 */
-	/*basic algorithm*/
-	GetRealImag(&real, &imag);
-	magnitudeSquared = real*real + imag*imag;
-	return ADC_COEFFICIENT*sqrt(magnitudeSquared); //relative magntude
-#endif
 
 	return ADC_COEFFICIENT * goertzel(SIZE_BUF_ADC, 50, 1024, v->Values);
 
