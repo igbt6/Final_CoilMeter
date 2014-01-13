@@ -10,11 +10,11 @@
  **  Environment : Atollic TrueSTUDIO
  **
  **
- **          Author : uszko, kwiecinski
+ **          Author : uszko lukasz
  **
  *****************************************************************************
  */
-//pront -- z cewki 0.90 [A]*
+
 /* Includes */
 #include <stdint.h>
 #include <stdbool.h>

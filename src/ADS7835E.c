@@ -61,11 +61,7 @@ void SPI2_Init(void) {
 
 }
 
-/**************************************************************************//**
- * @brief Setting up RX interrupts from USART2 RX
- * @param receiveBuffer points to where received data is to be stored
- * @param bytesToReceive indicates the number of bytes to receive
- *****************************************************************************/
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void SPI2_setupRXInt(uint16_t* receiveBuffer, int bytesToReceive) {
 	USART_TypeDef *spi = USART2;
 
